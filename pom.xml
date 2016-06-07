@@ -43,7 +43,7 @@
         </dependency>
         <dependency>
             <groupId>com.thinkaurelius.titan</groupId>
-            <artifactId>titan-hbase</artifactId>
+            <artifactId>titan-cassandra</artifactId>
             <version>1.0.0</version>
             <exclusions>
                 <exclusion>

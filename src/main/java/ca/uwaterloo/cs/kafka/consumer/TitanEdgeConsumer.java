@@ -23,7 +23,7 @@ import java.util.Properties;
 public class TitanEdgeConsumer {
 
     private static String KAFKA_CONFIG_FILE = "consumer.properties";
-    private static String TITAN_CONFIG_FILE = "titan-hbase-es.properties";
+    private static String TITAN_CONFIG_FILE = "titan-cassandra-es.properties";
 
     public static void main(String[] args) {
 
