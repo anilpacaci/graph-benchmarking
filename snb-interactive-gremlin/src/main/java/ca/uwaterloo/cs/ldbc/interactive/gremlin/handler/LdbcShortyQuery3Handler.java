@@ -1,0 +1,60 @@
+package ca.uwaterloo.cs.ldbc.interactive.gremlin.handler;
+
+import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinDbConnectionState;
+import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinUtils;
+import com.ldbc.driver.DbConnectionState;
+import com.ldbc.driver.DbException;
+import com.ldbc.driver.OperationHandler;
+import com.ldbc.driver.ResultReporter;
+import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcShortQuery3PersonFriends;
+import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcShortQuery3PersonFriendsResult;
+import com.ldbc.driver.workloads.ldbc.snb.interactive.db.DummyLdbcSnbInteractiveDb;
+import net.ellitron.ldbcsnbimpls.interactive.core.Entity;
+import net.ellitron.ldbcsnbimpls.interactive.titan.TitanDbConnectionState;
+import org.apache.tinkerpop.gremlin.driver.Client;
+import org.apache.tinkerpop.gremlin.driver.Result;
+import org.apache.tinkerpop.gremlin.structure.Edge;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+
+/**
+ * Created by apacaci on 7/14/16.
+ */
+public class LdbcShortyQuery3Handler implements OperationHandler<LdbcShortQuery3PersonFriends, DbConnectionState> {
+    @Override
+    public void executeOperation(LdbcShortQuery3PersonFriends ldbcShortQuery3PersonFriends, DbConnectionState dbConnectionState, ResultReporter resultReporter) throws DbException {
+        Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
+
+        List<LdbcShortQuery3PersonFriendsResult> result = new ArrayList<>();
+        Map<String, Object> params = new HashMap<>();
+        params.put("person_id", ldbcShortQuery3PersonFriends.personId());
+
+        List<Result> results = null;
+        try {
+            results = client.submit("g.V().has('iid', person_id).outE('knows').as('relation').inV().as('friend').order().by('creationDate', decr).by('iid', incr).select('relation', 'friend')", params).all().get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new DbException("Remote execution failed", e);
+        }
+
+        for(Result r : results) {
+            HashMap map = r.get(HashMap.class);
+            Edge edge = (Edge) r.get(HashMap.class).get("relation");
+            Vertex friend = (Vertex) r.get(HashMap.class).get("friend");
+
+            LdbcShortQuery3PersonFriendsResult res =
+                    new LdbcShortQuery3PersonFriendsResult(
+                            GremlinUtils.getSNBId(friend),
+                            friend.<String>property("firstName").value(),
+                            friend.<String>property("lastName").value(),
+                            Long.decode(edge.<String>property("creationDate").value()));
+            result.add(res);
+        }
+
+        resultReporter.report(result.size(), result, ldbcShortQuery3PersonFriends);
+    }
+}
