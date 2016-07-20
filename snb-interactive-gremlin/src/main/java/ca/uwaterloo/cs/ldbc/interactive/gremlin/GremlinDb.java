@@ -1,6 +1,7 @@
 package ca.uwaterloo.cs.ldbc.interactive.gremlin;
 
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.handler.LdbcShortQuery4Handler;
+import ca.uwaterloo.cs.ldbc.interactive.gremlin.handler.LdbcShortQuery5Handler;
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.handler.LdbcShortyQuery1Handler;
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.handler.LdbcShortyQuery3Handler;
 import com.ldbc.driver.Db;
@@ -10,6 +11,7 @@ import com.ldbc.driver.control.LoggingService;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcShortQuery1PersonProfile;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcShortQuery3PersonFriends;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcShortQuery4MessageContent;
+import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcShortQuery5MessageCreator;
 
 import java.io.IOException;
 import java.util.Map;
@@ -36,6 +38,7 @@ public class GremlinDb extends Db{
 
         registerOperationHandler(LdbcShortQuery3PersonFriends.class, LdbcShortyQuery3Handler.class);
         registerOperationHandler(LdbcShortQuery4MessageContent.class, LdbcShortQuery4Handler.class);
+        registerOperationHandler(LdbcShortQuery5MessageCreator.class, LdbcShortQuery5Handler.class);
 
     }
 
