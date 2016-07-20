@@ -14,11 +14,9 @@ import net.ellitron.ldbcsnbimpls.interactive.titan.TitanDbConnectionState;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Result;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -41,7 +39,7 @@ public class LdbcShortyQuery1Handler implements OperationHandler<LdbcShortQuery1
         Result r = results.get(0); // ShortQuery1 should return a single result
 
         HashMap map = r.get(HashMap.class);
-        Vertex person = (Edge) r.get(HashMap.class).get("person");
+        Vertex person = (Vertex) r.get(HashMap.class).get("person");
         Vertex place = (Vertex) r.get(HashMap.class).get("place");
 
         Iterator<VertexProperty<String>> props = person.properties();
@@ -63,8 +61,6 @@ public class LdbcShortyQuery1Handler implements OperationHandler<LdbcShortQuery1
                         propertyMap.get("gender"),
                         Long.parseLong(propertyMap.get("creationDate")));
 
-        resultReporter.report(0, res, operation);
-        break;
-
+        resultReporter.report(0, res, ldbcShortQuery1PersonProfile);
     }
 }

@@ -1,10 +1,12 @@
 package ca.uwaterloo.cs.ldbc.interactive.gremlin;
 
+import ca.uwaterloo.cs.ldbc.interactive.gremlin.handler.LdbcShortyQuery1Handler;
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.handler.LdbcShortyQuery3Handler;
 import com.ldbc.driver.Db;
 import com.ldbc.driver.DbConnectionState;
 import com.ldbc.driver.DbException;
 import com.ldbc.driver.control.LoggingService;
+import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcShortQuery1PersonProfile;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcShortQuery3PersonFriends;
 
 import java.io.IOException;
