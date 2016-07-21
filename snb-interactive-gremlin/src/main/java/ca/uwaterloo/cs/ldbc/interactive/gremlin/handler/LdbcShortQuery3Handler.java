@@ -1,5 +1,6 @@
 package ca.uwaterloo.cs.ldbc.interactive.gremlin.handler;
 
+import ca.uwaterloo.cs.ldbc.interactive.gremlin.Entity;
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinDbConnectionState;
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinUtils;
 import com.ldbc.driver.DbConnectionState;
@@ -22,14 +23,14 @@ import java.util.concurrent.ExecutionException;
 /**
  * Created by apacaci on 7/14/16.
  */
-public class LdbcShortyQuery3Handler implements OperationHandler<LdbcShortQuery3PersonFriends, DbConnectionState> {
+public class LdbcShortQuery3Handler implements OperationHandler<LdbcShortQuery3PersonFriends, DbConnectionState> {
     @Override
     public void executeOperation(LdbcShortQuery3PersonFriends ldbcShortQuery3PersonFriends, DbConnectionState dbConnectionState, ResultReporter resultReporter) throws DbException {
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
 
         List<LdbcShortQuery3PersonFriendsResult> result = new ArrayList<>();
         Map<String, Object> params = new HashMap<>();
-        params.put("person_id", ldbcShortQuery3PersonFriends.personId());
+        params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcShortQuery3PersonFriends.personId()));
 
         List<Result> results = null;
         try {
