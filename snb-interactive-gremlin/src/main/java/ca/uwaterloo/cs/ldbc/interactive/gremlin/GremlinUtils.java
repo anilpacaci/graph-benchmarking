@@ -1,6 +1,5 @@
 package ca.uwaterloo.cs.ldbc.interactive.gremlin;
 
-import net.ellitron.ldbcsnbimpls.interactive.core.Entity;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 /**

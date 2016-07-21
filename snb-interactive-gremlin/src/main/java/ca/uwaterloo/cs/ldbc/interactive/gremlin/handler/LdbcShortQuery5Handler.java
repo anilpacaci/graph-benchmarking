@@ -1,5 +1,6 @@
 package ca.uwaterloo.cs.ldbc.interactive.gremlin.handler;
 
+import ca.uwaterloo.cs.ldbc.interactive.gremlin.Entity;
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinDbConnectionState;
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinUtils;
 import com.ldbc.driver.DbConnectionState;
@@ -8,7 +9,6 @@ import com.ldbc.driver.OperationHandler;
 import com.ldbc.driver.ResultReporter;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcShortQuery5MessageCreator;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcShortQuery5MessageCreatorResult;
-import net.ellitron.ldbcsnbimpls.interactive.core.Entity;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Result;
 import org.apache.tinkerpop.gremlin.structure.Vertex;

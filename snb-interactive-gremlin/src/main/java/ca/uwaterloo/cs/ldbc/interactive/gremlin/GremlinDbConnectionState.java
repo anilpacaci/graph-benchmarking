@@ -1,8 +1,6 @@
 package ca.uwaterloo.cs.ldbc.interactive.gremlin;
 
 import com.ldbc.driver.DbConnectionState;
-import com.thinkaurelius.titan.core.TitanFactory;
-import org.apache.commons.configuration.BaseConfiguration;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.slf4j.Logger;
