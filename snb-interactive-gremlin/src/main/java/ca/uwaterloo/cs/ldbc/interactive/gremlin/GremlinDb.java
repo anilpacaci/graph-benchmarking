@@ -29,7 +29,6 @@ public class GremlinDb extends Db{
 
         registerOperationHandler(LdbcQuery8.class, LdbcComplexQuery8Handler.class);
         registerOperationHandler(LdbcQuery9.class, LdbcComplexQuery9Handler.class);
-
         registerOperationHandler(LdbcQuery11.class, LdbcComplexQuery11Handler.class);
         registerOperationHandler(LdbcQuery12.class, LdbcComplexQuery12Handler.class);
         registerOperationHandler(LdbcQuery13.class, LdbcComplexQuery13Handler.class);
@@ -44,8 +43,14 @@ public class GremlinDb extends Db{
 
         // Update Queries
 
+        registerOperationHandler(LdbcUpdate1AddPerson.class, LdbcUpdate1Handler.class);
         registerOperationHandler(LdbcUpdate2AddPostLike.class, LdbcUpdate2Handler.class);
         registerOperationHandler(LdbcUpdate3AddCommentLike.class, LdbcUpdate3Handler.class);
+        registerOperationHandler(LdbcUpdate4AddForum.class, LdbcUpdate4Handler.class);
+        registerOperationHandler(LdbcUpdate5AddForumMembership.class, LdbcUpdate5Handler.class);
+        registerOperationHandler(LdbcUpdate6AddPost.class, LdbcUpdate6Handler.class);
+        registerOperationHandler(LdbcUpdate7AddComment.class, LdbcUpdate7Handler.class);
+        registerOperationHandler(LdbcUpdate8AddFriendship.class, LdbcUpdate8Handler.class);
     }
 
     @Override
