@@ -8,11 +8,8 @@ import com.ldbc.driver.DbException;
 import com.ldbc.driver.OperationHandler;
 import com.ldbc.driver.ResultReporter;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcNoResult;
-import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcUpdate1AddPerson;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcUpdate2AddPostLike;
 import org.apache.tinkerpop.gremlin.driver.Client;
-import org.apache.tinkerpop.gremlin.driver.Result;
-import org.apache.tinkerpop.gremlin.structure.T;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,9 +34,10 @@ public class LdbcUpdate2Handler implements OperationHandler<LdbcUpdate2AddPostLi
         likesProperties.add(String.valueOf(ldbcUpdate2AddPostLike.creationDate()));
         params.put("likesProperties", likesProperties.toArray());
 
-        List<Result> results = null;
         try {
-            results = client.submit("person = g.V().has('iid', person_id).next(); post = g.V().has('iid', post_id); person.addEdge('likes', post, likesProperties)", params).all().get();
+            client.submit("person = g.V().has('iid', person_id).next(); " +
+                "post = g.V().has('iid', post_id).next(); " +
+                "person.addEdge('likes', post, likesProperties);", params).all().get();
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
         }

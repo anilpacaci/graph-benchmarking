@@ -39,7 +39,7 @@ public class LdbcShortQuery3Handler implements OperationHandler<LdbcShortQuery3P
             throw new DbException("Remote execution failed", e);
         }
 
-        for(Result r : results) {
+        for (Result r : results) {
             HashMap map = r.get(HashMap.class);
             Edge edge = (Edge) r.get(HashMap.class).get("relation");
             Vertex friend = (Vertex) r.get(HashMap.class).get("friend");
