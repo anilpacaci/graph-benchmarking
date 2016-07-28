@@ -11,7 +11,6 @@ import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery4;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery4Result;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Result;
-import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,10 +47,11 @@ public class LdbcComplexQuery4Handler implements OperationHandler<LdbcQuery4, Db
 
         String statement = "g.V().has('iid', person_id).out('knows')" +
             ".in('hasCreator').as('friend_posts')" +
-            ".filter{it.creationDate < start_date}" +
+            ".where(__.creationDate.is(lt(start_date)))" +
             ".out('hasTag').as('before_tags)" +
-            ".optional('friend_posts').filter{it.creationDate >= start_date}" +
-            ".filter{it.creationDate < start_date + duration}" +
+            ".optional('friend_posts')" +
+            ".where(__.creationDate.is(gte(start_date)))" +
+            ".where(__.creationDate.is(lt(start_date + duration)))" +
             ".out('hasTag')" +
             ".except('before_tags')" +
             ".as('tag_names')" +
@@ -59,9 +59,7 @@ public class LdbcComplexQuery4Handler implements OperationHandler<LdbcQuery4, Db
             ".order(local).by(valueDecr).as('count')" +
             ".sort{a,b -> b.value <=> a.value}" +
             ".limit(local, 10)" +
-            ".as('kv')" +
-            ".select('tag_names', 'kv')" +
-            ".by('tag_names').by('kv');";
+            ".select('tag_names', 'count')";
         List<Result> results;
         try {
             results = client.submit(statement, params).all().get();
@@ -72,17 +70,12 @@ public class LdbcComplexQuery4Handler implements OperationHandler<LdbcQuery4, Db
         List<LdbcQuery4Result> resultList = new ArrayList<>();
         for (Result r : results) {
             HashMap map = r.get(HashMap.class);
-            Vertex person = (Vertex) map.get("person");
-            int countx = (int) map.get("countx");
-            int county = (int) map.get("county");
+            String tagName = (String) map.get("tag_name");
+            int count = (int) map.get("count");
 
             LdbcQuery4Result ldbcQuery4Result = new LdbcQuery4Result(
-                Long.valueOf(person.<String>property("iid").value()),
-                person.<String>property("firstName").value(),
-                person.<String>property("lastName").value(),
-                countx,
-                county,
-                countx + county
+                tagName,
+                count
             );
 
             resultList.add(ldbcQuery4Result);

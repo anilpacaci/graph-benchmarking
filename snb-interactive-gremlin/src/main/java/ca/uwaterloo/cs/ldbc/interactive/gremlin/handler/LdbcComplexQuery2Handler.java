@@ -30,7 +30,7 @@ public class LdbcComplexQuery2Handler implements OperationHandler<LdbcQuery2, Db
 
         String statement = "g.V().has('iid', person_id).outE('knows').as('person')" +
             ".in('hasCreator').as('message')" +
-            ".filter(it.creationDate <= max_date)" +
+            ".where(creationDate.is(lte(max_date)))" +
             ".order().by('creationDate', decr)" +
             ".order().by('iid', asc)" +
             ".limit(20)" +

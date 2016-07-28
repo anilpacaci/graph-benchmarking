@@ -11,7 +11,6 @@ import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery5;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery5Result;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Result;
-import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,13 +39,14 @@ public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, Db
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery5.personId()));
-        params.put("min_date", String.valueOf(ldbcQuery5.minDate());
+        params.put("min_date", String.valueOf(ldbcQuery5.minDate()));
 
-        String statement = "g.V().has('iid', person_id).out('knows').loop(1){it.loops < 3}" +
-            ".inE('hasMember').filter{it.joinDate >= min_date}.outV.as('forum_name', 'post_count')" +
+        String statement = "g.V().has('iid', person_id).repeat(out('knows')).times(2).emit()" +
+            ".inE('hasMember').where(__.joinDate.is(gte(min_date))).outV.as('forum_name', 'post_count')" +
             ".select('forum_name','post_count')" +
             ".by('name')" +
-            ".by(in('hasCreator').as('post').out('hasContainer').back('post').count().as('cnt').where('cnt'.is(gt(0))))" +
+            ".by(in('hasCreator').as('post').out('hasContainer').back('post').count().as('cnt')" +
+            ".where(is(gt(0))))" +
             ".order().by(select('post_count'),decr)" +
             ".limit(20);";
         List<Result> results;

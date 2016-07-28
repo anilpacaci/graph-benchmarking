@@ -30,13 +30,13 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
         params.put("start_date", ldbcQuery3.startDate());
         params.put("duration", ldbcQuery3.durationDays());
 
-        String statement = "g.V().has('iid', person_id).out('knows').loop(1){it.loops < 3}" +
-            ".filter{it.place != countryX && it.place != countryY}" +
+        String statement = "g.V().has('iid', person_id).repeat(out('knows')).times(2).emit()" +
+            ".where(and(hasNot('place', countryX)), hasNot('place, countryY)))" +
             ".order().by('iid', asc)" +
             ".in('hasCreator')" +
-            ".filter{it.place == countryX || it.place == countryY}" +
-            ".filter{it.creationDate >= start_date}" +
-            ".filter{it.creationDate < start_date + duration}" +
+            ".where(or(has('place', countryX)), has('place, countryY)))" +
+            ".where(place.is(gte(start_date)))" +
+            ".where(place.is(lt(start_date + duration)))" +
             ".group().by('hasCreator').limit(20)" +
             ".fold().match(__.as('person')," +
             "              __.as('p').unfold().has(place, countryX).count(local).as('countx')," +
