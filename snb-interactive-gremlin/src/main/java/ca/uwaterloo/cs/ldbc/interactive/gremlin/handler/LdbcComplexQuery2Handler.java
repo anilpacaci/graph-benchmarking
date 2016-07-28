@@ -28,12 +28,13 @@ public class LdbcComplexQuery2Handler implements OperationHandler<LdbcQuery2, Db
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery2.personId()));
         params.put("max_date", ldbcQuery2.maxDate());
 
-        String statement = "g.V().has('iid', person_id).outE('knows')" +
-            ".in('hasCreator').filter(it.creationDate <= max_date)" +
+        String statement = "g.V().has('iid', person_id).outE('knows').as('person')" +
+            ".in('hasCreator').as('message')" +
+            ".filter(it.creationDate <= max_date)" +
             ".order().by('creationDate', decr)" +
             ".order().by('iid', asc)" +
-            ".limit(20).as('message')" +
-            ".out(hasCreator).as('person').select('person', 'message');";
+            ".limit(20)" +
+            ".select('person', 'message');";
         List<Result> results;
         try {
             results = client.submit(statement, params).all().get();

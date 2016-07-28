@@ -40,10 +40,11 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
             ".group().by('hasCreator').limit(20)" +
             ".fold().match(__.as('person')," +
             "              __.as('p').unfold().has(place, countryX).count(local).as('countx')," +
-            "              __.as('p').unfold().has(place, countryX).count(local).as('county')," +
+            "              __.as('p').unfold().has(place, countryY).count(local).as('county')," +
             "              )" +
             ".select('person', 'countx', 'county')" +
             ".order().by('countx', desc)";
+
         List<Result> results;
         try {
             results = client.submit(statement, params).all().get();
