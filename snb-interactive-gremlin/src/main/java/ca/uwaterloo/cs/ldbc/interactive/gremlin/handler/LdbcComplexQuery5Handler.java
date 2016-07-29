@@ -22,10 +22,10 @@ public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, Db
     @Override
     public void executeOperation(LdbcQuery5 ldbcQuery5, DbConnectionState dbConnectionState, ResultReporter resultReporter) throws DbException {
  //     • Description: Given a start Person,
-        // find the Forums which that Person’s friends and friends of friends (excluding start Person)
-        // became Members of after a given date.
-        // For each forum find the number of Posts that were created by any of these Persons.
-        // For each Forum and consider only those Persons which joined that particular Forum after the given date.
+ //     find the Forums which that Person’s friends and friends of friends (excluding start Person)
+ //     became Members of after a given date.
+ //     For each forum find the number of Posts that were created by any of these Persons.
+ //     For each Forum and consider only those Persons which joined that particular Forum after the given date.
  //     • Parameters: Person.id ID
  //     date Date
  //     • Results:
@@ -42,12 +42,11 @@ public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, Db
         params.put("min_date", String.valueOf(ldbcQuery5.minDate()));
 
         String statement = "g.V().has('iid', person_id).repeat(out('knows')).times(2).emit()" +
-            ".inE('hasMember').where(__.joinDate.is(gte(min_date))).outV.as('forum_name', 'post_count')" +
-            ".select('forum_name','post_count')" +
+            ".inE('hasMember').has('joinDate',gte(min_date)).outV().as('forum_name')" +
+            ".in('hasCreator').as('post').out('hasContainer').select('post').count().where(is(gt(0))).as('cnt')" +
+            ".order().by('cnt',decr)" +
+            ".select('forum_name','cnt')" +
             ".by('name')" +
-            ".by(in('hasCreator').as('post').out('hasContainer').back('post').count().as('cnt')" +
-            ".where(is(gt(0))))" +
-            ".order().by(select('post_count'),decr)" +
             ".limit(20);";
         List<Result> results;
         try {

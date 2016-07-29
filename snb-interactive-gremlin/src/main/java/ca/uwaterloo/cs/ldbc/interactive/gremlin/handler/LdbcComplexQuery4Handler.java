@@ -12,10 +12,10 @@ import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery4Result;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Result;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAccessor;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 public class LdbcComplexQuery4Handler implements OperationHandler<LdbcQuery4, DbConnectionState> {
@@ -44,22 +44,22 @@ public class LdbcComplexQuery4Handler implements OperationHandler<LdbcQuery4, Db
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery4.personId()));
         params.put("startDate", String.valueOf(ldbcQuery4.startDate().getTime()));
         params.put("duration", ldbcQuery4.durationDays());
+        Date start = ldbcQuery4.startDate();
+        LocalDate end = LocalDateTime.from( (TemporalAccessor) start ).plusDays( ldbcQuery4.durationDays()).toLocalDate();
+        params.put("start_date", start);
+        params.put("end_date", end);
 
         String statement = "g.V().has('iid', person_id).out('knows')" +
             ".in('hasCreator').as('friend_posts')" +
-            ".where(__.creationDate.is(lt(start_date)))" +
-            ".out('hasTag').as('before_tags)" +
-            ".optional('friend_posts')" +
-            ".where(__.creationDate.is(gte(start_date)))" +
-            ".where(__.creationDate.is(lt(start_date + duration)))" +
+            ".has('creationDate',lt(start_date))" +
+            ".out('hasTag').as('before_tags')" +
+            ".select('friend_posts')" +
+            ".has('creationDate', inside(start_date, end_date)))" +
             ".out('hasTag')" +
-            ".except('before_tags')" +
-            ".as('tag_names')" +
+            ".is(without(select('before_tags')))" +
             ".groupCount().by('name')" +
-            ".order(local).by(valueDecr).as('count')" +
-            ".sort{a,b -> b.value <=> a.value}" +
-            ".limit(local, 10)" +
-            ".select('tag_names', 'count')";
+            ".order().by(valueDecr)" +
+            ".limit(10)";
         List<Result> results;
         try {
             results = client.submit(statement, params).all().get();
@@ -69,16 +69,11 @@ public class LdbcComplexQuery4Handler implements OperationHandler<LdbcQuery4, Db
 
         List<LdbcQuery4Result> resultList = new ArrayList<>();
         for (Result r : results) {
-            HashMap map = r.get(HashMap.class);
-            String tagName = (String) map.get("tag_name");
-            int count = (int) map.get("count");
+            AbstractMap.SimpleEntry<String, Long> entry = r.get(AbstractMap.SimpleEntry.class);
+            String tagName = entry.getKey();
+            int tagCount = Math.toIntExact(entry.getValue());
 
-            LdbcQuery4Result ldbcQuery4Result = new LdbcQuery4Result(
-                tagName,
-                count
-            );
-
-            resultList.add(ldbcQuery4Result);
+            resultList.add(new LdbcQuery4Result(tagName, tagCount));
         }
         resultReporter.report(resultList.size(), resultList, ldbcQuery4);
     }
