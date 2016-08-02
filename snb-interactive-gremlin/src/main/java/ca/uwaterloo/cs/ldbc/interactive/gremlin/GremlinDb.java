@@ -47,9 +47,9 @@ public class GremlinDb extends Db{
         registerOperationHandler(LdbcShortQuery4MessageContent.class, LdbcShortQuery4Handler.class);
         registerOperationHandler(LdbcShortQuery5MessageCreator.class, LdbcShortQuery5Handler.class);
         registerOperationHandler(LdbcShortQuery6MessageForum.class, LdbcShortQuery6Handler.class);
+        registerOperationHandler(LdbcShortQuery7MessageReplies.class, LdbcShortQuery7Handler.class);
 
         // Update Queries
-
         registerOperationHandler(LdbcUpdate1AddPerson.class, LdbcUpdate1Handler.class);
         registerOperationHandler(LdbcUpdate2AddPostLike.class, LdbcUpdate2Handler.class);
         registerOperationHandler(LdbcUpdate3AddCommentLike.class, LdbcUpdate3Handler.class);
