@@ -14,7 +14,6 @@ import org.apache.tinkerpop.gremlin.driver.Client;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 public class LdbcUpdate4Handler implements OperationHandler<LdbcUpdate4AddForum, DbConnectionState> {
 
@@ -32,17 +31,14 @@ public class LdbcUpdate4Handler implements OperationHandler<LdbcUpdate4AddForum,
         params.put("moderator_id", ldbcUpdate4AddForum.moderatorPersonId());
         params.put("tag_id", ldbcUpdate4AddForum.tagIds());
 
+        params.put("tag_ids", ldbcUpdate4AddForum.tagIds());
         String statement = "forum = g.addVertex(props);" +
             "mod = g.V().has('iid', moderator_id).next();" +
-            "g.outE(hasModerator, mod);";
-        String tag_statement = ldbcUpdate4AddForum.tagIds()
-            .stream()
-            .map(t -> String.format("tag = g.V().has('iid', %s);" +
-                "tag.hasNext() && forum.addEdge('hasTag', tag);", t))
-            .collect( Collectors.joining("\n"));
+            "g.outE(hasModerator, mod);" +
+            "tags_ids.forEach(t -> { tag = g.V().has('iid', t); tag.hasNext() && forum.addEdge('hasTag', tag); })";
         try
         {
-            client.submit(String.join("\n", statement, tag_statement), params).all().get();
+            client.submit(statement, params).all().get();
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
         }

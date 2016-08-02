@@ -12,10 +12,8 @@ import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcUpdate6AddPost;
 import org.apache.tinkerpop.gremlin.driver.Client;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 public class LdbcUpdate6Handler implements OperationHandler<LdbcUpdate6AddPost,DbConnectionState>
 {
@@ -41,22 +39,19 @@ public class LdbcUpdate6Handler implements OperationHandler<LdbcUpdate6AddPost,D
         params.put("creator_id", GremlinUtils.makeIid( Entity.PERSON, ldbcUpdate6AddPost.authorPersonId() ) );
         params.put("forum_id", GremlinUtils.makeIid( Entity.FORUM, ldbcUpdate6AddPost.forumId() ) );
         params.put("country_id", GremlinUtils.makeIid( Entity.PLACE, ldbcUpdate6AddPost.countryId() ) );
-        List<Object> tags = ldbcUpdate6AddPost.tagIds().stream().map( t -> GremlinUtils.makeIid(Entity.TAG, t))
-                .collect(Collectors.toList());
+
+        params.put("tag_ids", ldbcUpdate6AddPost.tagIds());
+
         String statement = "post = g.addVertex(props); " +
-                "creator = g.V().has('iid', creator_id); " +
-                "forum = g.V().has('iid', forum_id); " +
-                "country = g.V().has('iid', country_id); " +
+                "creator = g.V().has('iid', creator_id).next(); " +
+                "forum = g.V().has('iid', forum_id).next(); " +
+                "country = g.V().has('iid', country_id).next(); " +
                 "post.addEdge(hasCreator, creator); " +
                 "post.addEdge(hasContainer, forum); " +
-                "post.addEdge(isLocatedIn, country);";
-        String tag_statement = ldbcUpdate6AddPost.tagIds()
-            .stream()
-            .map(t -> String.format("tag = g.V().has('iid', %s);" +
-                "tag.hasNext() && post.addEdge('hasTag', tag);", t))
-            .collect( Collectors.joining("\n"));
+                "post.addEdge(isLocatedIn, country);" +
+                "tags_ids.forEach(t -> { tag = g.V().has('iid', t); tag.hasNext() && post.addEdge('hasTag', tag); })";
         try {
-            client.submit(String.join("\n", statement, tag_statement), params).all().get();
+            client.submit(statement, params).all().get();
         } catch ( InterruptedException | ExecutionException e )
         {
             throw new DbException( "Remote execution failed", e );

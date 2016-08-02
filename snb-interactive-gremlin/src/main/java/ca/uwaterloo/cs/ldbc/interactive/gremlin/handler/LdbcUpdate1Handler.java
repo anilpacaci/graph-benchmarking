@@ -34,25 +34,15 @@ public class LdbcUpdate1Handler implements OperationHandler<LdbcUpdate1AddPerson
         props.put("location_ip", ldbcUpdate1AddPerson.locationIp());
         props.put("browser_used", ldbcUpdate1AddPerson.browserUsed());
 
+        props.put("languages", ldbcUpdate1AddPerson.languages());
+        props.put("emails", ldbcUpdate1AddPerson.emails());
+        props.put("tag_ids", ldbcUpdate1AddPerson.tagIds());
         String statement = "person = g.addVertex(props);" +
             "city = g.V().has(iid, located_in).next();" +
-            "person.outE('isLocatedIn', city);";
-
-        String lang_statement = ldbcUpdate1AddPerson.languages()
-            .stream()
-            .map(l -> String.format("person.property('language', %s);", l))
-            .collect(Collectors.joining("\n"));
-
-        String email_statement = ldbcUpdate1AddPerson.emails()
-            .stream()
-            .map(e -> String.format("person.property('email', %s);", e))
-            .collect(Collectors.joining("\n"));
-
-        String tag_statement = ldbcUpdate1AddPerson.tagIds()
-            .stream()
-            .map(t -> String.format("tag = g.V().has('iid', %s);" +
-                "tag.hasNext() && post.addEdge('hasInterest', tag);", t))
-            .collect( Collectors.joining("\n"));
+            "person.outE('isLocatedIn', city);" +
+            "langs.forEach(l -> { person.property('language', l); });" +
+            "emails.forEach(l -> { person.property('email', l); });" +
+            "tags_ids.forEach(t -> { tag = g.V().has('iid', t); tag.hasNext() && post.addEdge('hasTag', tag); })";
 
         String uni_statement = ldbcUpdate1AddPerson.studyAt().stream()
             .map(org -> {
@@ -73,9 +63,6 @@ public class LdbcUpdate1Handler implements OperationHandler<LdbcUpdate1AddPerson
         try {
             client.submit( String.join("\n",
                 statement,
-                lang_statement,
-                email_statement,
-                tag_statement,
                 uni_statement,
                 company_statement),
                 params)
