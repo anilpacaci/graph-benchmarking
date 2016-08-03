@@ -31,7 +31,7 @@ public class LdbcShortQuery7Handler implements OperationHandler<LdbcShortQuery7M
 
         List<Result> authorKnowsResults = null;
         try {
-            authorKnowsResults = client.submit("message = g.V().has('iid', message_id).out('hasCreator').out('knows')").all().get();
+            authorKnowsResults = client.submit("message = g.V().has('iid', message_id).out('hasCreator').out('knows')", params).all().get();
 
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
@@ -42,7 +42,7 @@ public class LdbcShortQuery7Handler implements OperationHandler<LdbcShortQuery7M
 
         List<Result> results = null;
         try {
-            results = client.submit("g.V().has('iid', message_id).in('replyOf').as('reply').out('hasCreator').as('creator').select('reply', 'creator')").all().get();
+            results = client.submit("g.V().has('iid', message_id).in('replyOf').as('reply').out('hasCreator').as('creator').select('reply', 'creator')", params).all().get();
 
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
