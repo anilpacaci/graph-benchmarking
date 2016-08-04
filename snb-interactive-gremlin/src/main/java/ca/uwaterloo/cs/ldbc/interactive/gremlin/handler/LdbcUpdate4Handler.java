@@ -12,6 +12,7 @@ import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcUpdate4AddForum;
 import org.apache.tinkerpop.gremlin.driver.Client;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -29,13 +30,12 @@ public class LdbcUpdate4Handler implements OperationHandler<LdbcUpdate4AddForum,
 
         params.put("props", vertex_props);
         params.put("moderator_id", ldbcUpdate4AddForum.moderatorPersonId());
-        params.put("tag_id", ldbcUpdate4AddForum.tagIds());
-
         params.put("tag_ids", ldbcUpdate4AddForum.tagIds());
+
         String statement = "forum = g.addVertex(props);" +
             "mod = g.V().has('iid', moderator_id).next();" +
             "g.outE(hasModerator, mod);" +
-            "tags_ids.forEach(t -> { tag = g.V().has('iid', t); tag.hasNext() && forum.addEdge('hasTag', tag); })";
+            "tags_ids.forEach{t ->  tag = g.V().has('iid', t); tag.hasNext() && forum.addEdge('hasTag', tag); }";
         try
         {
             client.submit(statement, params).all().get();

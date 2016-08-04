@@ -38,11 +38,11 @@ public class LdbcUpdate1Handler implements OperationHandler<LdbcUpdate1AddPerson
         props.put("emails", ldbcUpdate1AddPerson.emails());
         props.put("tag_ids", ldbcUpdate1AddPerson.tagIds());
         String statement = "person = g.addVertex(props);" +
-            "city = g.V().has(iid, located_in).next();" +
+            "city = g.V().has('iid', located_in).next();" +
             "person.outE('isLocatedIn', city);" +
-            "langs.forEach(l -> { person.property('language', l); });" +
-            "emails.forEach(l -> { person.property('email', l); });" +
-            "tags_ids.forEach(t -> { tag = g.V().has('iid', t); tag.hasNext() && post.addEdge('hasTag', tag); })";
+            "languages.forEach{l ->  person.property('language', l); };" +
+            "emails.forEach{l ->  person.property('email', l); };" +
+            "tags_ids.forEach{t ->  tag = g.V().has('iid', t); tag.hasNext() && post.addEdge('hasTag', tag); }";
 
         String uni_statement = ldbcUpdate1AddPerson.studyAt().stream()
             .map(org -> {

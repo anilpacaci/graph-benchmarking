@@ -37,11 +37,11 @@ public class LdbcUpdate7Handler implements OperationHandler<LdbcUpdate7AddCommen
         params.put( "props", props );
         params.put("tag_ids", ldbcUpdate7AddComment.tagIds());
         String statement = "comment = g.addVertex(props);" +
-            "country = g.V().has('iid, country_id);" +
-            "creator = g.V().has('iid, person_id).next();" +
+            "country = g.V().has('iid', country_id);" +
+            "creator = g.V().has('iid', person_id).next();" +
             "country.hasNext() && comment.addEdge('isLocatedIn', country.next());" +
             "creator.hasNext() && comment.addEdge('hasCreator', creator.next());" +
-            "tags_ids.forEach(t -> { tag = g.V().has('iid', t); tag.hasNext() && comment.addEdge('hasTag', tag); })";
+            "tags_ids.forEach{t ->  tag = g.V().has('iid', t); tag.hasNext() && comment.addEdge('hasTag', tag); }";
         if (ldbcUpdate7AddComment.replyToCommentId() != -1) {
             statement += "replied_comment = g.V().has('iid', reply_to_c_id);" +
                 "replied_comment.hasNext() && comment.addEdge('replyOf', replied_comment.next());";

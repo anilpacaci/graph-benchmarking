@@ -49,7 +49,7 @@ public class LdbcUpdate6Handler implements OperationHandler<LdbcUpdate6AddPost,D
                 "post.addEdge(hasCreator, creator); " +
                 "post.addEdge(hasContainer, forum); " +
                 "post.addEdge(isLocatedIn, country);" +
-                "tags_ids.forEach(t -> { tag = g.V().has('iid', t); tag.hasNext() && post.addEdge('hasTag', tag); })";
+                "tags_ids.forEach{t -> tag = g.V().has('iid', t); tag.hasNext() && post.addEdge('hasTag', tag); }";
         try {
             client.submit(statement, params).all().get();
         } catch ( InterruptedException | ExecutionException e )
