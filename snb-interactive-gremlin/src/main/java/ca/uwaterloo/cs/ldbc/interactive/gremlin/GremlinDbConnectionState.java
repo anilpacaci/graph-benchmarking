@@ -21,26 +21,19 @@ public class GremlinDbConnectionState extends DbConnectionState {
     private Client remoteClient;
 
     public GremlinDbConnectionState(Map<String, String> properties) {
-        String locator;
+        String remoteObjectFile;
         if (properties.containsKey("locator")) {
-            locator = properties.get("locator");
+            remoteObjectFile = properties.get("locator");
         } else {
-            locator = "127.0.0.1";
+            remoteObjectFile = "127.0.0.1";
         }
 
-        String backend;
-        if(properties.containsKey("backend")) {
-            backend = properties.get("backend");
-        } else {
-            backend = "cassandra";
+        try {
+            cluster = Cluster.open(remoteObjectFile);
+            remoteClient = cluster.connect();
+        } catch (Exception e) {
+            logger.error("Connection to remote Gremlin Server could NOT obtained");
         }
-
-            try {
-                cluster = Cluster.open(locator);
-                remoteClient = cluster.connect();
-            } catch (Exception e) {
-                logger.error("Connection to remote Gremlin Server could NOT obtained");
-            }
     }
 
     /**
