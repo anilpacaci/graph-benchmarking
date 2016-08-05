@@ -28,7 +28,7 @@ public class LdbcUpdate8Handler implements OperationHandler<LdbcUpdate8AddFriend
         params.put("props", props);
         try {
             client.submit("p1 = g.V().has('iid', p1_id).next(); " +
-                "p2= g.V().has('iid', p2_id); " +
+                "p2= g.V().has('iid', p2_id).next(); " +
                 "p1.addEdge('knows', p2, props); " +
                 "p2.addEdge('knows', p1, props);",
                 params).all().get();
