@@ -31,9 +31,15 @@ public class LdbcShortQuery2Handler implements OperationHandler<LdbcShortQuery2P
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcShortQuery2PersonPosts.personId()));
         params.put("result_limit", ldbcShortQuery2PersonPosts.limit());
 
+        String statement = "g.V().has('iid', person_id)" +
+                ".in('hasCreator').order().by('creationDate', decr).by('iid', decr).limit(result_limit).as('message')" +
+                ".repeat(out('replyOf')).until(hasLabel('post')).as('original')" +
+                ".out('hasCreator').as('owner')" +
+                ".select('message', 'original', 'owner')";
+
         List<Result> results = null;
         try {
-            results = client.submit("g.V().has('iid', person_id).in('hasCreator').order().by('creationDate', decr).by('iid', decr).limit(result_limit).as('message').repeat(out('replyOf')).until(hasLabel('post')).as('original').out('hasCreator').as('owner').select('message', 'original', 'owner')", params).all().get();
+            results = client.submit(statement, params).all().get();
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
         }

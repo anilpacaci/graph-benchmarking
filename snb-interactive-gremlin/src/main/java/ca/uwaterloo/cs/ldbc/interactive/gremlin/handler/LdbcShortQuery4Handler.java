@@ -28,9 +28,11 @@ public class LdbcShortQuery4Handler implements OperationHandler<LdbcShortQuery4M
         Map<String, Object> params = new HashMap<>();
         params.put("message_id", GremlinUtils.makeIid(Entity.MESSAGE, ldbcShortQuery4MessageContent.messageId()));
 
+        String statement = "g.V().has('iid', message_id)";
+
         List<Result> results = null;
         try {
-            results = client.submit("g.V().has('iid', message_id)", params).all().get();
+            results = client.submit(statement, params).all().get();
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
         }

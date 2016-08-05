@@ -40,9 +40,14 @@ public class LdbcShortQuery7Handler implements OperationHandler<LdbcShortQuery7M
         List<Vertex> authorKnows = new ArrayList<>();
         authorKnowsResults.forEach(res -> { authorKnows.add(res.getVertex());});
 
+        String statement = "g.V().has('iid', message_id)" +
+                ".in('replyOf').as('reply')" +
+                ".out('hasCreator').as('creator')" +
+                ".select('reply', 'creator')";
+
         List<Result> results = null;
         try {
-            results = client.submit("g.V().has('iid', message_id).in('replyOf').as('reply').out('hasCreator').as('creator').select('reply', 'creator')", params).all().get();
+            results = client.submit(statement, params).all().get();
 
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);

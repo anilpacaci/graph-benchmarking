@@ -34,10 +34,14 @@ public class LdbcComplexQuery13Handler implements OperationHandler<LdbcQuery13, 
             return;
         }
 
+        String statement = "g.V().has('iid', person1_id)" +
+                ".repeat(out('knows').simplePath()).until(has('iid', person2_id))" +
+                ".limit(1).path().count(local)";
+
         // TODO: is it possible to have no path between source & target. What is the length then?
         List<Result> results = null;
         try {
-            results = client.submit("g.V().has('iid', person1_id).repeat(out('knows').simplePath()).until(has('iid', person2_id)).limit(1).path().count(local)", params).all().get();
+            results = client.submit(statement, params).all().get();
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
         }

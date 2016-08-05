@@ -35,7 +35,7 @@ public class LdbcComplexQuery7Handler implements OperationHandler<LdbcQuery7, Db
 
         List<Result> authorKnowsResults = null;
         try {
-            authorKnowsResults = client.submit(" g.V().has('iid', person_id).out('knows')").all().get();
+            authorKnowsResults = client.submit(" g.V().has('iid', person_id).out('knows')", params).all().get();
 
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
@@ -44,14 +44,15 @@ public class LdbcComplexQuery7Handler implements OperationHandler<LdbcQuery7, Db
         List<Vertex> authorKnows = new ArrayList<>();
         authorKnowsResults.forEach(res -> { authorKnows.add(res.getVertex());});
 
+        String statement = "g.V().has('iid', person_id)" +
+                ".in('hasCreator').as('post')" +
+                ".inE('likes').as('like')" +
+                ".outV().as('liker')" +
+                ".select('post', 'like', 'liker')";
+
         List<Result> results = null;
         try {
-            results = client.submit("g.V().has('iid', person_id)" +
-                    ".in('hasCreator').as('post')" +
-                    ".inE('likes').as('like')" +
-                    ".outV().as('liker')" +
-                    ".select('post', 'like', 'liker')").all().get();
-
+            results = client.submit(statement, params).all().get();
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
         }

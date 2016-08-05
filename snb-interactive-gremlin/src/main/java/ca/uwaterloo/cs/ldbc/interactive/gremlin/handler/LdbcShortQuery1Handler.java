@@ -30,9 +30,11 @@ public class LdbcShortQuery1Handler implements OperationHandler<LdbcShortQuery1P
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcShortQuery1PersonProfile.personId()));
 
+        String statement = "g.V().has('iid', person_id).as('person').outE('isLocatedIn').inV().as('place').select('person', 'place')";
+
         List<Result> results = null;
         try {
-            results = client.submit("g.V().has('iid', person_id).as('person').outE('isLocatedIn').inV().as('place').select('person', 'place')", params).all().get();
+            results = client.submit(statement, params).all().get();
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
         }

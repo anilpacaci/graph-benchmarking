@@ -48,6 +48,7 @@ public class LdbcComplexQuery4Handler implements OperationHandler<LdbcQuery4, Db
         LocalDate end = LocalDateTime.from( (TemporalAccessor) start ).plusDays( ldbcQuery4.durationDays()).toLocalDate();
         params.put("start_date", start);
         params.put("end_date", end);
+        params.put("result_limit", ldbcQuery4.limit());
 
         String statement = "g.V().has('iid', person_id).out('knows')" +
             ".in('hasCreator').as('friend_posts')" +
@@ -59,7 +60,7 @@ public class LdbcComplexQuery4Handler implements OperationHandler<LdbcQuery4, Db
             ".is(without(select('before_tags')))" +
             ".groupCount().by('name')" +
             ".order().by(valueDecr)" +
-            ".limit(10)";
+            ".limit(result_limit)";
         List<Result> results;
         try {
             results = client.submit(statement, params).all().get();
