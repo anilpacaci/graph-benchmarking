@@ -40,7 +40,7 @@ public class LdbcUpdate6Handler implements OperationHandler<LdbcUpdate6AddPost,D
         params.put("forum_id", GremlinUtils.makeIid( Entity.FORUM, ldbcUpdate6AddPost.forumId() ) );
         params.put("country_id", GremlinUtils.makeIid( Entity.PLACE, ldbcUpdate6AddPost.countryId() ) );
 
-        params.put("tag_ids", ldbcUpdate6AddPost.tagIds());
+        params.put("tag_ids", GremlinUtils.makeIid(Entity.TAG, ldbcUpdate6AddPost.tagIds()));
 
         String statement = "post = g.addVertex(props); " +
                 "creator = g.V().has('iid', creator_id).next(); " +

@@ -30,7 +30,7 @@ public class LdbcUpdate4Handler implements OperationHandler<LdbcUpdate4AddForum,
 
         params.put("props", vertex_props);
         params.put("moderator_id", ldbcUpdate4AddForum.moderatorPersonId());
-        params.put("tag_ids", ldbcUpdate4AddForum.tagIds());
+        params.put("tag_ids", GremlinUtils.makeIid(Entity.TAG, ldbcUpdate4AddForum.tagIds()));
 
         String statement = "forum = g.addVertex(props);" +
             "mod = g.V().has('iid', moderator_id).next();" +

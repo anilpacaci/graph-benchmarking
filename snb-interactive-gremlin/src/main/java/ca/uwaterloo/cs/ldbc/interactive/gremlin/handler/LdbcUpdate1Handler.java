@@ -36,7 +36,7 @@ public class LdbcUpdate1Handler implements OperationHandler<LdbcUpdate1AddPerson
 
         props.put("languages", ldbcUpdate1AddPerson.languages());
         props.put("emails", ldbcUpdate1AddPerson.emails());
-        props.put("tag_ids", ldbcUpdate1AddPerson.tagIds());
+        props.put("tag_ids", GremlinUtils.makeIid(Entity.TAG, ldbcUpdate1AddPerson.tagIds()));
         String statement = "person = g.addVertex(props);" +
             "city = g.V().has('iid', located_in).next();" +
             "person.outE('isLocatedIn', city);" +

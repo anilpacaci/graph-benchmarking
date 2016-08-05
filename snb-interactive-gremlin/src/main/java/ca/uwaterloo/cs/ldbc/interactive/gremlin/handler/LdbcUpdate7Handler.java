@@ -35,7 +35,7 @@ public class LdbcUpdate7Handler implements OperationHandler<LdbcUpdate7AddCommen
         props.put("content", ldbcUpdate7AddComment.content() );
         props.put("location_ip", ldbcUpdate7AddComment.locationIp() );
         params.put( "props", props );
-        params.put("tag_ids", ldbcUpdate7AddComment.tagIds());
+        params.put("tag_ids", GremlinUtils.makeIid(Entity.TAG, ldbcUpdate7AddComment.tagIds()));
         String statement = "comment = g.addVertex(props);" +
             "country = g.V().has('iid', country_id);" +
             "creator = g.V().has('iid', person_id).next();" +
