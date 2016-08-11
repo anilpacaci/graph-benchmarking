@@ -12,11 +12,9 @@ import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery3Result;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Result;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.joda.time.DateTime;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, DbConnectionState> {
@@ -27,23 +25,26 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery3.personId()));
         params.put("countryX", ldbcQuery3.countryXName());
         params.put("countryY", ldbcQuery3.countryYName());
-        params.put("start_date", ldbcQuery3.startDate());
-        params.put("duration", ldbcQuery3.durationDays());
+        Date start = ldbcQuery3.startDate();
+        String end  = Long.toString(new DateTime(start ).plusDays(ldbcQuery3.durationDays()).toDate().getTime());
+        params.put("start_date", Long.toString(start.getTime()));
+        params.put("end_date", end);
 
-        String statement = "g.V().has('iid', person_id).out('knows').loop(1){it.loops < 3}" +
-            ".filter{it.place != countryX && it.place != countryY}" +
-            ".order().by('iid', asc)" +
+        String statement = "g.V().has('iid', person_id)" +
+            ".repeat(out('knows')).times(2).emit().as('person')" +
+            ".where(has('place', neq(countryX)).and(has('place', neq(countryY))))" +
+            ".order().by('iid', incr)" +
             ".in('hasCreator')" +
-            ".filter{it.place == countryX || it.place == countryY}" +
-            ".filter{it.creationDate >= start_date}" +
-            ".filter{it.creationDate < start_date + duration}" +
-            ".group().by('hasCreator').limit(20)" +
-            ".fold().match(__.as('person')," +
-            "              __.as('p').unfold().has(place, countryX).count(local).as('countx')," +
-            "              __.as('p').unfold().has(place, countryX).count(local).as('county')," +
-            "              )" +
+            ".where(has('place', countryX)).or(has('place, countryY))))" +
+            ".has('creationDate', inside(start_date, end_date))" +
+            ".group().by('hasCreator')" +
+            ".by(fold().match(__.as('p').unfold().has('place', countryX).count(local).as('countx')," +
+            "                 __.as('p').unfold().has('place', countryY).count(local).as('county')," +
+            "                )" +
             ".select('person', 'countx', 'county')" +
-            ".order().by('countx', desc)";
+            ".order().by('countx', decr))" +
+            ".limit(20)";
+
         List<Result> results;
         try {
             results = client.submit(statement, params).all().get();

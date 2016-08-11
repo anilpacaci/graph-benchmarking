@@ -34,13 +34,14 @@ public class LdbcUpdate7Handler implements OperationHandler<LdbcUpdate7AddCommen
         props.put("type", ldbcUpdate7AddComment.type() );
         props.put("content", ldbcUpdate7AddComment.content() );
         props.put("location_ip", ldbcUpdate7AddComment.locationIp() );
-
         params.put( "props", props );
+        params.put("tag_ids", ldbcUpdate7AddComment.tagIds());
         String statement = "comment = g.addVertex(props);" +
             "country = g.V().has('iid, country_id);" +
             "creator = g.V().has('iid, person_id).next();" +
             "country.hasNext() && comment.addEdge('isLocatedIn', country.next());" +
-            "creator.hasNext() && comment.addEdge('hasCreator', creator.next());";
+            "creator.hasNext() && comment.addEdge('hasCreator', creator.next());" +
+            "tags_ids.forEach(t -> { tag = g.V().has('iid', t); tag.hasNext() && comment.addEdge('hasTag', tag); })";
         if (ldbcUpdate7AddComment.replyToCommentId() != -1) {
             statement += "replied_comment = g.V().has('iid', reply_to_c_id);" +
                 "replied_comment.hasNext() && comment.addEdge('replyOf', replied_comment.next());";
@@ -56,7 +57,7 @@ public class LdbcUpdate7Handler implements OperationHandler<LdbcUpdate7AddCommen
             .collect(Collectors.joining("\n"));
 
         try {
-            client.submit(String.join("\n", statement, tag_statement), params).all().get();
+            client.submit(statement, params).all().get();
         } catch ( InterruptedException | ExecutionException e ) {
             throw new DbException( "Remote execution failed", e );
         }

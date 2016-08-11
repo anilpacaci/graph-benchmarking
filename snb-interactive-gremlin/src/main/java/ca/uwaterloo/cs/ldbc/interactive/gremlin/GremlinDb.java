@@ -27,8 +27,12 @@ public class GremlinDb extends Db{
 
         // Complex Queries
 
+        registerOperationHandler(LdbcQuery3.class, LdbcComplexQuery3Handler.class);
+        registerOperationHandler(LdbcQuery3.class, LdbcComplexQuery3Handler.class);
+        registerOperationHandler(LdbcQuery4.class, LdbcComplexQuery4Handler.class);
+        registerOperationHandler(LdbcQuery5.class, LdbcComplexQuery5Handler.class);
         registerOperationHandler(LdbcQuery6.class, LdbcComplexQuery6Handler.class);
-
+        registerOperationHandler(LdbcQuery7.class, LdbcComplexQuery7Handler.class);
         registerOperationHandler(LdbcQuery8.class, LdbcComplexQuery8Handler.class);
         registerOperationHandler(LdbcQuery9.class, LdbcComplexQuery9Handler.class);
         registerOperationHandler(LdbcQuery11.class, LdbcComplexQuery11Handler.class);
@@ -42,9 +46,9 @@ public class GremlinDb extends Db{
         registerOperationHandler(LdbcShortQuery4MessageContent.class, LdbcShortQuery4Handler.class);
         registerOperationHandler(LdbcShortQuery5MessageCreator.class, LdbcShortQuery5Handler.class);
         registerOperationHandler(LdbcShortQuery6MessageForum.class, LdbcShortQuery6Handler.class);
+        registerOperationHandler(LdbcShortQuery7MessageReplies.class, LdbcShortQuery7Handler.class);
 
         // Update Queries
-
         registerOperationHandler(LdbcUpdate1AddPerson.class, LdbcUpdate1Handler.class);
         registerOperationHandler(LdbcUpdate2AddPostLike.class, LdbcUpdate2Handler.class);
         registerOperationHandler(LdbcUpdate3AddCommentLike.class, LdbcUpdate3Handler.class);
