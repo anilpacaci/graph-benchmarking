@@ -36,6 +36,7 @@ public class LdbcUpdate4Handler implements OperationHandler<LdbcUpdate4AddForum,
             "mod = g.V().has('iid', moderator_id).next();" +
             "g.outE(hasModerator, mod);" +
             "tags_ids.forEach{t ->  tag = g.V().has('iid', t).next(); forum.addEdge('hasTag', tag); }";
+
         producer.send(new ProducerRecord<String, GremlinStatement>(topic, new GremlinStatement(statement, params)));
 
         resultReporter.report(0, LdbcNoResult.INSTANCE, ldbcUpdate4AddForum);
