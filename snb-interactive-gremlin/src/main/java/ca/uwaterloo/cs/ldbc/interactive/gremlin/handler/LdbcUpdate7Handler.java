@@ -14,7 +14,6 @@ import org.apache.tinkerpop.gremlin.driver.Client;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 public class LdbcUpdate7Handler implements OperationHandler<LdbcUpdate7AddComment, DbConnectionState>
 {
@@ -37,11 +36,11 @@ public class LdbcUpdate7Handler implements OperationHandler<LdbcUpdate7AddCommen
         params.put( "props", props );
         params.put("tag_ids", GremlinUtils.makeIid(Entity.TAG, ldbcUpdate7AddComment.tagIds()));
         String statement = "comment = g.addVertex(props);" +
-            "country = g.V().has('iid', country_id);" +
+            "country = g.V().has('iid', country_id).next();" +
             "creator = g.V().has('iid', person_id).next();" +
-            "country.hasNext() && comment.addEdge('isLocatedIn', country.next());" +
-            "creator.hasNext() && comment.addEdge('hasCreator', creator.next());" +
-            "tags_ids.forEach{t ->  tag = g.V().has('iid', t); tag.hasNext() && comment.addEdge('hasTag', tag); }";
+            "comment.addEdge('isLocatedIn', country);" +
+            "comment.addEdge('hasCreator', creator);" +
+            "tags_ids.forEach{t ->  tag = g.V().has('iid', t).next(); comment.addEdge('hasTag', tag); }";
         if (ldbcUpdate7AddComment.replyToCommentId() != -1) {
             statement += "replied_comment = g.V().has('iid', reply_to_c_id);" +
                 "replied_comment.hasNext() && comment.addEdge('replyOf', replied_comment.next());";
@@ -50,11 +49,6 @@ public class LdbcUpdate7Handler implements OperationHandler<LdbcUpdate7AddCommen
             statement += "replied_post = g.V().has('iid', reply_to_c_id);" +
                 "replied_post.hasNext() && comment.addEdge('replyOf', replied_post.next());";
         }
-        String tag_statement = ldbcUpdate7AddComment.tagIds()
-            .stream()
-            .map(t -> String.format("tag = g.V().has('iid', %s);" +
-                "tag.hasNext() && post.addEdge('hasTag', tag);", t))
-            .collect(Collectors.joining("\n"));
 
         try {
             client.submit(statement, params).all().get();
