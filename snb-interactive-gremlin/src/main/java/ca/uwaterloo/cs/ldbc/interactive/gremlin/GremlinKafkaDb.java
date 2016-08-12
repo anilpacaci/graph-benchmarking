@@ -17,13 +17,13 @@ import java.util.Map;
  *
  * @author apacaci
  */
-public class GremlinDb extends Db{
-    private GremlinDbConnectionState connection;
+public class GremlinKafkaDb extends Db{
+    private GremlinKafkaDbConnectionState connection;
 
     @Override
     protected void onInit(Map<String, String> map, LoggingService loggingService) throws DbException {
 
-        connection = new GremlinDbConnectionState(map);
+        connection = new GremlinKafkaDbConnectionState(map);
 
         // Complex Queries
 
