@@ -1,7 +1,7 @@
 package ca.uwaterloo.cs.ldbc.interactive.gremlin.handler;
 
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.Entity;
-import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinDbConnectionState;
+import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinKafkaDbConnectionState;
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinUtils;
 import com.ldbc.driver.DbConnectionState;
 import com.ldbc.driver.DbException;
@@ -12,7 +12,6 @@ import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcShortQuery2PersonPosts
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Result;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +25,7 @@ import java.util.concurrent.ExecutionException;
 public class LdbcShortQuery2Handler implements OperationHandler<LdbcShortQuery2PersonPosts, DbConnectionState> {
     @Override
     public void executeOperation(LdbcShortQuery2PersonPosts ldbcShortQuery2PersonPosts, DbConnectionState dbConnectionState, ResultReporter resultReporter) throws DbException {
-        Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
+        Client client = ((GremlinKafkaDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcShortQuery2PersonPosts.personId()));
         params.put("result_limit", ldbcShortQuery2PersonPosts.limit());

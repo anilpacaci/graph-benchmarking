@@ -1,7 +1,8 @@
 package ca.uwaterloo.cs.ldbc.interactive.gremlin.handler;
 
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.Entity;
-import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinDbConnectionState;
+import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinKafkaDbConnectionState;
+import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinStatement;
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinUtils;
 import com.ldbc.driver.DbConnectionState;
 import com.ldbc.driver.DbException;
@@ -9,11 +10,11 @@ import com.ldbc.driver.OperationHandler;
 import com.ldbc.driver.ResultReporter;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcNoResult;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcUpdate6AddPost;
-import org.apache.tinkerpop.gremlin.driver.Client;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 public class LdbcUpdate6Handler implements OperationHandler<LdbcUpdate6AddPost,DbConnectionState>
 {
@@ -22,7 +23,8 @@ public class LdbcUpdate6Handler implements OperationHandler<LdbcUpdate6AddPost,D
     public void executeOperation( LdbcUpdate6AddPost ldbcUpdate6AddPost,
             DbConnectionState dbConnectionState, ResultReporter resultReporter ) throws DbException
     {
-        Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
+        KafkaProducer<String, GremlinStatement> producer = ((GremlinKafkaDbConnectionState) dbConnectionState).getKafkaProducer();
+        String topic = ((GremlinKafkaDbConnectionState) dbConnectionState).getKafkaTopic();
 
         Map<String,Object> params = new HashMap<>();
         Map<String,Object> props = new HashMap<>();
@@ -35,11 +37,9 @@ public class LdbcUpdate6Handler implements OperationHandler<LdbcUpdate6AddPost,D
         props.put("content", ldbcUpdate6AddPost.content() );
         props.put("length", String.valueOf( ldbcUpdate6AddPost.length() ) );
         params.put("props", props );
-
         params.put("creator_id", GremlinUtils.makeIid( Entity.PERSON, ldbcUpdate6AddPost.authorPersonId() ) );
         params.put("forum_id", GremlinUtils.makeIid( Entity.FORUM, ldbcUpdate6AddPost.forumId() ) );
         params.put("country_id", GremlinUtils.makeIid( Entity.PLACE, ldbcUpdate6AddPost.countryId() ) );
-
         params.put("tag_ids", GremlinUtils.makeIid(Entity.TAG, ldbcUpdate6AddPost.tagIds()));
 
         String statement = "post = g.addVertex(props); " +
@@ -50,12 +50,7 @@ public class LdbcUpdate6Handler implements OperationHandler<LdbcUpdate6AddPost,D
                 "post.addEdge(hasContainer, forum); " +
                 "post.addEdge(isLocatedIn, country);" +
                 "tags_ids.forEach{t -> tag = g.V().has('iid', t).next(); post.addEdge('hasTag', tag); }";
-        try {
-            client.submit(statement, params).all().get();
-        } catch ( InterruptedException | ExecutionException e )
-        {
-            throw new DbException( "Remote execution failed", e );
-        }
+        producer.send(new ProducerRecord<String, GremlinStatement>(topic, new GremlinStatement(statement, params)));
 
         resultReporter.report( 0, LdbcNoResult.INSTANCE, ldbcUpdate6AddPost );
 

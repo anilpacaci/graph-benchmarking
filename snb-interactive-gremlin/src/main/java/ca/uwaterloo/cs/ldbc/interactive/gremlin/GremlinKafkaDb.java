@@ -17,17 +17,16 @@ import java.util.Map;
  *
  * @author apacaci
  */
-public class GremlinDb extends Db{
-    private GremlinDbConnectionState connection;
+public class GremlinKafkaDb extends Db{
+    private GremlinKafkaDbConnectionState connection;
 
     @Override
     protected void onInit(Map<String, String> map, LoggingService loggingService) throws DbException {
 
-        connection = new GremlinDbConnectionState(map);
+        connection = new GremlinKafkaDbConnectionState(map);
 
         // Complex Queries
         // TODO 1, 10 and 14 are dummy implementation.
-        registerOperationHandler(LdbcQuery1.class, LdbcComplexQuery1Handler.class);
         registerOperationHandler(LdbcQuery2.class, LdbcComplexQuery2Handler.class);
         registerOperationHandler(LdbcQuery3.class, LdbcComplexQuery3Handler.class);
         registerOperationHandler(LdbcQuery4.class, LdbcComplexQuery4Handler.class);
