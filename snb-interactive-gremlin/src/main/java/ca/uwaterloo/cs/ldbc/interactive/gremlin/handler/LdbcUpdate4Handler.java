@@ -1,9 +1,9 @@
 package ca.uwaterloo.cs.ldbc.interactive.gremlin.handler;
 
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.Entity;
-import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinKafkaDbConnectionState;
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinStatement;
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinUtils;
+import ca.uwaterloo.cs.ldbc.interactive.gremlin.LdbcKafkaProducer;
 import com.ldbc.driver.DbConnectionState;
 import com.ldbc.driver.DbException;
 import com.ldbc.driver.OperationHandler;
@@ -17,11 +17,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class LdbcUpdate4Handler implements OperationHandler<LdbcUpdate4AddForum, DbConnectionState> {
+    private KafkaProducer<String, GremlinStatement> producer;
+
+    public LdbcUpdate4Handler() {
+        producer = LdbcKafkaProducer.createProducer();
+    }
 
     @Override
     public void executeOperation(LdbcUpdate4AddForum ldbcUpdate4AddForum, DbConnectionState dbConnectionState, ResultReporter resultReporter) throws DbException {
-        KafkaProducer<String, GremlinStatement> producer = ((GremlinKafkaDbConnectionState) dbConnectionState).getKafkaProducer();
-        String topic = ((GremlinKafkaDbConnectionState) dbConnectionState).getKafkaTopic();
+        String topic = LdbcKafkaProducer.KAFKA_TOPIC;
         Map<String, Object> params = new HashMap<>();
 
         Map<String, Object> vertex_props = new HashMap<>();

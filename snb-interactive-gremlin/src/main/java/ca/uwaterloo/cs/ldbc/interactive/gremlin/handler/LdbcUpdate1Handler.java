@@ -1,9 +1,9 @@
 package ca.uwaterloo.cs.ldbc.interactive.gremlin.handler;
 
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.Entity;
-import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinKafkaDbConnectionState;
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinStatement;
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinUtils;
+import ca.uwaterloo.cs.ldbc.interactive.gremlin.LdbcKafkaProducer;
 import com.ldbc.driver.DbConnectionState;
 import com.ldbc.driver.DbException;
 import com.ldbc.driver.OperationHandler;
@@ -19,10 +19,15 @@ import java.util.stream.Collectors;
 
 public class LdbcUpdate1Handler implements OperationHandler<LdbcUpdate1AddPerson, DbConnectionState> {
 
+    private KafkaProducer<String, GremlinStatement> producer;
+
+    public LdbcUpdate1Handler() {
+        producer = LdbcKafkaProducer.createProducer();
+    }
+
     @Override
     public void executeOperation(LdbcUpdate1AddPerson ldbcUpdate1AddPerson, DbConnectionState dbConnectionState, ResultReporter resultReporter) throws DbException {
-        KafkaProducer<String, GremlinStatement> producer = ((GremlinKafkaDbConnectionState) dbConnectionState).getKafkaProducer();
-        String topic = ((GremlinKafkaDbConnectionState) dbConnectionState).getKafkaTopic();
+        String topic = LdbcKafkaProducer.KAFKA_TOPIC;
         Map<String, Object> params = new HashMap<>();
         Map<String, Object> props = new HashMap<>();
 

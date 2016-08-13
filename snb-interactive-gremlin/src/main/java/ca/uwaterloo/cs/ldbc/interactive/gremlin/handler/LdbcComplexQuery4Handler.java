@@ -1,7 +1,7 @@
 package ca.uwaterloo.cs.ldbc.interactive.gremlin.handler;
 
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.Entity;
-import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinKafkaDbConnectionState;
+import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinDbConnectionState;
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinUtils;
 import com.ldbc.driver.DbConnectionState;
 import com.ldbc.driver.DbException;
@@ -39,7 +39,7 @@ public class LdbcComplexQuery4Handler implements OperationHandler<LdbcQuery4, Db
        // the interval [startDate, startDate + Duration) is closed-open
        // number of Posts made within the given time interval that have this Tag
 
-        Client client = ((GremlinKafkaDbConnectionState) dbConnectionState).getClient();
+        Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery4.personId()));
         params.put("startDate", String.valueOf(ldbcQuery4.startDate().getTime()));
