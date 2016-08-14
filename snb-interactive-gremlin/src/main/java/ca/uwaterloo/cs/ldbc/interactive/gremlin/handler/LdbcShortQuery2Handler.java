@@ -12,7 +12,6 @@ import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcShortQuery2PersonPosts
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Result;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,8 +33,7 @@ public class LdbcShortQuery2Handler implements OperationHandler<LdbcShortQuery2P
         String statement = "g.V().has('iid', person_id)" +
                 ".in('hasCreator').order().by('creationDate', decr).by('iid', decr).limit(result_limit).as('message')" +
                 ".repeat(out('replyOf')).until(hasLabel('post')).as('original')" +
-                ".out('hasCreator').as('owner')" +
-                ".select('message', 'original', 'owner')";
+                ".out('hasCreator').as('owner')" + ".select('message', 'original', 'owner')";
 
         List<Result> results = null;
         try {
@@ -57,8 +55,8 @@ public class LdbcShortQuery2Handler implements OperationHandler<LdbcShortQuery2P
                     Long.parseLong(message.<String>property("creationDate").value()),
                     GremlinUtils.getSNBId(original),
                     GremlinUtils.getSNBId(owner),
-                    message.<String>property("firstName").value(),
-                    message.<String>property("lastName").value());
+                    owner.<String>property("firstName").value(),
+                    owner.<String>property("lastName").value());
         }
 
         resultReporter.report(resultList.size(), resultList, ldbcShortQuery2PersonPosts);

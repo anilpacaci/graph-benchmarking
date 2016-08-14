@@ -11,9 +11,7 @@ import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcNoResult;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcUpdate3AddCommentLike;
 import org.apache.tinkerpop.gremlin.driver.Client;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -28,16 +26,13 @@ public class LdbcUpdate3Handler implements OperationHandler<LdbcUpdate3AddCommen
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcUpdate3AddCommentLike.personId()));
         params.put("comment_id", GremlinUtils.makeIid(Entity.POST, ldbcUpdate3AddCommentLike.commentId()));
+        params.put("creation_date", String.valueOf(ldbcUpdate3AddCommentLike.creationDate().getTime()));
 
-        List<Object> likesProperties = new ArrayList<>();
-        likesProperties.add("creationDate");
-        likesProperties.add(String.valueOf(ldbcUpdate3AddCommentLike.creationDate()));
-        params.put("likesProperties", likesProperties.toArray());
 
         try {
             client.submit("person = g.V().has('iid', person_id).next(); " +
                 "comment = g.V().has('iid', comment_id).next(); " +
-                "person.addEdge('likes', comment, likesProperties)", params).all().get();
+                "person.addEdge('likes', comment).property('creation_date', creation_date);", params).all().get();
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
         }

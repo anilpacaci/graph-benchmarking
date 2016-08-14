@@ -22,16 +22,15 @@ public class LdbcUpdate4Handler implements OperationHandler<LdbcUpdate4AddForum,
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
 
-        Map<String, Object> vertex_props = new HashMap<>();
-        vertex_props.put("forum_id", GremlinUtils.makeIid(Entity.FORUM, ldbcUpdate4AddForum.forumId()));
-        vertex_props.put("title", ldbcUpdate4AddForum.forumTitle());
-        vertex_props.put("creation_date", String.valueOf(ldbcUpdate4AddForum.creationDate().getTime()));
-
-        params.put("props", vertex_props);
+        params.put("forum_id", GremlinUtils.makeIid(Entity.FORUM, ldbcUpdate4AddForum.forumId()));
+        params.put("title", ldbcUpdate4AddForum.forumTitle());
+        params.put("creation_date", String.valueOf(ldbcUpdate4AddForum.creationDate().getTime()));
         params.put("moderator_id", ldbcUpdate4AddForum.moderatorPersonId());
         params.put("tag_ids", GremlinUtils.makeIid(Entity.TAG, ldbcUpdate4AddForum.tagIds()));
 
-        String statement = "forum = g.addVertex(props);" +
+        String statement = "forum = g.addV().property('iid', forum_id)" +
+            ".property('title', title)" +
+            ".property('creation_date', creation_date);" +
             "mod = g.V().has('iid', moderator_id).next();" +
             "g.outE(hasModerator, mod);" +
             "tags_ids.forEach{t ->  tag = g.V().has('iid', t).next(); forum.addEdge('hasTag', tag); }";

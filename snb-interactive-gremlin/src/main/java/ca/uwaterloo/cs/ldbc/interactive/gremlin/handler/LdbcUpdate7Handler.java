@@ -23,32 +23,35 @@ public class LdbcUpdate7Handler implements OperationHandler<LdbcUpdate7AddCommen
     {
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
-        Map<String, Object> props = new HashMap<>();
-        props.put("comment_id", GremlinUtils.makeIid( Entity.PERSON, ldbcUpdate7AddComment.commentId() ) );
         params.put("country_id", GremlinUtils.makeIid( Entity.PERSON, ldbcUpdate7AddComment.countryId() ) );
         params.put("person_id", GremlinUtils.makeIid( Entity.PERSON, ldbcUpdate7AddComment.authorPersonId() ) );
         params.put("reply_to_c_id", GremlinUtils.makeIid( Entity.PERSON, ldbcUpdate7AddComment.replyToCommentId() ) );
         params.put("reply_to_p_id", GremlinUtils.makeIid( Entity.PERSON, ldbcUpdate7AddComment.replyToPostId() ) );
-        props.put("length", ldbcUpdate7AddComment.length() );
-        props.put("type", ldbcUpdate7AddComment.type() );
-        props.put("content", ldbcUpdate7AddComment.content() );
-        props.put("location_ip", ldbcUpdate7AddComment.locationIp() );
-        params.put( "props", props );
+        params.put("comment_id", GremlinUtils.makeIid( Entity.PERSON, ldbcUpdate7AddComment.commentId() ) );
+        params.put("length", ldbcUpdate7AddComment.length() );
+        params.put("type", ldbcUpdate7AddComment.type() );
+        params.put("content", ldbcUpdate7AddComment.content() );
+        params.put("location_ip", ldbcUpdate7AddComment.locationIp() );
         params.put("tag_ids", GremlinUtils.makeIid(Entity.TAG, ldbcUpdate7AddComment.tagIds()));
-        String statement = "comment = g.addVertex(props);" +
+        String statement = "comment = g.addV().property('iid', comment_id)" +
+            ".property('length', length)" +
+            ".property('type', type)" +
+            ".property('content', content)" +
+            ".property('location_ip', location_ip);" +
             "country = g.V().has('iid', country_id).next();" +
             "creator = g.V().has('iid', person_id).next();" +
             "comment.addEdge('isLocatedIn', country);" +
-            "comment.addEdge('hasCreator', creator);" +
-            "tags_ids.forEach{t ->  tag = g.V().has('iid', t).next(); comment.addEdge('hasTag', tag); }";
+            "comment.addEdge('hasCreator', creator);";
         if (ldbcUpdate7AddComment.replyToCommentId() != -1) {
-            statement += "replied_comment = g.V().has('iid', reply_to_c_id);" +
-                "replied_comment.hasNext() && comment.addEdge('replyOf', replied_comment.next());";
+            statement += "\nreplied_comment = g.V().has('iid', reply_to_c_id).next();" +
+                "comment.addEdge('replyOf', replied_comment);";
         }
         if (ldbcUpdate7AddComment.replyToPostId() != -1) {
-            statement += "replied_post = g.V().has('iid', reply_to_c_id);" +
-                "replied_post.hasNext() && comment.addEdge('replyOf', replied_post.next());";
+            statement += "\nreplied_post = g.V().has('iid', reply_to_c_id).next();" +
+                "comment.addEdge('replyOf', replied_post);";
         }
+
+        statement += "tags_ids.forEach{t ->  tag = g.V().has('iid', t).next(); comment.addEdge('hasTag', tag); }";
 
         try {
             client.submit(statement, params).all().get();

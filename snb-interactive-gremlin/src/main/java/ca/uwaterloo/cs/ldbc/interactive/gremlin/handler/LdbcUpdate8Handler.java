@@ -23,14 +23,12 @@ public class LdbcUpdate8Handler implements OperationHandler<LdbcUpdate8AddFriend
         Map<String, Object> params = new HashMap<>();
         params.put("p1_id", GremlinUtils.makeIid(Entity.PERSON, ldbcUpdate8AddFriendship.person1Id()));
         params.put("p2_id", GremlinUtils.makeIid(Entity.PERSON, ldbcUpdate8AddFriendship.person2Id()));
-        Map<String, Object> props = new HashMap<>();
-        props.put( "creationDate", String.valueOf( ldbcUpdate8AddFriendship.creationDate().getTime() ) );
-        params.put("props", props);
+        params.put( "creation_date", String.valueOf( ldbcUpdate8AddFriendship.creationDate().getTime() ) );
         try {
             client.submit("p1 = g.V().has('iid', p1_id).next(); " +
                 "p2 = g.V().has('iid', p2_id).next(); " +
-                "p1.addEdge('knows', p2, props); " +
-                "p2.addEdge('knows', p1, props);",
+                "p1.addEdge('knows', p2).property('creation_date', creation_date);" +
+                "p2.addEdge('knows', p1).property('creation_date', creation_date);",
                 params).all().get();
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);

@@ -14,6 +14,7 @@
     <orderEntry type="library" name="Maven: ch.qos.logback:logback-classic:1.1.2" level="project" />
     <orderEntry type="library" name="Maven: ch.qos.logback:logback-core:1.1.2" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.6" level="project" />
+    <orderEntry type="library" name="Maven: joda-time:joda-time:2.9.4" level="project" />
     <orderEntry type="library" name="Maven: com.ldbc.driver:jeeves:0.3-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.apache.tinkerpop:gremlin-driver:3.1.1-incubating" level="project" />
     <orderEntry type="library" name="Maven: org.apache.tinkerpop:gremlin-core:3.1.1-incubating" level="project" />
@@ -34,6 +35,5 @@
     <orderEntry type="library" name="Maven: org.codehaus.groovy:groovy:2.4.5" level="project" />
     <orderEntry type="library" name="Maven: org.codehaus.groovy:groovy-sql:indy:2.4.5" level="project" />
     <orderEntry type="library" name="Maven: org.apache.commons:commons-lang3:3.3.1" level="project" />
-    <orderEntry type="library" name="Maven: joda-time:joda-time:2.7" level="project" />
   </component>
 </module>

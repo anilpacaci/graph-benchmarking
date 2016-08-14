@@ -40,9 +40,9 @@ public class LdbcShortQuery4Handler implements OperationHandler<LdbcShortQuery4M
         Vertex message = results.get(0).getVertex();
 
         LdbcShortQuery4MessageContentResult result =
-                new LdbcShortQuery4MessageContentResult(
-                        message.<String>property("content").value(),
-                        Long.decode(message.<String>property("creationDate").value()));
+            new LdbcShortQuery4MessageContentResult(
+                message.<String>property( "content" ).value(),
+                Long.decode( message.<String>property( "creationDate" ).value() ) );
 
         resultReporter.report(1, result, ldbcShortQuery4MessageContent);
     }

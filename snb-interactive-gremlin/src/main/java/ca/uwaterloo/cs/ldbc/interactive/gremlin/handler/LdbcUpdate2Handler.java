@@ -11,9 +11,7 @@ import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcNoResult;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcUpdate2AddPostLike;
 import org.apache.tinkerpop.gremlin.driver.Client;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -28,16 +26,12 @@ public class LdbcUpdate2Handler implements OperationHandler<LdbcUpdate2AddPostLi
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcUpdate2AddPostLike.personId()));
         params.put("post_id", GremlinUtils.makeIid(Entity.POST, ldbcUpdate2AddPostLike.postId()));
-
-        List<Object> likesProperties = new ArrayList<>();
-        likesProperties.add("creationDate");
-        likesProperties.add(String.valueOf(ldbcUpdate2AddPostLike.creationDate()));
-        params.put("likesProperties", likesProperties.toArray());
+        params.put("creation_date", String.valueOf(ldbcUpdate2AddPostLike.creationDate().getTime()));
 
         try {
             client.submit("person = g.V().has('iid', person_id).next(); " +
                 "post = g.V().has('iid', post_id).next(); " +
-                "person.addEdge('likes', post, likesProperties);", params).all().get();
+                "person.addEdge('likes', post).property('creation_date', creation_date);", params).all().get();
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
         }
