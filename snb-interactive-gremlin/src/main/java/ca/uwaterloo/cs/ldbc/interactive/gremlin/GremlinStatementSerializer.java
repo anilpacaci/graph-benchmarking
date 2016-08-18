@@ -14,7 +14,6 @@ public class GremlinStatementSerializer implements Serializer<GremlinStatement>
 
     @Override
     public void configure(Map<String, ?> configs, boolean isKey) {
-
     }
 
     @Override
@@ -29,7 +28,6 @@ public class GremlinStatementSerializer implements Serializer<GremlinStatement>
 
     @Override
     public void close() {
-
     }
 }
 

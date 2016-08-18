@@ -1,9 +1,9 @@
 package ca.uwaterloo.cs.ldbc.interactive.gremlin.handler;
 
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.Entity;
-import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinKafkaDbConnectionState;
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinStatement;
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinUtils;
+import ca.uwaterloo.cs.ldbc.interactive.gremlin.LdbcKafkaProducer;
 import com.ldbc.driver.DbConnectionState;
 import com.ldbc.driver.DbException;
 import com.ldbc.driver.OperationHandler;
@@ -19,10 +19,15 @@ import java.util.stream.Collectors;
 
 public class LdbcUpdate1Handler implements OperationHandler<LdbcUpdate1AddPerson, DbConnectionState> {
 
+    private KafkaProducer<String, GremlinStatement> producer;
+
+    public LdbcUpdate1Handler() {
+        producer = LdbcKafkaProducer.createProducer();
+    }
+
     @Override
     public void executeOperation(LdbcUpdate1AddPerson ldbcUpdate1AddPerson, DbConnectionState dbConnectionState, ResultReporter resultReporter) throws DbException {
-        KafkaProducer<String, GremlinStatement> producer = ((GremlinKafkaDbConnectionState) dbConnectionState).getKafkaProducer();
-        String topic = ((GremlinKafkaDbConnectionState) dbConnectionState).getKafkaTopic();
+        String topic = LdbcKafkaProducer.KAFKA_TOPIC;
         Map<String, Object> params = new HashMap<>();
         Map<String, Object> props = new HashMap<>();
 
@@ -38,13 +43,13 @@ public class LdbcUpdate1Handler implements OperationHandler<LdbcUpdate1AddPerson
 
         props.put("languages", ldbcUpdate1AddPerson.languages());
         props.put("emails", ldbcUpdate1AddPerson.emails());
-        props.put("tag_ids", ldbcUpdate1AddPerson.tagIds());
+        props.put("tag_ids", GremlinUtils.makeIid(Entity.TAG, ldbcUpdate1AddPerson.tagIds()));
         String statement = "person = g.addVertex(props);" +
-            "city = g.V().has(iid, located_in).next();" +
+            "city = g.V().has('iid', located_in).next();" +
             "person.outE('isLocatedIn', city);" +
-            "langs.forEach(l -> { person.property('language', l); });" +
-            "emails.forEach(l -> { person.property('email', l); });" +
-            "tags_ids.forEach(t -> { tag = g.V().has('iid', t); tag.hasNext() && post.addEdge('hasTag', tag); })";
+            "languages.forEach{l ->  person.property('language', l); };" +
+            "emails.forEach{l ->  person.property('email', l); };" +
+            "tags_ids.forEach{t ->  tag = g.V().has('iid', t).next(); post.addEdge('hasTag', tag); }";
 
         String uni_statement = ldbcUpdate1AddPerson.studyAt().stream()
             .map(org -> {

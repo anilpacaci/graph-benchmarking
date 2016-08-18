@@ -1,9 +1,9 @@
 package ca.uwaterloo.cs.ldbc.interactive.gremlin.handler;
 
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.Entity;
-import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinKafkaDbConnectionState;
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinStatement;
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinUtils;
+import ca.uwaterloo.cs.ldbc.interactive.gremlin.LdbcKafkaProducer;
 import com.ldbc.driver.DbConnectionState;
 import com.ldbc.driver.DbException;
 import com.ldbc.driver.OperationHandler;
@@ -22,11 +22,15 @@ import java.util.Map;
  * Created by anilpacaci on 2016-07-21.
  */
 public class LdbcUpdate3Handler implements OperationHandler<LdbcUpdate3AddCommentLike, DbConnectionState> {
+    private KafkaProducer<String, GremlinStatement> producer;
+
+    LdbcUpdate3Handler() {
+        producer = LdbcKafkaProducer.createProducer();
+    }
 
     @Override
     public void executeOperation(LdbcUpdate3AddCommentLike ldbcUpdate3AddCommentLike, DbConnectionState dbConnectionState, ResultReporter resultReporter) throws DbException {
-        KafkaProducer<String, GremlinStatement> producer = ((GremlinKafkaDbConnectionState) dbConnectionState).getKafkaProducer();
-        String topic = ((GremlinKafkaDbConnectionState) dbConnectionState).getKafkaTopic();
+        String topic = LdbcKafkaProducer.KAFKA_TOPIC;
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcUpdate3AddCommentLike.personId()));
         params.put("comment_id", GremlinUtils.makeIid(Entity.POST, ldbcUpdate3AddCommentLike.commentId()));

@@ -30,10 +30,15 @@ public class LdbcComplexQuery8Handler implements OperationHandler<LdbcQuery8, Db
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery8.personId()));
         params.put("result_limit", ldbcQuery8.limit());
 
+        String statement = "g.V().has('iid', person_id)" +
+                ".in('hasCreator').in('replyOf')" +
+                ".order().by('creationDate', decr).by('iid', incr).limit(result_limit).as('comment')" +
+                ".out('hasCreator').as('person')" +
+                ".select('person', 'comment')";
 
         List<Result> results = null;
         try {
-            results = client.submit("g.V().has('iid', person_id).in('hasCreator').in('replyOf').order().by('creationDate', decr).by('iid', incr).limit(result_limit).as('comment').out('hasCreator').as('person').select('person', 'comment')", params).all().get();
+            results = client.submit(statement, params).all().get();
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
         }

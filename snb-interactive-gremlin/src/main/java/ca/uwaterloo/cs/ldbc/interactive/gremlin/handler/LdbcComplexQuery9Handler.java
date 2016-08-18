@@ -31,10 +31,15 @@ public class LdbcComplexQuery9Handler implements OperationHandler<LdbcQuery9, Db
         params.put("max_date", Long.toString(ldbcQuery9.maxDate().getTime()));
         params.put("result_limit", ldbcQuery9.limit());
 
+        String statement = "g.V().has('iid', person_id)" +
+                ".repeat(out('knows').simplePath()).until(loops().is(gt(1))).as('person')" +
+                ".in('hasCreator').has('creationDate', lt(max_date)).limit(result_limit).as('message')" +
+                ".order().by('creationDate', decr).by('iid', incr)" +
+                ".select('person', 'message')";
 
         List<Result> results = null;
         try {
-            results = client.submit("g.V().has('iid', person_id).repeat(out('knows').simplePath()).until(loops().is(gt(1))).as('person').in('hasCreator').has('creationDate', lt(max_date)).limit(result_limit).as('message').order().by('creationDate', decr).by('iid', incr).select('person', 'message')", params).all().get();
+            results = client.submit(statement, params).all().get();
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
         }

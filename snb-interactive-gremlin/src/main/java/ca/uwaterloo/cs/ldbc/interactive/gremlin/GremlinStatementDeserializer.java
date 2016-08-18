@@ -14,7 +14,6 @@ public class GremlinStatementDeserializer implements Deserializer<GremlinStateme
 
     @Override
     public void configure( Map<String, ?> configs, boolean isKey) {
-
     }
 
     @Override
@@ -28,7 +27,6 @@ public class GremlinStatementDeserializer implements Deserializer<GremlinStateme
 
     @Override
     public void close() {
-
     }
 }
 

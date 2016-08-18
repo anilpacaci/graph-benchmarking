@@ -26,8 +26,8 @@ public class GremlinKafkaDb extends Db{
         connection = new GremlinKafkaDbConnectionState(map);
 
         // Complex Queries
-
-        registerOperationHandler(LdbcQuery3.class, LdbcComplexQuery3Handler.class);
+        // TODO 1, 10 and 14 are dummy implementation.
+        registerOperationHandler(LdbcQuery2.class, LdbcComplexQuery2Handler.class);
         registerOperationHandler(LdbcQuery3.class, LdbcComplexQuery3Handler.class);
         registerOperationHandler(LdbcQuery4.class, LdbcComplexQuery4Handler.class);
         registerOperationHandler(LdbcQuery5.class, LdbcComplexQuery5Handler.class);
@@ -35,9 +35,11 @@ public class GremlinKafkaDb extends Db{
         registerOperationHandler(LdbcQuery7.class, LdbcComplexQuery7Handler.class);
         registerOperationHandler(LdbcQuery8.class, LdbcComplexQuery8Handler.class);
         registerOperationHandler(LdbcQuery9.class, LdbcComplexQuery9Handler.class);
+        registerOperationHandler(LdbcQuery10.class, LdbcComplexQuery10Handler.class);
         registerOperationHandler(LdbcQuery11.class, LdbcComplexQuery11Handler.class);
         registerOperationHandler(LdbcQuery12.class, LdbcComplexQuery12Handler.class);
         registerOperationHandler(LdbcQuery13.class, LdbcComplexQuery13Handler.class);
+        registerOperationHandler(LdbcQuery14.class, LdbcComplexQuery14Handler.class);
 
         // Short Queries
         registerOperationHandler(LdbcShortQuery1PersonProfile.class, LdbcShortQuery1Handler.class);

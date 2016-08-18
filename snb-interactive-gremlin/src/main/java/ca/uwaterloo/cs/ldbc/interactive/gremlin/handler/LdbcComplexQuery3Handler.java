@@ -29,6 +29,7 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
         String end  = Long.toString(new DateTime(start).plusDays(ldbcQuery3.durationDays()).toDate().getTime());
         params.put("start_date", Long.toString(start.getTime()));
         params.put("end_date", end);
+        params.put("result_limit", ldbcQuery3.limit());
 
         String statement = "g.V().has('iid', person_id)" +
             ".repeat(out('knows')).times(2).emit().as('person')" +
@@ -43,7 +44,7 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
             "                )" +
             ".select('person', 'countx', 'county')" +
             ".order().by('countx', decr))" +
-            ".limit(20)";
+            ".limit(result_limit)";
 
         List<Result> results;
         try {

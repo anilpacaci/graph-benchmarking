@@ -1,9 +1,9 @@
 package ca.uwaterloo.cs.ldbc.interactive.gremlin.handler;
 
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.Entity;
-import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinKafkaDbConnectionState;
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinStatement;
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinUtils;
+import ca.uwaterloo.cs.ldbc.interactive.gremlin.LdbcKafkaProducer;
 import com.ldbc.driver.DbConnectionState;
 import com.ldbc.driver.DbException;
 import com.ldbc.driver.OperationHandler;
@@ -18,13 +18,17 @@ import java.util.Map;
 
 public class LdbcUpdate6Handler implements OperationHandler<LdbcUpdate6AddPost,DbConnectionState>
 {
+    private KafkaProducer<String, GremlinStatement> producer;
+
+    public LdbcUpdate6Handler() {
+        producer = LdbcKafkaProducer.createProducer();
+    }
 
     @Override
     public void executeOperation( LdbcUpdate6AddPost ldbcUpdate6AddPost,
             DbConnectionState dbConnectionState, ResultReporter resultReporter ) throws DbException
     {
-        KafkaProducer<String, GremlinStatement> producer = ((GremlinKafkaDbConnectionState) dbConnectionState).getKafkaProducer();
-        String topic = ((GremlinKafkaDbConnectionState) dbConnectionState).getKafkaTopic();
+        String topic = LdbcKafkaProducer.KAFKA_TOPIC;
 
         Map<String,Object> params = new HashMap<>();
         Map<String,Object> props = new HashMap<>();
@@ -37,12 +41,10 @@ public class LdbcUpdate6Handler implements OperationHandler<LdbcUpdate6AddPost,D
         props.put("content", ldbcUpdate6AddPost.content() );
         props.put("length", String.valueOf( ldbcUpdate6AddPost.length() ) );
         params.put("props", props );
-
         params.put("creator_id", GremlinUtils.makeIid( Entity.PERSON, ldbcUpdate6AddPost.authorPersonId() ) );
         params.put("forum_id", GremlinUtils.makeIid( Entity.FORUM, ldbcUpdate6AddPost.forumId() ) );
         params.put("country_id", GremlinUtils.makeIid( Entity.PLACE, ldbcUpdate6AddPost.countryId() ) );
-
-        params.put("tag_ids", ldbcUpdate6AddPost.tagIds());
+        params.put("tag_ids", GremlinUtils.makeIid(Entity.TAG, ldbcUpdate6AddPost.tagIds()));
 
         String statement = "post = g.addVertex(props); " +
                 "creator = g.V().has('iid', creator_id).next(); " +
@@ -51,7 +53,7 @@ public class LdbcUpdate6Handler implements OperationHandler<LdbcUpdate6AddPost,D
                 "post.addEdge(hasCreator, creator); " +
                 "post.addEdge(hasContainer, forum); " +
                 "post.addEdge(isLocatedIn, country);" +
-                "tags_ids.forEach(t -> { tag = g.V().has('iid', t); tag.hasNext() && post.addEdge('hasTag', tag); })";
+                "tags_ids.forEach{t -> tag = g.V().has('iid', t).next(); post.addEdge('hasTag', tag); }";
         producer.send(new ProducerRecord<String, GremlinStatement>(topic, new GremlinStatement(statement, params)));
 
         resultReporter.report( 0, LdbcNoResult.INSTANCE, ldbcUpdate6AddPost );

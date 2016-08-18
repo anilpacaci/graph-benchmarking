@@ -28,9 +28,15 @@ public class LdbcShortQuery6Handler implements OperationHandler<LdbcShortQuery6M
         Map<String, Object> params = new HashMap<>();
         params.put("message_id", GremlinUtils.makeIid(Entity.MESSAGE, ldbcShortQuery6MessageForum.messageId()));
 
+        String statement = "g.V().has('message_id', message_id)" +
+                ".repeat(out('replyOf')).until(hasLabel('post')).in('containerOf').as('forum')" +
+                ".out('moderator').as('moderator')" +
+                ".select('forum', 'moderator')";
+
+
         List<Result> results = null;
         try {
-            results = client.submit("g.V().has('message_id', message_id).repeat(out('replyOf')).until(hasLabel('post')).in('containerOf').as('forum').out('moderator').as('moderator').select('forum', 'moderator')", params).all().get();
+            results = client.submit(statement, params).all().get();
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
         }
