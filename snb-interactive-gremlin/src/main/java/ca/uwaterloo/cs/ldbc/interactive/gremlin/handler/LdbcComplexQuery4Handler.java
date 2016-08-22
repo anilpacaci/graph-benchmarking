@@ -51,7 +51,7 @@ public class LdbcComplexQuery4Handler implements OperationHandler<LdbcQuery4, Db
             ".has('creationDate',lt(start_date))" +
             ".out('hasTag').as('before_tags')" +
             ".select('friend_posts')" +
-            ".has('creationDate', inside(start_date, end_date)))" +
+            ".has('creationDate', inside(start_date, end_date))" +
             ".out('hasTag')" +
             ".is(without(select('before_tags')))" +
             ".groupCount().by('name')" +
