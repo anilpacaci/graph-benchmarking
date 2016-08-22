@@ -36,7 +36,7 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
             ".where(has('place', neq(countryX)).and(has('place', neq(countryY))))" +
             ".order().by('iid', incr)" +
             ".in('hasCreator')" +
-            ".where(has('place', countryX)).or(has('place, countryY))))" +
+            ".where(has('place', countryX).or(has('place', countryY)))" +
             ".has('creationDate', inside(start_date, end_date))" +
             ".group().by('hasCreator')" +
             ".by(fold().match(__.as('p').unfold().has('place', countryX).count(local).as('countx')," +
