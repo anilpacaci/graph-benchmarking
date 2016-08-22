@@ -61,7 +61,7 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
             int county = (int) map.get("county");
 
             LdbcQuery3Result ldbcQuery3Result = new LdbcQuery3Result(
-                Long.valueOf(person.<String>property("iid").value()),
+                GremlinUtils.getSNBId(person),
                 person.<String>property("firstName").value(),
                 person.<String>property("lastName").value(),
                 countx,
