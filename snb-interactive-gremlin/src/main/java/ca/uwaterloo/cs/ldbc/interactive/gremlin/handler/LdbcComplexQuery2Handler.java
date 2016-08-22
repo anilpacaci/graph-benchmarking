@@ -55,7 +55,7 @@ public class LdbcComplexQuery2Handler implements OperationHandler<LdbcQuery2, Db
                 GremlinUtils.getSNBId(person),
                 person.<String>property("firstName").value(),
                 person.<String>property("lastName").value(),
-                Long.valueOf(message.<String>property("iid").value()),
+                GremlinUtils.getSNBId(message),
                 message.property("content") == VertexProperty.empty() ?
                 message.<String>property("imageFile").value() : message.<String>property("content").value(),
                 Long.valueOf(message.<String>property("creationDate").value())
