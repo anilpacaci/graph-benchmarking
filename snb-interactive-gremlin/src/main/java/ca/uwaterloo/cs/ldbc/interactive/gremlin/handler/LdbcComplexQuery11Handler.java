@@ -56,7 +56,7 @@ public class LdbcComplexQuery11Handler implements OperationHandler<LdbcQuery11, 
                     person.<String>property("firstName").value(),
                     person.<String>property("lastName").value(),
                     organization.<String>property("name").value(),
-                    Integer.parseInt(workAt.<String>property("workAt").value()));
+                    Integer.parseInt(workAt.<String>property("workFrom").value()));
 
             resultList.add(ldbcQuery11Result);
         }
