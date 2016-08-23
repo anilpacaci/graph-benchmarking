@@ -156,7 +156,7 @@ class SNBParser {
 
                     GraphTraversalSource g = graph.traversal();
                     Vertex vertex =
-                            g.V().has("iid", entityName + ":" + colVals[0]).next();
+                            g.V().has(entityName, "iid", entityName + ":" + colVals[0]).next();
 
                     for (int j = 1; j < colVals.length; ++j) {
                         vertex.property(VertexProperty.Cardinality.list, colNames[j],
@@ -230,9 +230,9 @@ class SNBParser {
 
                     GraphTraversalSource g = graph.traversal();
                     Vertex vertex1 =
-                            g.V().has("iid", v1EntityName + ":" + colVals[0]).next();
+                            g.V().has(v1EntityName, "iid", v1EntityName + ":" + colVals[0]).next();
                     Vertex vertex2 =
-                            g.V().has("iid", v2EntityName + ":" + colVals[1]).next();
+                            g.V().has(v2EntityName, "iid", v2EntityName + ":" + colVals[1]).next();
 
                     propertiesMap = new HashMap<>();
                     for (int j = 2; j < colVals.length; ++j) {
