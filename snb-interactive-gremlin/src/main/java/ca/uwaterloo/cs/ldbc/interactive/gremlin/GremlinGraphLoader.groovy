@@ -48,7 +48,7 @@ class SNBParser {
 
     static TX_MAX_RETRIES = 1000
 
-    void loadVertices(Graph graph, Path filePath, boolean printLoadingDots, int batchSize, long progReportPeriod) throws IOException, ParseException {
+    static void loadVertices(Graph graph, String filePath, boolean printLoadingDots, int batchSize, long progReportPeriod) throws IOException, ParseException {
 
         String[] colNames = null;
         boolean firstLine = true;
@@ -58,7 +58,7 @@ class SNBParser {
         SimpleDateFormat creationDateDateFormat =
                 new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         creationDateDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-        String[] fileNameParts = filePath.getFileName().toString().split("_");
+        String[] fileNameParts = filePath.split("_");
         String entityName = fileNameParts[0];
 
         List<String> lines = Files.readAllLines(filePath);
@@ -137,11 +137,11 @@ class SNBParser {
         }
     }
 
-    void loadProperties(Graph graph, Path filePath, boolean printLoadingDots, int batchSize, long progReportPeriod) throws IOException {
+    static void loadProperties(Graph graph, String filePath, boolean printLoadingDots, int batchSize, long progReportPeriod) throws IOException {
         long count = 0;
         String[] colNames = null;
         boolean firstLine = true;
-        String[] fileNameParts = filePath.getFileName().toString().split("_");
+        String[] fileNameParts = filePath.split("_");
         String entityName = fileNameParts[0];
 
         List<String> lines = Files.readAllLines(filePath);
@@ -204,7 +204,7 @@ class SNBParser {
         }
     }
 
-    void loadEdges(Graph graph, Path filePath, boolean undirected, boolean printLoadingDots, int batchSize, long progReportPeriod) throws IOException, ParseException {
+    static void loadEdges(Graph graph, String filePath, boolean undirected, boolean printLoadingDots, int batchSize, long progReportPeriod) throws IOException, ParseException {
         long count = 0;
         String[] colNames = null;
         boolean firstLine = true;
@@ -215,7 +215,7 @@ class SNBParser {
         SimpleDateFormat joinDateDateFormat =
                 new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         joinDateDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-        String[] fileNameParts = filePath.getFileName().toString().split("_");
+        String[] fileNameParts = filePath.split("_");
         String v1EntityName = fileNameParts[0];
         String edgeLabel = fileNameParts[1];
         String v2EntityName = fileNameParts[2];
@@ -500,7 +500,7 @@ class SNBParser {
             for (String fileName : nodeFiles) {
                 System.out.print("Loading node file " + fileName + " ");
                 try {
-                    loadVertices(graph, Paths.get(inputBaseDir + "/" + fileName),
+                    loadVertices(graph, Paths.get(inputBaseDir + "/" + fileName).getFileName().toString(),
                             true, batchSize, progReportPeriod);
                     System.out.println("Finished");
                 } catch (NoSuchFileException e) {
@@ -511,7 +511,7 @@ class SNBParser {
             for (String fileName : propertiesFiles) {
                 System.out.print("Loading properties file " + fileName + " ");
                 try {
-                    loadProperties(graph, Paths.get(inputBaseDir + "/" + fileName),
+                    loadProperties(graph, Paths.get(inputBaseDir + "/" + fileName).getFileName().toString(),
                             true, batchSize, progReportPeriod);
                     System.out.println("Finished");
                 } catch (NoSuchFileException e) {
@@ -523,10 +523,10 @@ class SNBParser {
                 System.out.print("Loading edge file " + fileName + " ");
                 try {
                     if (fileName.contains("person_knows_person")) {
-                        loadEdges(graph, Paths.get(inputBaseDir + "/" + fileName), true,
+                        loadEdges(graph, Paths.get(inputBaseDir + "/" + fileName).getFileName().toString(), true,
                                 true, batchSize, progReportPeriod);
                     } else {
-                        loadEdges(graph, Paths.get(inputBaseDir + "/" + fileName), false,
+                        loadEdges(graph, Paths.get(inputBaseDir + "/" + fileName).getFileName().toString(), false,
                                 true, batchSize, progReportPeriod);
                     }
 
