@@ -31,6 +31,7 @@ import org.apache.tinkerpop.gremlin.structure.VertexProperty
 
 import java.nio.file.Files
 import java.nio.file.NoSuchFileException
+import java.nio.file.Path
 import java.nio.file.Paths
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -46,7 +47,7 @@ class SNBParser {
 
     static TX_MAX_RETRIES = 1000
 
-    static void loadVertices(Graph graph, String filePath, boolean printLoadingDots, int batchSize, long progReportPeriod) throws IOException, ParseException {
+    static void loadVertices(Graph graph, Path filePath, boolean printLoadingDots, int batchSize, long progReportPeriod) throws IOException, ParseException {
 
         String[] colNames;
         Map<Object, Object> propertiesMap;
@@ -55,10 +56,10 @@ class SNBParser {
         SimpleDateFormat creationDateDateFormat =
                 new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         creationDateDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-        String[] fileNameParts = filePath.split("_");
+        String[] fileNameParts = filePath.getFileName().toString().split("_");
         String entityName = fileNameParts[0];
 
-        List<String> lines = Files.readAllLines(Paths.get(filePath));
+        List<String> lines = Files.readAllLines(filePath);
         colNames = lines.get(0).split("\\|");
         long lineCount = 0;
         boolean txSucceeded;
@@ -134,12 +135,12 @@ class SNBParser {
         }
     }
 
-    static void loadProperties(Graph graph, String filePath, boolean printLoadingDots, int batchSize, long progReportPeriod) throws IOException {
+    static void loadProperties(Graph graph, Path filePath, boolean printLoadingDots, int batchSize, long progReportPeriod) throws IOException {
         String[] colNames;
-        String[] fileNameParts = filePath.split("_");
+        String[] fileNameParts = filePath.getFileName().toString().split("_");
         String entityName = fileNameParts[0];
 
-        List<String> lines = Files.readAllLines(Paths.get(filePath));
+        List<String> lines = Files.readAllLines(filePath);
         colNames = lines.get(0).split("\\|");
         long lineCount = 0;
         boolean txSucceeded;
@@ -199,7 +200,7 @@ class SNBParser {
         }
     }
 
-    static void loadEdges(Graph graph, String filePath, boolean undirected, boolean printLoadingDots, int batchSize, long progReportPeriod) throws IOException, ParseException {
+    static void loadEdges(Graph graph, Path filePath, boolean undirected, boolean printLoadingDots, int batchSize, long progReportPeriod) throws IOException, ParseException {
         String[] colNames;
         Map<Object, Object> propertiesMap;
         SimpleDateFormat creationDateDateFormat =
@@ -208,12 +209,12 @@ class SNBParser {
         SimpleDateFormat joinDateDateFormat =
                 new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         joinDateDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-        String[] fileNameParts = filePath.split("_");
+        String[] fileNameParts = filePath.getFileName().toString().split("_");
         String v1EntityName = fileNameParts[0];
         String edgeLabel = fileNameParts[1];
         String v2EntityName = fileNameParts[2];
 
-        List<String> lines = Files.readAllLines(Paths.get(filePath));
+        List<String> lines = Files.readAllLines(filePath);
         colNames = lines.get(0).split("\\|");
         long lineCount = 0;
         boolean txSucceeded;
@@ -492,7 +493,7 @@ class SNBParser {
             for (String fileName : nodeFiles) {
                 System.out.print("Loading node file " + fileName + " ");
                 try {
-                    loadVertices(graph, Paths.get(inputBaseDir + "/" + fileName).getFileName().toString(),
+                    loadVertices(graph, Paths.get(inputBaseDir + "/" + fileName),
                             true, batchSize, progReportPeriod);
                     System.out.println("Finished");
                 } catch (NoSuchFileException e) {
@@ -503,7 +504,7 @@ class SNBParser {
             for (String fileName : propertiesFiles) {
                 System.out.print("Loading properties file " + fileName + " ");
                 try {
-                    loadProperties(graph, Paths.get(inputBaseDir + "/" + fileName).getFileName().toString(),
+                    loadProperties(graph, Paths.get(inputBaseDir + "/" + fileName),
                             true, batchSize, progReportPeriod);
                     System.out.println("Finished");
                 } catch (NoSuchFileException e) {
@@ -515,10 +516,10 @@ class SNBParser {
                 System.out.print("Loading edge file " + fileName + " ");
                 try {
                     if (fileName.contains("person_knows_person")) {
-                        loadEdges(graph, Paths.get(inputBaseDir + "/" + fileName).getFileName().toString(), true,
+                        loadEdges(graph, Paths.get(inputBaseDir + "/" + fileName), true,
                                 true, batchSize, progReportPeriod);
                     } else {
-                        loadEdges(graph, Paths.get(inputBaseDir + "/" + fileName).getFileName().toString(), false,
+                        loadEdges(graph, Paths.get(inputBaseDir + "/" + fileName), false,
                                 true, batchSize, progReportPeriod);
                     }
 
