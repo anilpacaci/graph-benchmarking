@@ -313,8 +313,7 @@ void initializeNeo4j(Neo4jGraph neo4jGraph) {
             "place",
             "post",
             "tag",
-            "tagclass"
-    ]
+            "tagclass" ]
 
     vertexLabels.forEach { label ->
         neo4jGraph.cypher("CREATE INDEX ON :" + label + "(iid)")
@@ -337,8 +336,7 @@ void initializeTitan(TitanGraph titanGraph) {
             "place",
             "post",
             "tag",
-            "tagclass"
-    ]
+            "tagclass" ]
 
     List<String> edgeLabels = [
             "containerOf",
@@ -355,8 +353,7 @@ void initializeTitan(TitanGraph titanGraph) {
             "likes",
             "replyOf",
             "studyAt",
-            "workAt"
-    ]
+            "workAt" ]
 
     // All property keys with Cardinality.SINGLE
     List<String> singleCardPropKeys = [
@@ -377,14 +374,12 @@ void initializeTitan(TitanGraph titanGraph) {
             "title", // forum
             "type", // organisation place
             "url", // organisation place tag tagclass
-            "workFrom", // workAt
-    ]
+            "workFrom" ] // workAt
 
     // All property keys with Cardinality.LIST
     List<String> listCardPropKeys = [
             "email", // person
-            "language" // person, post
-    ]
+            "language" ] // person, post
 
     /*
  * Explicitly define the graph schema.
@@ -472,8 +467,7 @@ void loadSNBGraph(Graph graph, String inputBaseDir, int batchSize, long progRepo
 
     List<String> propertiesFiles = [
             "person_email_emailaddress_0_0.csv",
-            "person_speaks_language_0_0.csv"
-    ]
+            "person_speaks_language_0_0.csv" ]
 
     List<String> edgeFiles = [
             "comment_hasCreator_person_0_0.csv",
@@ -498,8 +492,7 @@ void loadSNBGraph(Graph graph, String inputBaseDir, int batchSize, long progRepo
             "post_hasTag_tag_0_0.csv",
             "post_isLocatedIn_place_0_0.csv",
             "tag_hasType_tagclass_0_0.csv",
-            "tagclass_isSubclassOf_tagclass_0_0.csv"
-    ]
+            "tagclass_isSubclassOf_tagclass_0_0.csv" ]
 
     try {
         for (String fileName : nodeFiles) {
