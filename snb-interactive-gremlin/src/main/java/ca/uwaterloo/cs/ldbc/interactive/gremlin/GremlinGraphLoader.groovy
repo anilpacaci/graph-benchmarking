@@ -22,6 +22,7 @@ import com.thinkaurelius.titan.core.PropertyKey
 import com.thinkaurelius.titan.core.TitanGraph
 import com.thinkaurelius.titan.core.schema.SchemaAction
 import com.thinkaurelius.titan.graphdb.database.management.ManagementSystem
+import org.apache.tinkerpop.gremlin.neo4j.structure.Neo4jGraph
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
 import org.apache.tinkerpop.gremlin.structure.Graph
 import org.apache.tinkerpop.gremlin.structure.T
@@ -75,8 +76,7 @@ public class GremlinGraphLoader {
         long nextProgReportTime = startTime + progReportPeriod * 1000;
         long lastLineCount = 0;
 
-        for (int startIndex = 1; startIndex < lines.size();
-             startIndex += batchSize) {
+        for (int startIndex = 1; startIndex < lines.size(); startIndex += batchSize) {
             int endIndex = Math.min(startIndex + batchSize, lines.size());
             txSucceeded = false;
             txFailCount = 0;
@@ -104,7 +104,7 @@ public class GremlinGraphLoader {
                     propertiesMap.put(T.label, entityName);
 
                     List<Object> keyValues = new ArrayList<>();
-                    propertiesMap.forEach{ key, val ->
+                    propertiesMap.forEach { key, val ->
                         keyValues.add(key);
                         keyValues.add(val);
                     }
@@ -161,8 +161,7 @@ public class GremlinGraphLoader {
         long nextProgReportTime = startTime + progReportPeriod * 1000;
         long lastLineCount = 0;
 
-        for (int startIndex = 1; startIndex < lines.size();
-             startIndex += batchSize) {
+        for (int startIndex = 1; startIndex < lines.size(); startIndex += batchSize) {
             int endIndex = Math.min(startIndex + batchSize, lines.size());
             txSucceeded = false;
             txFailCount = 0;
@@ -240,8 +239,7 @@ public class GremlinGraphLoader {
         long nextProgReportTime = startTime + progReportPeriod * 1000;
         long lastLineCount = 0;
 
-        for (int startIndex = 1; startIndex < lines.size();
-             startIndex += batchSize) {
+        for (int startIndex = 1; startIndex < lines.size(); startIndex += batchSize) {
             int endIndex = Math.min(startIndex + batchSize, lines.size());
             txSucceeded = false;
             txFailCount = 0;
@@ -271,7 +269,7 @@ public class GremlinGraphLoader {
                     }
 
                     List<Object> keyValues = new ArrayList<>();
-                    propertiesMap.forEach{ key, val ->
+                    propertiesMap.forEach { key, val ->
                         keyValues.add(key);
                         keyValues.add(val);
                     }
@@ -312,7 +310,34 @@ public class GremlinGraphLoader {
         }
     }
 
-    public static void buildIndexes(TitanGraph titanGraph) {
+    /**
+     * Helper function to handle Neo4j Specific initialization, i.e. schema definition and index creation
+     * @param neo4jGraph
+     */
+    public static void initializeNeo4j(Neo4jGraph neo4jGraph) {
+        String[] vertexLabels = [
+                "person",
+                "comment",
+                "forum",
+                "organisation",
+                "place",
+                "post",
+                "tag",
+                "tagclass"
+        ]
+
+        vertexLabels.forEach { label ->
+            neo4jGraph.cypher("CREATE INDEX ON :" + label + "(iid)")
+            neo4jGraph.tx().commit()
+
+        }
+    }
+
+    /**
+     * Helper function to handle Titan Specific initialization, i.e. schema definition and index creation
+     * @param titanGraph
+     */
+    public static void initializeTitan(TitanGraph titanGraph) {
 
         String[] vertexLabels = [
                 "person",
@@ -414,13 +439,13 @@ public class GremlinGraphLoader {
                 mgmt.commit();
             }
 
-      /*
-       * Create a special ID property where we will store the IDs of
-       * vertices in the SNB dataset, and a corresponding index. This is
-       * necessary because TitanDB generates its own IDs for graph
-       * vertices, but the benchmark references vertices by the ID they
-       * were originally assigned during dataset generation.
-       */
+            /*
+             * Create a special ID property where we will store the IDs of
+             * vertices in the SNB dataset, and a corresponding index. This is
+             * necessary because TitanDB generates its own IDs for graph
+             * vertices, but the benchmark references vertices by the ID they
+             * were originally assigned during dataset generation.
+             */
             mgmt = (ManagementSystem) titanGraph.openManagement();
             mgmt.makePropertyKey("iid").dataType(String.class)
                     .cardinality(Cardinality.SINGLE).make();
@@ -446,7 +471,8 @@ public class GremlinGraphLoader {
 
     }
 
-    public static void loadSNBGraph(Graph graph, String inputBaseDir, int batchSize, long progReportPeriod) throws IOException {
+    public
+    static void loadSNBGraph(Graph graph, String inputBaseDir, int batchSize, long progReportPeriod) throws IOException {
 
         // TODO: Make file list generation programmatic. This method of loading,
         // however, will be far too slow for anything other than the very
