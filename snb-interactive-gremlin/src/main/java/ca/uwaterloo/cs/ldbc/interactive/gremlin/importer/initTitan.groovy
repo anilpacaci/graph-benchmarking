@@ -19,9 +19,11 @@
 import com.thinkaurelius.titan.core.Cardinality
 import com.thinkaurelius.titan.core.Multiplicity
 import com.thinkaurelius.titan.core.PropertyKey
+import com.thinkaurelius.titan.core.TitanFactory
 import com.thinkaurelius.titan.core.TitanGraph
 import com.thinkaurelius.titan.core.schema.SchemaAction
 import com.thinkaurelius.titan.graphdb.database.management.ManagementSystem
+import org.apache.tinkerpop.gremlin.structure.Graph
 import org.apache.tinkerpop.gremlin.structure.Vertex
 
 /**
@@ -35,7 +37,9 @@ import org.apache.tinkerpop.gremlin.structure.Vertex
  * Helper function to handle Titan Specific initialization, i.e. schema definition and index creation
  * @param titanGraph
  */
-public static void initializeTitan(TitanGraph titanGraph) {
+public static Graph initializeTitan(String propertiesFile) {
+
+    titanGraph = TitanFactory.open(propertiesFile)
 
     List<String> vertexLabels = [
             "person",
@@ -162,5 +166,6 @@ public static void initializeTitan(TitanGraph titanGraph) {
         e.printStackTrace();
     }
 
+    return titanGraph
 
 }
