@@ -31,12 +31,10 @@ import org.apache.tinkerpop.gremlin.structure.VertexProperty
 
 import java.nio.file.Files
 import java.nio.file.NoSuchFileException
-import java.nio.file.Path
 import java.nio.file.Paths
 import java.text.ParseException
 import java.text.SimpleDateFormat
-import java.util.logging.Level
-import java.util.logging.Logger
+
 
 /**
  * This is a Groovy Script to run inside gremlin console, for loading LDBC SNB data into Tinkerpop Competible Graph.
@@ -50,8 +48,7 @@ class SNBParser {
 
     static void loadVertices(Graph graph, String filePath, boolean printLoadingDots, int batchSize, long progReportPeriod) throws IOException, ParseException {
 
-        String[] colNames = null;
-        boolean firstLine = true;
+        String[] colNames;
         Map<Object, Object> propertiesMap;
         SimpleDateFormat birthdayDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         birthdayDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -61,7 +58,7 @@ class SNBParser {
         String[] fileNameParts = filePath.split("_");
         String entityName = fileNameParts[0];
 
-        List<String> lines = Files.readAllLines(filePath);
+        List<String> lines = Files.readAllLines(Paths.get(filePath));
         colNames = lines.get(0).split("\\|");
         long lineCount = 0;
         boolean txSucceeded;
@@ -138,13 +135,11 @@ class SNBParser {
     }
 
     static void loadProperties(Graph graph, String filePath, boolean printLoadingDots, int batchSize, long progReportPeriod) throws IOException {
-        long count = 0;
-        String[] colNames = null;
-        boolean firstLine = true;
+        String[] colNames;
         String[] fileNameParts = filePath.split("_");
         String entityName = fileNameParts[0];
 
-        List<String> lines = Files.readAllLines(filePath);
+        List<String> lines = Files.readAllLines(Paths.get(filePath));
         colNames = lines.get(0).split("\\|");
         long lineCount = 0;
         boolean txSucceeded;
@@ -205,9 +200,7 @@ class SNBParser {
     }
 
     static void loadEdges(Graph graph, String filePath, boolean undirected, boolean printLoadingDots, int batchSize, long progReportPeriod) throws IOException, ParseException {
-        long count = 0;
-        String[] colNames = null;
-        boolean firstLine = true;
+        String[] colNames;
         Map<Object, Object> propertiesMap;
         SimpleDateFormat creationDateDateFormat =
                 new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
@@ -220,7 +213,7 @@ class SNBParser {
         String edgeLabel = fileNameParts[1];
         String v2EntityName = fileNameParts[2];
 
-        List<String> lines = Files.readAllLines(filePath);
+        List<String> lines = Files.readAllLines(Paths.get(filePath));
         colNames = lines.get(0).split("\\|");
         long lineCount = 0;
         boolean txSucceeded;
@@ -306,7 +299,7 @@ class SNBParser {
  * Helper function to handle Neo4j Specific initialization, i.e. schema definition and index creation
  * @param neo4jGraph
  */
-    void initializeNeo4j(Neo4jGraph neo4jGraph) {
+    public static void initializeNeo4j(Neo4jGraph neo4jGraph) {
         List<String> vertexLabels = [
                 "person",
                 "comment",
@@ -453,7 +446,6 @@ class SNBParser {
         } catch (Exception e) {
             System.out.println("Exception: " + e);
             e.printStackTrace();
-            return;
         }
 
 
