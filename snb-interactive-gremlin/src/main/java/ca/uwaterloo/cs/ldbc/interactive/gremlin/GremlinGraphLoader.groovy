@@ -128,7 +128,7 @@ class SNBParser {
                 long linesLoaded = lineCount - lastLineCount;
                 System.out.println(String.format(
                         "Time Elapsed: %03dm.%02ds, Lines Loaded: +%d",
-                        (timeElapsed / 1000) / 60, (timeElapsed / 1000) % 60, linesLoaded));
+                        (timeElapsed / 1000) / 60, (timeElapsed.intdiv(1000)) % 60, linesLoaded));
                 nextProgReportTime += progReportPeriod * 1000;
                 lastLineCount = lineCount;
             }
@@ -193,7 +193,7 @@ class SNBParser {
                 long linesLoaded = lineCount - lastLineCount;
                 System.out.println(String.format(
                         "Time Elapsed: %03dm.%02ds, Lines Loaded: +%d",
-                        (timeElapsed / 1000) / 60, (timeElapsed / 1000) % 60, linesLoaded));
+                        (timeElapsed / 1000) / 60, (timeElapsed.intdiv(1000)) % 60, linesLoaded));
                 nextProgReportTime += progReportPeriod * 1000;
                 lastLineCount = lineCount;
             }
@@ -289,7 +289,7 @@ class SNBParser {
                 long linesLoaded = lineCount - lastLineCount;
                 System.out.println(String.format(
                         "Time Elapsed: %03dm.%02ds, Lines Loaded: +%d",
-                        (timeElapsed / 1000) / 60, (timeElapsed / 1000) % 60, linesLoaded));
+                        (timeElapsed / 1000) / 60, (timeElapsed.intdiv(1000)) % 60, linesLoaded));
                 nextProgReportTime += progReportPeriod * 1000;
                 lastLineCount = lineCount;
             }
