@@ -1,4 +1,3 @@
-package ca.uwaterloo.cs.ldbc.interactive.gremlin.importer
 /*
  * Copyright (C) 2015-2016 Stanford University
  *
