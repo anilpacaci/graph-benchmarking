@@ -36,6 +36,19 @@
           <artifactId>gremlin-driver</artifactId>
           <version>3.1.1-incubating</version>
       </dependency>
+      <!-- Titan Libraries -->
+      <dependency>
+          <groupId>com.thinkaurelius.titan</groupId>
+          <artifactId>titan-all</artifactId>
+          <version>1.0.0</version>
+      </dependency>
+      <!-- Neo4j Gremlin Adaptor -->
+      <dependency>
+          <groupId>org.apache.tinkerpop</groupId>
+          <artifactId>neo4j-gremlin</artifactId>
+          <version>3.1.1-incubating</version>
+      </dependency>
+
   </dependencies>
   <build>
 	<plugins>
