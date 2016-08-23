@@ -25,14 +25,14 @@ import org.apache.tinkerpop.gremlin.structure.Graph
  * Helper function to handle Neo4j Specific initialization, i.e. schema definition and index creation
  * @param neo4jGraph
  */
-public static Graph initializeNeo4j(String directory) {
+Graph initializeNeo4j(String directory) {
 
     conf = new BaseConfiguration()
     conf.setProperty('gremlin.neo4j.directory',directory)
     conf.setProperty('gremlin.neo4j.multiProperties',true)
     conf.setProperty('gremlin.neo4j.metaProperties',true)
 
-    graph = Neo4jGraph.open(conf)
+    neo4jGraph  = Neo4jGraph.open(conf)
 
     List<String> vertexLabels = [
             "person",
@@ -50,5 +50,5 @@ public static Graph initializeNeo4j(String directory) {
 
     }
 
-    return graph
+    return neo4jGraph
 }

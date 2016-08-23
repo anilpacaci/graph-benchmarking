@@ -37,7 +37,7 @@ import org.apache.tinkerpop.gremlin.structure.Vertex
  * Helper function to handle Titan Specific initialization, i.e. schema definition and index creation
  * @param titanGraph
  */
-public static Graph initializeTitan(String propertiesFile) {
+Graph initializeTitan(String propertiesFile) {
 
     titanGraph = TitanFactory.open(propertiesFile)
 
