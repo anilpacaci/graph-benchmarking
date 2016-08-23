@@ -44,9 +44,7 @@ import java.util.logging.Logger
  *
  * @author Anil Pacaci <apacaci@uwaterloo.ca>
  */
-logger = Logger.getLogger(this.class.getName());
-
-TX_MAX_RETRIES = 1000;
+TX_MAX_RETRIES = 1000
 
 void loadVertices(Graph graph, Path filePath, boolean printLoadingDots, int batchSize, long progReportPeriod) throws IOException, ParseException {
 
@@ -307,7 +305,7 @@ void loadEdges(Graph graph, Path filePath, boolean undirected, boolean printLoad
  * @param neo4jGraph
  */
 void initializeNeo4j(Neo4jGraph neo4jGraph) {
-    String[] vertexLabels = [
+    List<String> vertexLabels = [
             "person",
             "comment",
             "forum",
@@ -331,7 +329,7 @@ void initializeNeo4j(Neo4jGraph neo4jGraph) {
  */
 void initializeTitan(TitanGraph titanGraph) {
 
-    String[] vertexLabels = [
+    List<String> vertexLabels = [
             "person",
             "comment",
             "forum",
@@ -342,7 +340,7 @@ void initializeTitan(TitanGraph titanGraph) {
             "tagclass"
     ]
 
-    String[] edgeLabels = [
+    List<String> edgeLabels = [
             "containerOf",
             "hasCreator",
             "hasInterest",
@@ -361,7 +359,7 @@ void initializeTitan(TitanGraph titanGraph) {
     ]
 
     // All property keys with Cardinality.SINGLE
-    String[] singleCardPropKeys = [
+    List<String> singleCardPropKeys = [
             "birthday", // person
             "browserUsed", // comment person post
             "classYear", // studyAt
@@ -383,7 +381,7 @@ void initializeTitan(TitanGraph titanGraph) {
     ]
 
     // All property keys with Cardinality.LIST
-    String[] listCardPropKeys = [
+    List<String> listCardPropKeys = [
             "email", // person
             "language" // person, post
     ]
@@ -456,7 +454,8 @@ void initializeTitan(TitanGraph titanGraph) {
         mgmt.commit();
 
     } catch (Exception e) {
-        logger.log(Level.SEVERE, e.toString());
+        System.out.println("Exception: " + e);
+        e.printStackTrace();
         return;
     }
 
@@ -469,23 +468,14 @@ void loadSNBGraph(Graph graph, String inputBaseDir, int batchSize, long progRepo
     // however, will be far too slow for anything other than the very
     // smallest of SNB graphs, and is therefore quite transient. This will
     // do for now.
-    String[] nodeFiles = [
-            "person_0_0.csv",
-            "comment_0_0.csv",
-            "forum_0_0.csv",
-            "organisation_0_0.csv",
-            "place_0_0.csv",
-            "post_0_0.csv",
-            "tag_0_0.csv",
-            "tagclass_0_0.csv"
-    ]
+    List<String> nodeFiles = ["person_0_0.csv",  "comment_0_0.csv",  "forum_0_0.csv",  "organisation_0_0.csv", "place_0_0.csv", "post_0_0.csv", "tag_0_0.csv", "tagclass_0_0.csv"]
 
-    String[] propertiesFiles = [
+    List<String> propertiesFiles = [
             "person_email_emailaddress_0_0.csv",
             "person_speaks_language_0_0.csv"
     ]
 
-    String[] edgeFiles = [
+    List<String> edgeFiles = [
             "comment_hasCreator_person_0_0.csv",
             "comment_hasTag_tag_0_0.csv",
             "comment_isLocatedIn_place_0_0.csv",
