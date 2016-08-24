@@ -32,8 +32,8 @@ public class LdbcShortQuery6Handler implements OperationHandler<LdbcShortQuery6M
         params.put("comment_id", GremlinUtils.makeIid(Entity.COMMENT, ldbcShortQuery6MessageForum.messageId()));
 
         String statement = "g.V().hasLabel(label1, label2).has('iid', within(post_id, comment_id))" +
-                ".repeat(out('replyOf')).until(hasLabel('post')).in('containerOf').as('forum')" +
-                ".out('moderator').as('moderator')" +
+                ".until(hasLabel('post')).repeat(out('replyOf')).in('containerOf').as('forum')" +
+                ".out('hasModerator').as('moderator')" +
                 ".select('forum', 'moderator')";
 
 
