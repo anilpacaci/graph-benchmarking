@@ -42,19 +42,19 @@ public class LdbcUpdate6Handler implements OperationHandler<LdbcUpdate6AddPost,D
         params.put("tag_ids", GremlinUtils.makeIid(Entity.TAG, ldbcUpdate6AddPost.tagIds()));
 
         String statement = "post = g.addV(label, vlabel).property('iid', post_id)" +
-                ".property('image_file', image_file)" +
-                ".property('creation_date', creation_date)" +
-                ".property('location_ip', location_ip)" +
-                ".property('browser_used', browser_used)" +
+                ".property('imageFile', image_file)" +
+                ".property('creationFate', creation_date)" +
+                ".property('locationIP', location_ip)" +
+                ".property('browserUsed', browser_used)" +
                 ".property('language', language)" +
                 ".property('content', content)" +
                 ".property('length', length).next(); " +
                 "creator = g.V().has('iid', creator_id).next(); " +
                 "forum = g.V().has('iid', forum_id).next(); " +
                 "country = g.V().has('iid', country_id).next(); " +
-                "post.addEdge(hasCreator, creator); " +
-                "post.addEdge(hasContainer, forum); " +
-                "post.addEdge(isLocatedIn, country);" +
+                "post.addEdge('hasCreator', creator); " +
+                "post.addEdge('hasContainer', forum); " +
+                "post.addEdge('isLocatedIn', country);" +
                 "tags_ids.forEach{t -> tag = g.V().has('iid', t).next(); post.addEdge('hasTag', tag); };";
         try {
             client.submit(statement, params).all().get();

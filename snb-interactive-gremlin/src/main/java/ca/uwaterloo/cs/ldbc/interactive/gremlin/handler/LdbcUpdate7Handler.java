@@ -33,12 +33,14 @@ public class LdbcUpdate7Handler implements OperationHandler<LdbcUpdate7AddCommen
         params.put("type", ldbcUpdate7AddComment.type() );
         params.put("content", ldbcUpdate7AddComment.content() );
         params.put("location_ip", ldbcUpdate7AddComment.locationIp() );
+        params.put("browser_used", ldbcUpdate7AddComment.browserUsed());
         params.put("tag_ids", GremlinUtils.makeIid(Entity.TAG, ldbcUpdate7AddComment.tagIds()));
         String statement = "comment = g.addV(label, vlabel).property('iid', comment_id)" +
             ".property('length', length)" +
             ".property('type', type)" +
             ".property('content', content)" +
-            ".property('location_ip', location_ip).next();" +
+            ".property('locationIP', location_ip).next();" +
+            ".property('browserUsed', browser_used)" +
             "country = g.V().has('iid', country_id).next();" +
             "creator = g.V().has('iid', person_id).next();" +
             "comment.addEdge('isLocatedIn', country);" +
@@ -48,7 +50,7 @@ public class LdbcUpdate7Handler implements OperationHandler<LdbcUpdate7AddCommen
                 "comment.addEdge('replyOf', replied_comment);";
         }
         if (ldbcUpdate7AddComment.replyToPostId() != -1) {
-            statement += "\nreplied_post = g.V().has('iid', reply_to_c_id).next();" +
+            statement += "\nreplied_post = g.V().has('iid', reply_to_p_id).next();" +
                 "comment.addEdge('replyOf', replied_post);";
         }
 

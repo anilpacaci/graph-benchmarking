@@ -27,8 +27,8 @@ public class LdbcUpdate8Handler implements OperationHandler<LdbcUpdate8AddFriend
         try {
             client.submit("p1 = g.V().has('iid', p1_id).next(); " +
                 "p2 = g.V().has('iid', p2_id).next(); " +
-                "p1.addEdge('knows', p2).property('creation_date', creation_date);" +
-                "p2.addEdge('knows', p1).property('creation_date', creation_date);",
+                "p1.addEdge('knows', p2).property('creationDate', creation_date);" +
+                "p2.addEdge('knows', p1).property('creationDate', creation_date);",
                 params).all().get();
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);

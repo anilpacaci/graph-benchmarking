@@ -32,7 +32,7 @@ public class LdbcUpdate3Handler implements OperationHandler<LdbcUpdate3AddCommen
         try {
             client.submit("person = g.V().has('iid', person_id).next(); " +
                 "comment = g.V().has('iid', comment_id).next(); " +
-                "person.addEdge('likes', comment).property('creation_date', creation_date);", params).all().get();
+                "person.addEdge('likes', comment).property('creationDate', creation_date);", params).all().get();
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
         }

@@ -31,7 +31,7 @@ public class LdbcUpdate2Handler implements OperationHandler<LdbcUpdate2AddPostLi
         try {
             client.submit("person = g.V().has('iid', person_id).next(); " +
                 "post = g.V().has('iid', post_id).next(); " +
-                "person.addEdge('likes', post).property('creation_date', creation_date);", params).all().get();
+                "person.addEdge('likes', post).property('creationDate', creation_date);", params).all().get();
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
         }

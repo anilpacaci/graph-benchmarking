@@ -39,32 +39,32 @@ public class LdbcUpdate1Handler implements OperationHandler<LdbcUpdate1AddPerson
 
         String statement = "person = g.addV(label, vlabel)" +
             ".property('iid', person_id')" +
-            ".property('located_in', located_in)" +
+            ".property('isLocatedIn', located_in)" +
             ".property('firstName', firstName)" +
             ".property('lastName', lastName)" +
             ".property('gender', gender); " +
             ".property('birthday', birthday); " +
-            ".property('creation_date', creation_date)" +
-            ".property('location_ip', location_ip)" +
-            ".property('browser_used', browser_used).next();" +
+            ".property('creationDate', creation_date)" +
+            ".property('locationIP', location_ip)" +
+            ".property('browserUsed', browser_used).next();" +
             "city = g.V().has('iid', located_in).next();" +
             "person.addEdge('isLocatedIn', city);" +
-            "languages.forEach{l ->  person.property('language', l); };" +
+            "languages.forEach{l ->  person.property('speaks', l); };" +
             "emails.forEach{l ->  person.property('email', l); };" +
-            "tags_ids.forEach{t ->  tag = g.V().has('iid', t).next(); post.addEdge('hasTag', tag); }";
+            "tags_ids.forEach{t ->  tag = g.V().has('iid', t).next(); person.addEdge('hasInterest', tag); }";
 
         String uni_statement = ldbcUpdate1AddPerson.studyAt().stream()
             .map(org -> {
                 Object iid = GremlinUtils.makeIid(Entity.ORGANISATION, org.organizationId());
-                return String.format("v = g.addVertex(); v.property('iid', %s);" +
-                    "e = person.addEdge('studyAt', v); e.property('classYear', %s);", iid, String.valueOf(org.year()));
+                return String.format("v = g.V().has(%s, 'iid', %s);" +
+                    "e = person.addEdge('studyAt', v); e.property('classYear', %s);", Entity.ORGANISATION.getName(), iid, String.valueOf(org.year()));
             })
             .collect( Collectors.joining("\n"));
         String company_statement = ldbcUpdate1AddPerson.workAt().stream()
             .map(org -> {
                 Object iid = GremlinUtils.makeIid(Entity.ORGANISATION, org.organizationId());
-                return String.format("v = g.addVertex(); v.property('iid', %s);" +
-                    "e = person.addEdge('workAt', v); e.property('workFrom', %s);", iid, String.valueOf(org.year()));
+                return String.format("v = g.V().has(%s, 'iid', %s);" +
+                    "e = person.addEdge('workAt', v); e.property('workFrom', %s);", Entity.ORGANISATION.getName(), iid, String.valueOf(org.year()));
             })
             .collect(Collectors.joining("\n"));
 
