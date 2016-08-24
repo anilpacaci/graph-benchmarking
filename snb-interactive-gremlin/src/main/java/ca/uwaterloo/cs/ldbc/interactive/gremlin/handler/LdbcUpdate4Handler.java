@@ -22,13 +22,14 @@ public class LdbcUpdate4Handler implements OperationHandler<LdbcUpdate4AddForum,
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
 
+        params.put("vlabel", Entity.FORUM.getName());
         params.put("forum_id", GremlinUtils.makeIid(Entity.FORUM, ldbcUpdate4AddForum.forumId()));
         params.put("title", ldbcUpdate4AddForum.forumTitle());
         params.put("creation_date", String.valueOf(ldbcUpdate4AddForum.creationDate().getTime()));
-        params.put("moderator_id", ldbcUpdate4AddForum.moderatorPersonId());
+        params.put("moderator_id", GremlinUtils.makeIid(Entity.PERSON, ldbcUpdate4AddForum.moderatorPersonId()));
         params.put("tag_ids", GremlinUtils.makeIid(Entity.TAG, ldbcUpdate4AddForum.tagIds()));
 
-        String statement = "forum = g.addV().property('iid', forum_id)" +
+        String statement = "forum = g.addV(label, vlabel).property('iid', forum_id)" +
             ".property('title', title)" +
             ".property('creation_date', creation_date);" +
             "mod = g.V().has('iid', moderator_id).next();" +

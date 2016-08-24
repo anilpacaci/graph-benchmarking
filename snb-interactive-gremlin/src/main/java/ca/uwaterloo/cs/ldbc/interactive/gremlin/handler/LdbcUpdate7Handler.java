@@ -23,17 +23,18 @@ public class LdbcUpdate7Handler implements OperationHandler<LdbcUpdate7AddCommen
     {
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
-        params.put("country_id", GremlinUtils.makeIid( Entity.PERSON, ldbcUpdate7AddComment.countryId() ) );
+        params.put("vlabel", Entity.COMMENT.getName());
+        params.put("country_id", GremlinUtils.makeIid( Entity.PLACE, ldbcUpdate7AddComment.countryId() ) );
         params.put("person_id", GremlinUtils.makeIid( Entity.PERSON, ldbcUpdate7AddComment.authorPersonId() ) );
-        params.put("reply_to_c_id", GremlinUtils.makeIid( Entity.PERSON, ldbcUpdate7AddComment.replyToCommentId() ) );
-        params.put("reply_to_p_id", GremlinUtils.makeIid( Entity.PERSON, ldbcUpdate7AddComment.replyToPostId() ) );
-        params.put("comment_id", GremlinUtils.makeIid( Entity.PERSON, ldbcUpdate7AddComment.commentId() ) );
+        params.put("reply_to_c_id", GremlinUtils.makeIid( Entity.COMMENT, ldbcUpdate7AddComment.replyToCommentId() ) );
+        params.put("reply_to_p_id", GremlinUtils.makeIid( Entity.POST, ldbcUpdate7AddComment.replyToPostId() ) );
+        params.put("comment_id", GremlinUtils.makeIid( Entity.COMMENT, ldbcUpdate7AddComment.commentId() ) );
         params.put("length", ldbcUpdate7AddComment.length() );
         params.put("type", ldbcUpdate7AddComment.type() );
         params.put("content", ldbcUpdate7AddComment.content() );
         params.put("location_ip", ldbcUpdate7AddComment.locationIp() );
         params.put("tag_ids", GremlinUtils.makeIid(Entity.TAG, ldbcUpdate7AddComment.tagIds()));
-        String statement = "comment = g.addV().property('iid', comment_id)" +
+        String statement = "comment = g.addV(label, vlabel).property('iid', comment_id)" +
             ".property('length', length)" +
             ".property('type', type)" +
             ".property('content', content)" +
