@@ -51,7 +51,7 @@ public class LdbcUpdate1Handler implements OperationHandler<LdbcUpdate1AddPerson
             "person.addEdge('isLocatedIn', city);" +
             "languages.forEach{l ->  person.property('speaks', l); };" +
             "emails.forEach{l ->  person.property('email', l); };" +
-            "tags_ids.forEach{t ->  tag = g.V().has('iid', t).next(); person.addEdge('hasInterest', tag); }";
+            "tag_ids.forEach{t ->  tag = g.V().has('iid', t).next(); person.addEdge('hasInterest', tag); }";
 
         String uni_statement = ldbcUpdate1AddPerson.studyAt().stream()
             .map(org -> {

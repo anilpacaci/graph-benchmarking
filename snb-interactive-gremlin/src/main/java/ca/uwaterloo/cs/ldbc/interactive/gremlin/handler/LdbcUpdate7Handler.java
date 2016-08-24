@@ -54,7 +54,7 @@ public class LdbcUpdate7Handler implements OperationHandler<LdbcUpdate7AddCommen
                 "comment.addEdge('replyOf', replied_post);";
         }
 
-        statement += "tags_ids.forEach{t ->  tag = g.V().has('iid', t).next(); comment.addEdge('hasTag', tag); }";
+        statement += "tag_ids.forEach{t ->  tag = g.V().has('iid', t).next(); comment.addEdge('hasTag', tag); }";
 
         try {
             client.submit(statement, params).all().get();

@@ -34,7 +34,7 @@ public class LdbcUpdate4Handler implements OperationHandler<LdbcUpdate4AddForum,
             ".property('creationDate', creation_date).next();" +
             "mod = g.V().has('iid', moderator_id).next();" +
             "forum.addEdge('hasModerator', mod);" +
-            "tags_ids.forEach{t ->  tag = g.V().has('iid', t).next(); forum.addEdge('hasTag', tag); }";
+            "tag_ids.forEach{t ->  tag = g.V().has('iid', t).next(); forum.addEdge('hasTag', tag); }";
         try
         {
             client.submit(statement, params).all().get();
