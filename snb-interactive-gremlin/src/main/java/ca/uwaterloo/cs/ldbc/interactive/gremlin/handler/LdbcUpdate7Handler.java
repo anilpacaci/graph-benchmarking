@@ -38,7 +38,7 @@ public class LdbcUpdate7Handler implements OperationHandler<LdbcUpdate7AddCommen
             ".property('length', length)" +
             ".property('type', type)" +
             ".property('content', content)" +
-            ".property('location_ip', location_ip);" +
+            ".property('location_ip', location_ip).next();" +
             "country = g.V().has('iid', country_id).next();" +
             "creator = g.V().has('iid', person_id).next();" +
             "comment.addEdge('isLocatedIn', country);" +

@@ -48,7 +48,7 @@ public class LdbcUpdate6Handler implements OperationHandler<LdbcUpdate6AddPost,D
                 ".property('browser_used', browser_used)" +
                 ".property('language', language)" +
                 ".property('content', content)" +
-                ".property('length', length); " +
+                ".property('length', length).next(); " +
                 "creator = g.V().has('iid', creator_id).next(); " +
                 "forum = g.V().has('iid', forum_id).next(); " +
                 "country = g.V().has('iid', country_id).next(); " +

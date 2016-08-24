@@ -26,9 +26,12 @@ public class LdbcShortQuery4Handler implements OperationHandler<LdbcShortQuery4M
     public void executeOperation(LdbcShortQuery4MessageContent ldbcShortQuery4MessageContent, DbConnectionState dbConnectionState, ResultReporter resultReporter) throws DbException {
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
-        params.put("message_id", GremlinUtils.makeIid(Entity.MESSAGE, ldbcShortQuery4MessageContent.messageId()));
+        params.put("label1", Entity.POST.getName());
+        params.put("label2", Entity.COMMENT.getName());
+        params.put("post_id", GremlinUtils.makeIid(Entity.POST, ldbcShortQuery4MessageContent.messageId()));
+        params.put("comment_id", GremlinUtils.makeIid(Entity.COMMENT, ldbcShortQuery4MessageContent.messageId()));
 
-        String statement = "g.V().has('iid', message_id)";
+        String statement = "g.V().hasLabel(label1, label2).has('iid', within(post_id, comment_id))";
 
         List<Result> results = null;
         try {
