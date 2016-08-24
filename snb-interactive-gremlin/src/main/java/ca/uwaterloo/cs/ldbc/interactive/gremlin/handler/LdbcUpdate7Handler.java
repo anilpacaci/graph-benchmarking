@@ -30,17 +30,17 @@ public class LdbcUpdate7Handler implements OperationHandler<LdbcUpdate7AddCommen
         params.put("reply_to_p_id", GremlinUtils.makeIid( Entity.POST, ldbcUpdate7AddComment.replyToPostId() ) );
         params.put("comment_id", GremlinUtils.makeIid( Entity.COMMENT, ldbcUpdate7AddComment.commentId() ) );
         params.put("length", ldbcUpdate7AddComment.length() );
-        params.put("type", ldbcUpdate7AddComment.type() );
         params.put("content", ldbcUpdate7AddComment.content() );
         params.put("location_ip", ldbcUpdate7AddComment.locationIp() );
         params.put("browser_used", ldbcUpdate7AddComment.browserUsed());
+        params.put("creation_date", ldbcUpdate7AddComment.creationDate());
         params.put("tag_ids", GremlinUtils.makeIid(Entity.TAG, ldbcUpdate7AddComment.tagIds()));
         String statement = "comment = g.addV(label, vlabel).property('iid', comment_id)" +
             ".property('length', length)" +
-            ".property('type', type)" +
             ".property('content', content)" +
-            ".property('locationIP', location_ip).next();" +
-            ".property('browserUsed', browser_used)" +
+            ".property('locationIP', location_ip)" +
+            ".property('creationDate', creation_date)" +
+            ".property('browserUsed', browser_used).next();" +
             "country = g.V().has('iid', country_id).next();" +
             "creator = g.V().has('iid', person_id).next();" +
             "comment.addEdge('isLocatedIn', country);" +

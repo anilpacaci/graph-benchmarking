@@ -43,7 +43,7 @@ public class LdbcUpdate6Handler implements OperationHandler<LdbcUpdate6AddPost,D
 
         String statement = "post = g.addV(label, vlabel).property('iid', post_id)" +
                 ".property('imageFile', image_file)" +
-                ".property('creationFate', creation_date)" +
+                ".property('creationDate', creation_date)" +
                 ".property('locationIP', location_ip)" +
                 ".property('browserUsed', browser_used)" +
                 ".property('language', language)" +
