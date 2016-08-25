@@ -28,10 +28,10 @@ public class LdbcComplexQuery6Handler implements OperationHandler<LdbcQuery6, Db
         params.put("tag_name", ldbcQuery6.tagName());
         params.put("result_limit", ldbcQuery6.limit());
 
-        String statement = "g.V().has('iid', person_id).aggregate('start').repeat(out('knows').simplePath()).until(loops().is(gte(2)))." +
-                ".in('hasCreator').hasLabel('post').where(out('hasTag').has('name', tag_name))." +
-                "out('hasTag').has('name', neq(tag_name)).groupCount('temp').by('name').cap('temp').next()." +
-                "sort({-it.getValue()})[0..resultLimit]";
+        String statement = "g.V().has('iid', person_id).aggregate('start').repeat(out('knows').simplePath()).until(loops().is(gte(2)))" +
+                ".in('hasCreator').hasLabel('post').where(out('hasTag').has('name', tag_name))" +
+                ".out('hasTag').has('name', neq(tag_name)).groupCount('temp').by('name').cap('temp').next()" +
+                ".sort({-it.getValue()})[0..resultLimit]";
 
         List<Result> results = null;
         try {

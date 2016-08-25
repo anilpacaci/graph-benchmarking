@@ -38,7 +38,7 @@ public class LdbcUpdate1Handler implements OperationHandler<LdbcUpdate1AddPerson
         params.put("tag_ids", GremlinUtils.makeIid(Entity.TAG, ldbcUpdate1AddPerson.tagIds()));
 
         String statement = "person = g.addV(label, vlabel)" +
-            ".property('iid', person_id')" +
+            ".property('iid', person_id)" +
             ".property('isLocatedIn', located_in)" +
             ".property('firstName', firstName)" +
             ".property('lastName', lastName)" +

@@ -53,7 +53,7 @@ public class LdbcUpdate6Handler implements OperationHandler<LdbcUpdate6AddPost,D
                 "forum = g.V().has('iid', forum_id).next(); " +
                 "country = g.V().has('iid', country_id).next(); " +
                 "post.addEdge('hasCreator', creator); " +
-                "post.addEdge('hasContainer', forum); " +
+                "forum.addEdge('containerOf', post); " +
                 "post.addEdge('isLocatedIn', country);" +
                 "tag_ids.forEach{t -> tag = g.V().has('iid', t).next(); post.addEdge('hasTag', tag); };";
         try {

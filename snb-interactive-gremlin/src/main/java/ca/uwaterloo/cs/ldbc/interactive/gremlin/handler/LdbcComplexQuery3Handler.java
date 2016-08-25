@@ -57,8 +57,8 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
 
             Vertex person = (Vertex) r.getKey();
             HashMap count = (HashMap) r.getValue();
-            int countx = (int) count.get(ldbcQuery3.countryXName());
-            int county = (int) count.get(ldbcQuery3.countryYName());
+            long countx = (long) count.get(ldbcQuery3.countryXName());
+            long county = (long) count.get(ldbcQuery3.countryYName());
 
             LdbcQuery3Result ldbcQuery3Result = new LdbcQuery3Result(
                 GremlinUtils.getSNBId(person),
@@ -80,6 +80,11 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
             else return o1.personId() < o2.personId() ? -1 : 1;
         });
 
-        resultReporter.report(resultList.size(), resultList, ldbcQuery3);
+
+        if(resultList.size() > ldbcQuery3.limit()) {
+            resultReporter.report(ldbcQuery3.limit(), resultList.subList(0, ldbcQuery3.limit()), ldbcQuery3);
+        } else {
+            resultReporter.report(resultList.size(), resultList, ldbcQuery3);
+        }
     }
 }
