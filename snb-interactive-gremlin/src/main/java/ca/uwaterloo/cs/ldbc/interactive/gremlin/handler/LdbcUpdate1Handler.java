@@ -24,6 +24,7 @@ public class LdbcUpdate1Handler implements OperationHandler<LdbcUpdate1AddPerson
         Map<String, Object> params = new HashMap<>();
 
         params.put("vlabel", Entity.PERSON.getName());
+        params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcUpdate1AddPerson.personId()));
         params.put("located_in", GremlinUtils.makeIid(Entity.PLACE, ldbcUpdate1AddPerson.cityId()));
         params.put("firstName", ldbcUpdate1AddPerson.personFirstName());
         params.put("lastName", ldbcUpdate1AddPerson.personLastName());
@@ -39,7 +40,6 @@ public class LdbcUpdate1Handler implements OperationHandler<LdbcUpdate1AddPerson
 
         String statement = "person = g.addV(label, vlabel)" +
             ".property('iid', person_id)" +
-            ".property('isLocatedIn', located_in)" +
             ".property('firstName', firstName)" +
             ".property('lastName', lastName)" +
             ".property('gender', gender) " +
