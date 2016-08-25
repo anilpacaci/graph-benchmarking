@@ -34,8 +34,9 @@ public class LdbcComplexQuery13Handler implements OperationHandler<LdbcQuery13, 
             return;
         }
 
+        // In only goes to depth 10
         String statement = "g.V().has('iid', person1_id)" +
-                ".repeat(out('knows').simplePath()).until(has('iid', person2_id))" +
+                ".repeat(out('knows').simplePath()).until(has('iid', person2_id).or().loops().is(10))" +
                 ".limit(1).path().count(local)";
 
         // TODO: is it possible to have no path between source & target. What is the length then?
