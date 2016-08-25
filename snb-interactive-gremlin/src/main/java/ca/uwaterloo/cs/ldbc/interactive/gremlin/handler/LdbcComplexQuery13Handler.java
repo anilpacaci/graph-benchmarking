@@ -30,7 +30,7 @@ public class LdbcComplexQuery13Handler implements OperationHandler<LdbcQuery13, 
 
         if(ldbcQuery13.person1Id() == ldbcQuery13.person2Id()) {
             // same person, return 0
-            resultReporter.report(1, new LdbcQuery13Result(-1), ldbcQuery13);
+            resultReporter.report(1, new LdbcQuery13Result(0), ldbcQuery13);
             return;
         }
 
@@ -46,8 +46,13 @@ public class LdbcComplexQuery13Handler implements OperationHandler<LdbcQuery13, 
             throw new DbException("Remote execution failed", e);
         }
 
-        int pathLength = results.get(0).getInt();
+        if(results == null && results.isEmpty()) {
+            // no path exists between two
+            resultReporter.report(1, new LdbcQuery13Result(-1), ldbcQuery13);
+            return;
+        }
 
+        int pathLength = results.get(0).getInt();
         // path includes both source and target vertices
         resultReporter.report(1, new LdbcQuery13Result(pathLength - 1), ldbcQuery13);
     }
