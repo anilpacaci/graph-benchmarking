@@ -12,7 +12,9 @@ import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery3Result;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Result;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 import org.joda.time.DateTime;
+import org.neo4j.cypher.internal.compiler.v1_9.commands.Has;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -33,18 +35,12 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
 
         String statement = "g.V().has('iid', person_id)" +
             ".repeat(out('knows')).times(2).emit().as('person')" +
-            ".where(has('place', neq(countryX)).and(has('place', neq(countryY))))" +
-            ".order().by('iid', incr)" +
+            ".where(out('isLocatedIn').out('isPartOf').has('name', neq(countryX)).and().out('isLocatedIn').out('isPartOf').has('name', neq(countryY)))" +
             ".in('hasCreator')" +
-            ".where(has('place', countryX).or(has('place', countryY)))" +
+            ".where(out('isLocatedIn').has('name', countryX).or().out('isLocatedIn').has('name', countryY))" +
             ".has('creationDate', inside(start_date, end_date))" +
-            ".group().by('hasCreator')" +
-            ".by(fold().match(__.as('p').unfold().has('place', countryX).count(local).as('countx')," +
-            "                 __.as('p').unfold().has('place', countryY).count(local).as('county')," +
-            "                )" +
-            ".select('person', 'countx', 'county')" +
-            ".order().by('countx', decr))" +
-            ".limit(result_limit)";
+            ".group().by(out('hasCreator'))" +
+            ".by(groupCount().by(out('isLocatedIn').values('name')))";
 
         List<Result> results;
         try {
@@ -53,12 +49,16 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
             throw new DbException("Remote execution failed", e);
         }
 
+        HashMap<Vertex, HashMap> resultMap = results.get(0).get(HashMap.class);
+
+
         List<LdbcQuery3Result> resultList = new ArrayList<>();
-        for (Result r : results) {
-            HashMap map = r.get(HashMap.class);
-            Vertex person = (Vertex) map.get("person");
-            int countx = (int) map.get("countx");
-            int county = (int) map.get("county");
+        for ( Map.Entry r : resultMap.entrySet()) {
+
+            Vertex person = (Vertex) r.getKey();
+            HashMap count = (HashMap) r.getValue();
+            int countx = (int) count.get(ldbcQuery3.countryXName());
+            int county = (int) count.get(ldbcQuery3.countryYName());
 
             LdbcQuery3Result ldbcQuery3Result = new LdbcQuery3Result(
                 GremlinUtils.getSNBId(person),
@@ -71,6 +71,15 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
 
             resultList.add(ldbcQuery3Result);
         }
+
+        Collections.sort(resultList, (o1, o2) -> {
+            long o1count = o1.xCount() + o1.yCount();
+            long o2count = o2.xCount() + o2.yCount();
+            if (o1count < o2count) return 1;
+            else if (o1count > o2count) return -1;
+            else return o1.personId() < o2.personId() ? -1 : 1;
+        });
+
         resultReporter.report(resultList.size(), resultList, ldbcQuery3);
     }
 }
