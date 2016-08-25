@@ -46,7 +46,7 @@ public class LdbcComplexQuery13Handler implements OperationHandler<LdbcQuery13, 
             throw new DbException("Remote execution failed", e);
         }
 
-        if(results == null && results.isEmpty()) {
+        if(results == null || results.isEmpty()) {
             // no path exists between two
             resultReporter.report(1, new LdbcQuery13Result(-1), ldbcQuery13);
             return;
