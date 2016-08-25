@@ -42,8 +42,8 @@ public class LdbcUpdate1Handler implements OperationHandler<LdbcUpdate1AddPerson
             ".property('isLocatedIn', located_in)" +
             ".property('firstName', firstName)" +
             ".property('lastName', lastName)" +
-            ".property('gender', gender); " +
-            ".property('birthday', birthday); " +
+            ".property('gender', gender) " +
+            ".property('birthday', birthday) " +
             ".property('creationDate', creation_date)" +
             ".property('locationIP', location_ip)" +
             ".property('browserUsed', browser_used).next();" +
