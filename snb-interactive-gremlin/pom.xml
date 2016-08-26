@@ -14,6 +14,11 @@
       <version>4.12</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.kafka</groupId>
+      <artifactId>kafka-clients</artifactId>
+      <version>0.9.0.0</version>
+    </dependency>
       <dependency>
           <groupId>ch.qos.logback</groupId>
           <artifactId>logback-classic</artifactId>
@@ -48,7 +53,6 @@
           <artifactId>neo4j-gremlin</artifactId>
           <version>3.1.1-incubating</version>
       </dependency>
-
   </dependencies>
   <build>
 	<plugins>

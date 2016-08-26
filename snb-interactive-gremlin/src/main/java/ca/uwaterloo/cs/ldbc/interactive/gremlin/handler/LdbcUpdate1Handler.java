@@ -1,7 +1,8 @@
 package ca.uwaterloo.cs.ldbc.interactive.gremlin.handler;
 
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.Entity;
-import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinDbConnectionState;
+import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinKafkaDbConnectionState;
+import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinStatement;
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinUtils;
 import com.ldbc.driver.DbConnectionState;
 import com.ldbc.driver.DbException;
@@ -9,18 +10,19 @@ import com.ldbc.driver.OperationHandler;
 import com.ldbc.driver.ResultReporter;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcNoResult;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcUpdate1AddPerson;
-import org.apache.tinkerpop.gremlin.driver.Client;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class LdbcUpdate1Handler implements OperationHandler<LdbcUpdate1AddPerson, DbConnectionState> {
 
     @Override
     public void executeOperation(LdbcUpdate1AddPerson ldbcUpdate1AddPerson, DbConnectionState dbConnectionState, ResultReporter resultReporter) throws DbException {
-        Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
+        KafkaProducer<String, GremlinStatement> producer = ((GremlinKafkaDbConnectionState) dbConnectionState).getKafkaProducer();
+        String topic = ((GremlinKafkaDbConnectionState) dbConnectionState).getKafkaTopic();
         Map<String, Object> params = new HashMap<>();
 
         params.put("vlabel", Entity.PERSON.getName());
@@ -71,16 +73,10 @@ public class LdbcUpdate1Handler implements OperationHandler<LdbcUpdate1AddPerson
             })
             .collect(Collectors.joining("\n"));
 
-        try {
-            client.submit( String.join("\n",
-                statement,
-                uni_statement,
-                company_statement),
-                params)
-                .all().get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new DbException("Remote execution failed", e);
-        }
+        statement = String.join("\n", statement, uni_statement, company_statement);
+
+        producer.send(new ProducerRecord<String, GremlinStatement>(topic, new GremlinStatement(statement, params)));
+
         resultReporter.report(0, LdbcNoResult.INSTANCE, ldbcUpdate1AddPerson);
 
     }

@@ -1,7 +1,7 @@
 package ca.uwaterloo.cs.ldbc.interactive.gremlin.handler;
 
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.Entity;
-import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinDbConnectionState;
+import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinKafkaDbConnectionState;
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinUtils;
 import com.ldbc.driver.DbConnectionState;
 import com.ldbc.driver.DbException;
@@ -24,7 +24,7 @@ import java.util.concurrent.ExecutionException;
 public class LdbcShortQuery4Handler implements OperationHandler<LdbcShortQuery4MessageContent, DbConnectionState> {
     @Override
     public void executeOperation(LdbcShortQuery4MessageContent ldbcShortQuery4MessageContent, DbConnectionState dbConnectionState, ResultReporter resultReporter) throws DbException {
-        Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
+        Client client = ((GremlinKafkaDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
         params.put("label1", Entity.POST.getName());
         params.put("label2", Entity.COMMENT.getName());
