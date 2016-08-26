@@ -56,14 +56,14 @@ public class LdbcUpdate1Handler implements OperationHandler<LdbcUpdate1AddPerson
         String uni_statement = ldbcUpdate1AddPerson.studyAt().stream()
             .map(org -> {
                 Object iid = GremlinUtils.makeIid(Entity.ORGANISATION, org.organizationId());
-                return String.format("v = g.V().has('%s', 'iid', '%s');" +
+                return String.format("v = g.V().has('%s', 'iid', '%s').next();" +
                     "e = person.addEdge('studyAt', v); e.property('classYear', '%s');", Entity.ORGANISATION.getName(), iid, String.valueOf(org.year()));
             })
             .collect( Collectors.joining("\n"));
         String company_statement = ldbcUpdate1AddPerson.workAt().stream()
             .map(org -> {
                 Object iid = GremlinUtils.makeIid(Entity.ORGANISATION, org.organizationId());
-                return String.format("v = g.V().has('%s', 'iid', '%s');" +
+                return String.format("v = g.V().has('%s', 'iid', '%s').next();" +
                     "e = person.addEdge('workAt', v); e.property('workFrom', '%s');", Entity.ORGANISATION.getName(), iid, String.valueOf(org.year()));
             })
             .collect(Collectors.joining("\n"));

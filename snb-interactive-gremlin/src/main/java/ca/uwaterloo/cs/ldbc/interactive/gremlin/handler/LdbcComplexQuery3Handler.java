@@ -57,8 +57,19 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
 
             Vertex person = (Vertex) r.getKey();
             HashMap count = (HashMap) r.getValue();
-            long countx = (long) count.get(ldbcQuery3.countryXName());
-            long county = (long) count.get(ldbcQuery3.countryYName());
+
+            Object countxObject = count.get(ldbcQuery3.countryXName());
+            Object countyObject = count.get(ldbcQuery3.countryYName());
+
+            long countx = 0;
+            long county = 0;
+
+            if(countxObject != null) {
+                countx = (long) countxObject;
+            }
+            if(countyObject != null) {
+                county = (long) countyObject;
+            }
 
             LdbcQuery3Result ldbcQuery3Result = new LdbcQuery3Result(
                 GremlinUtils.getSNBId(person),
