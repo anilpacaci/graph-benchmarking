@@ -47,7 +47,7 @@ public class LdbcShortQuery7Handler implements OperationHandler<LdbcShortQuery7M
         authorKnowsResults.forEach(res -> { authorKnows.add(res.getVertex());});
 
         statement = "g.V().hasLabel(label1, label2).has('iid', within(post_id, comment_id))" +
-                ".in('replyOf').as('reply')" +
+                ".in('replyOf').as('reply').order().by('creationDate', dect).by(out('hasCreator').values('iid'), incr)" +
                 ".out('hasCreator').as('creator')" +
                 ".select('reply', 'creator')";
 

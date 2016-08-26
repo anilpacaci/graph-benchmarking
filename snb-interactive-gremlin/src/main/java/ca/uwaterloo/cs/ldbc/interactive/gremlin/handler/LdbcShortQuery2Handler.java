@@ -51,13 +51,20 @@ public class LdbcShortQuery2Handler implements OperationHandler<LdbcShortQuery2P
             Vertex original = (Vertex) resultMap.get("original");
             Vertex owner = (Vertex) resultMap.get("owner");
 
+            String content = message.<String>property("content").value();
+            if(content == null || content.isEmpty()) {
+                content = message.<String>property("imageFile").value();
+            }
+
             LdbcShortQuery2PersonPostsResult result = new LdbcShortQuery2PersonPostsResult(GremlinUtils.getSNBId(message),
-                    message.<String>property("content").value(),
+                    content,
                     Long.parseLong(message.<String>property("creationDate").value()),
                     GremlinUtils.getSNBId(original),
                     GremlinUtils.getSNBId(owner),
                     owner.<String>property("firstName").value(),
                     owner.<String>property("lastName").value());
+
+            resultList.add(result);
         }
 
         resultReporter.report(resultList.size(), resultList, ldbcShortQuery2PersonPosts);
