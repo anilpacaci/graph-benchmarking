@@ -29,12 +29,15 @@ public class LdbcUpdate4Handler implements OperationHandler<LdbcUpdate4AddForum,
         params.put("moderator_id", GremlinUtils.makeIid(Entity.PERSON, ldbcUpdate4AddForum.moderatorPersonId()));
         params.put("tag_ids", GremlinUtils.makeIid(Entity.TAG, ldbcUpdate4AddForum.tagIds()));
 
+        params.put("person_label", Entity.PERSON.getName());
+        params.put("tag_label", Entity.TAG.getName());
+
         String statement = "forum = g.addV(label, vlabel).property('iid', forum_id)" +
             ".property('title', title)" +
             ".property('creationDate', creation_date).next();" +
-            "mod = g.V().has('iid', moderator_id).next();" +
+            "mod = g.V().has(person_label, 'iid', moderator_id).next();" +
             "forum.addEdge('hasModerator', mod);" +
-            "tag_ids.forEach{t ->  tag = g.V().has('iid', t).next(); forum.addEdge('hasTag', tag); }";
+            "tag_ids.forEach{t ->  tag = g.V().has(tag_label, 'iid', t).next(); forum.addEdge('hasTag', tag); }";
         try
         {
             client.submit(statement, params).all().get();

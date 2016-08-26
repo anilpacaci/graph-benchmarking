@@ -41,6 +41,11 @@ public class LdbcUpdate6Handler implements OperationHandler<LdbcUpdate6AddPost,D
 
         params.put("tag_ids", GremlinUtils.makeIid(Entity.TAG, ldbcUpdate6AddPost.tagIds()));
 
+        params.put("person_label", Entity.PERSON.getName());
+        params.put("forum_label", Entity.FORUM.getName());
+        params.put("place_label", Entity.PLACE.getName());
+        params.put("tag_label", Entity.TAG.getName());
+
         String statement = "post = g.addV(label, vlabel).property('iid', post_id)" +
                 ".property('imageFile', image_file)" +
                 ".property('creationDate', creation_date)" +
@@ -49,13 +54,13 @@ public class LdbcUpdate6Handler implements OperationHandler<LdbcUpdate6AddPost,D
                 ".property('language', language)" +
                 ".property('content', content)" +
                 ".property('length', length).next(); " +
-                "creator = g.V().has('iid', creator_id).next(); " +
-                "forum = g.V().has('iid', forum_id).next(); " +
-                "country = g.V().has('iid', country_id).next(); " +
+                "creator = g.V().has(person_label, 'iid', creator_id).next(); " +
+                "forum = g.V().has(forum_label, 'iid', forum_id).next(); " +
+                "country = g.V().has(place_label, 'iid', country_id).next(); " +
                 "post.addEdge('hasCreator', creator); " +
                 "forum.addEdge('containerOf', post); " +
                 "post.addEdge('isLocatedIn', country);" +
-                "tag_ids.forEach{t -> tag = g.V().has('iid', t).next(); post.addEdge('hasTag', tag); };";
+                "tag_ids.forEach{t -> tag = g.V().has(tag_label, 'iid', t).next(); post.addEdge('hasTag', tag); };";
         try {
             client.submit(statement, params).all().get();
         } catch ( InterruptedException | ExecutionException e ) {

@@ -38,6 +38,9 @@ public class LdbcUpdate1Handler implements OperationHandler<LdbcUpdate1AddPerson
         params.put("emails", ldbcUpdate1AddPerson.emails());
         params.put("tag_ids", GremlinUtils.makeIid(Entity.TAG, ldbcUpdate1AddPerson.tagIds()));
 
+        params.put("place_label", Entity.PLACE.getName());
+        params.put("tag_label", Entity.TAG.getName());
+
         String statement = "person = g.addV(label, vlabel)" +
             ".property('iid', person_id)" +
             ".property('firstName', firstName)" +
@@ -47,11 +50,11 @@ public class LdbcUpdate1Handler implements OperationHandler<LdbcUpdate1AddPerson
             ".property('creationDate', creation_date)" +
             ".property('locationIP', location_ip)" +
             ".property('browserUsed', browser_used).next();" +
-            "city = g.V().has('iid', located_in).next();" +
+            "city = g.V().has(place_label, 'iid', located_in).next();" +
             "person.addEdge('isLocatedIn', city);" +
             "languages.forEach{l ->  person.property('speaks', l); };" +
             "emails.forEach{l ->  person.property('email', l); };" +
-            "tag_ids.forEach{t ->  tag = g.V().has('iid', t).next(); person.addEdge('hasInterest', tag); }";
+            "tag_ids.forEach{t ->  tag = g.V().has(tag_label, 'iid', t).next(); person.addEdge('hasInterest', tag); }";
 
         String uni_statement = ldbcUpdate1AddPerson.studyAt().stream()
             .map(org -> {

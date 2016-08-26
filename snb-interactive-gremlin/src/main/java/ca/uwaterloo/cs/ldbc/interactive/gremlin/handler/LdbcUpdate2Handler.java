@@ -28,9 +28,12 @@ public class LdbcUpdate2Handler implements OperationHandler<LdbcUpdate2AddPostLi
         params.put("post_id", GremlinUtils.makeIid(Entity.POST, ldbcUpdate2AddPostLike.postId()));
         params.put("creation_date", String.valueOf(ldbcUpdate2AddPostLike.creationDate().getTime()));
 
+        params.put("person_label", Entity.PERSON.getName());
+        params.put("post_label", Entity.POST.getName());
+
         try {
-            client.submit("person = g.V().has('iid', person_id).next(); " +
-                "post = g.V().has('iid', post_id).next(); " +
+            client.submit("person = g.V().has(person_label, 'iid', person_id).next(); " +
+                "post = g.V().has(post_label, 'iid', post_id).next(); " +
                 "person.addEdge('likes', post).property('creationDate', creation_date);", params).all().get();
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
