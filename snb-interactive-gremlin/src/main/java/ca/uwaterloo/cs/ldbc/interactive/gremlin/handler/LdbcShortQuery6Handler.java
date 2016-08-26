@@ -26,11 +26,14 @@ public class LdbcShortQuery6Handler implements OperationHandler<LdbcShortQuery6M
     public void executeOperation(LdbcShortQuery6MessageForum ldbcShortQuery6MessageForum, DbConnectionState dbConnectionState, ResultReporter resultReporter) throws DbException {
         Client client = ((GremlinKafkaDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
-        params.put("message_id", GremlinUtils.makeIid(Entity.MESSAGE, ldbcShortQuery6MessageForum.messageId()));
+        params.put("label1", Entity.POST.getName());
+        params.put("label2", Entity.COMMENT.getName());
+        params.put("post_id", GremlinUtils.makeIid(Entity.POST, ldbcShortQuery6MessageForum.messageId()));
+        params.put("comment_id", GremlinUtils.makeIid(Entity.COMMENT, ldbcShortQuery6MessageForum.messageId()));
 
-        String statement = "g.V().has('message_id', message_id)" +
-                ".repeat(out('replyOf')).until(hasLabel('post')).in('containerOf').as('forum')" +
-                ".out('moderator').as('moderator')" +
+        String statement = "g.V().hasLabel(label1, label2).has('iid', within(post_id, comment_id))" +
+                ".until(hasLabel('post')).repeat(out('replyOf')).in('containerOf').as('forum')" +
+                ".out('hasModerator').as('moderator')" +
                 ".select('forum', 'moderator')";
 
 

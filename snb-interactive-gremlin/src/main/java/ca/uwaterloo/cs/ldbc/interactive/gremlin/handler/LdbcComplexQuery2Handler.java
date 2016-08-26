@@ -26,10 +26,11 @@ public class LdbcComplexQuery2Handler implements OperationHandler<LdbcQuery2, Db
         Client client = ((GremlinKafkaDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery2.personId()));
+        params.put("person_label", Entity.PERSON.getName());
         params.put("max_date", Long.toString(ldbcQuery2.maxDate().getTime()));
         params.put("result_limit", ldbcQuery2.limit());
 
-        String statement = "g.V().has('iid', person_id)" +
+        String statement = "g.V().has(person_label, 'iid', person_id)" +
             ".out('knows').as('person')" +
             ".in('hasCreator').as('message')" +
             ".has('creationDate', lte(max_date))" +
@@ -52,10 +53,10 @@ public class LdbcComplexQuery2Handler implements OperationHandler<LdbcQuery2, Db
             Vertex person= (Vertex) map.get("person");
 
             LdbcQuery2Result ldbcQuery2Result = new LdbcQuery2Result(
-                Long.valueOf(person.<String>property("iid").value()),
+                GremlinUtils.getSNBId(person),
                 person.<String>property("firstName").value(),
                 person.<String>property("lastName").value(),
-                Long.valueOf(message.<String>property("iid").value()),
+                GremlinUtils.getSNBId(message),
                 message.property("content") == VertexProperty.empty() ?
                 message.<String>property("imageFile").value() : message.<String>property("content").value(),
                 Long.valueOf(message.<String>property("creationDate").value())

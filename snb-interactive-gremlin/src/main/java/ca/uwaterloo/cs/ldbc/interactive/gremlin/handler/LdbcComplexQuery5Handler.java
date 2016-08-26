@@ -39,9 +39,10 @@ public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, Db
         Client client = ((GremlinKafkaDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery5.personId()));
-        params.put("min_date", String.valueOf(ldbcQuery5.minDate()));
+        params.put("person_label", Entity.PERSON.getName());
+        params.put("min_date", String.valueOf(ldbcQuery5.minDate().getTime()));
 
-        String statement = "g.V().has('iid', person_id).repeat(out('knows')).times(2).emit()" +
+        String statement = "g.V().has(person_label, 'iid', person_id).repeat(out('knows')).times(2).emit()" +
             ".inE('hasMember').has('joinDate',gte(min_date)).outV().as('forum_name')" +
             ".in('hasCreator').as('post').out('hasContainer').select('post').count().where(is(gt(0))).as('cnt')" +
             ".order().by('cnt',decr)" +

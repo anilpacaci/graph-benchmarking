@@ -29,6 +29,7 @@ public class LdbcComplexQuery7Handler implements OperationHandler<LdbcQuery7, Db
         Client client = ((GremlinKafkaDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery7.personId()));
+        params.put("person_label", Entity.PERSON.getName());
         params.put("result_limit", ldbcQuery7.limit());
 
         List<Result> authorKnowsResults = null;
@@ -42,7 +43,7 @@ public class LdbcComplexQuery7Handler implements OperationHandler<LdbcQuery7, Db
         List<Vertex> authorKnows = new ArrayList<>();
         authorKnowsResults.forEach(res -> { authorKnows.add(res.getVertex());});
 
-        String statement = "g.V().has('iid', person_id)" +
+        String statement = "g.V().has(person_label, 'iid', person_id)" +
                 ".in('hasCreator').as('post')" +
                 ".inE('likes').as('like')" +
                 ".outV().as('liker')" +

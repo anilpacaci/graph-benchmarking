@@ -28,9 +28,10 @@ public class LdbcComplexQuery8Handler implements OperationHandler<LdbcQuery8, Db
         Client client = ((GremlinKafkaDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery8.personId()));
+        params.put("person_label", Entity.PERSON.getName());
         params.put("result_limit", ldbcQuery8.limit());
 
-        String statement = "g.V().has('iid', person_id)" +
+        String statement = "g.V().has(person_label, 'iid', person_id)" +
                 ".in('hasCreator').in('replyOf')" +
                 ".order().by('creationDate', decr).by('iid', incr).limit(result_limit).as('comment')" +
                 ".out('hasCreator').as('person')" +

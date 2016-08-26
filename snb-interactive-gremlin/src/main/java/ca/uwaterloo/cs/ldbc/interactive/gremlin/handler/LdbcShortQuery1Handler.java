@@ -29,8 +29,9 @@ public class LdbcShortQuery1Handler implements OperationHandler<LdbcShortQuery1P
         Client client = ((GremlinKafkaDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcShortQuery1PersonProfile.personId()));
+        params.put("person_label", Entity.PERSON.getName());
 
-        String statement = "g.V().has('iid', person_id).as('person').outE('isLocatedIn').inV().as('place').select('person', 'place')";
+        String statement = "g.V().has(person_label, 'iid', person_id).as('person').outE('isLocatedIn').inV().as('place').select('person', 'place')";
 
         List<Result> results = null;
         try {

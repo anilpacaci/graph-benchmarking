@@ -31,11 +31,12 @@ public class LdbcShortQuery3Handler implements OperationHandler<LdbcShortQuery3P
         List<LdbcShortQuery3PersonFriendsResult> result = new ArrayList<>();
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcShortQuery3PersonFriends.personId()));
+        params.put("person_label", Entity.PERSON.getName());
 
-        String statement = "g.V().has('iid', person_id)" +
+        String statement = "g.V().has(person_label, 'iid', person_id)" +
                 ".outE('knows').as('relation')" +
+                ".order().by('creationDate', decr).by(inV().values('iid'), incr)" +
                 ".inV().as('friend')" +
-                ".order().by('creationDate', decr).by('iid', incr)" +
                 ".select('relation', 'friend')";
 
         List<Result> results = null;

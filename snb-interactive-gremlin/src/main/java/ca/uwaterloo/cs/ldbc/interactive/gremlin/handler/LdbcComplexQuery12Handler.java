@@ -28,10 +28,11 @@ public class LdbcComplexQuery12Handler implements OperationHandler<LdbcQuery12, 
         Client client = ((GremlinKafkaDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery12.personId()));
+        params.put("person_label", Entity.PERSON.getName());
         params.put("tagclass", ldbcQuery12.tagClassName());
         params.put("result_limit", ldbcQuery12.limit());
 
-        String statement = "g.V().has('iid', person_id)" +
+        String statement = "g.V().has(person_label, 'iid', person_id)" +
                 ".out('knows').limit(result_limit).as('friends')" +
                 ".in('hasCreator').where(out('replyOf').hasLabel('post').out('hasTag').repeat(out('hasType')).until(has('name', tagclass))).as('messages')" +
                 ".out('hasTag').values('name').as('tags')" +
