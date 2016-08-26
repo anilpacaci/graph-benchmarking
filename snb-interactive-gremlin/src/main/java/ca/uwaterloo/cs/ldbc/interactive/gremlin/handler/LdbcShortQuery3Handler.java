@@ -34,8 +34,8 @@ public class LdbcShortQuery3Handler implements OperationHandler<LdbcShortQuery3P
 
         String statement = "g.V().has('iid', person_id)" +
                 ".outE('knows').as('relation')" +
+                ".order().by('creationDate', decr).by(inV().values('iid'), incr)" +
                 ".inV().as('friend')" +
-                ".order().by('creationDate', decr).by('iid', incr)" +
                 ".select('relation', 'friend')";
 
         List<Result> results = null;

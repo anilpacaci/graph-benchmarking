@@ -42,9 +42,14 @@ public class LdbcShortQuery4Handler implements OperationHandler<LdbcShortQuery4M
 
         Vertex message = results.get(0).getVertex();
 
+        String content = message.<String>property( "content" ).value();
+        if(content == null || content.isEmpty()) {
+            content = message.<String>property("imageFile").value();
+        }
+
         LdbcShortQuery4MessageContentResult result =
             new LdbcShortQuery4MessageContentResult(
-                message.<String>property( "content" ).value(),
+                content,
                 Long.decode( message.<String>property( "creationDate" ).value() ) );
 
         resultReporter.report(1, result, ldbcShortQuery4MessageContent);

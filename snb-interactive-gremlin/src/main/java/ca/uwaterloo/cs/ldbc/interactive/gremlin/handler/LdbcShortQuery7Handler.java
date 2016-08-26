@@ -27,11 +27,17 @@ public class LdbcShortQuery7Handler implements OperationHandler<LdbcShortQuery7M
     public void executeOperation(LdbcShortQuery7MessageReplies ldbcShortQuery7MessageReplies, DbConnectionState dbConnectionState, ResultReporter resultReporter) throws DbException {
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
-        params.put("message_id", GremlinUtils.makeIid(Entity.PERSON, ldbcShortQuery7MessageReplies.messageId()));
+        params.put("label1", Entity.POST.getName());
+        params.put("label2", Entity.COMMENT.getName());
+        params.put("post_id", GremlinUtils.makeIid(Entity.POST, ldbcShortQuery7MessageReplies.messageId()));
+        params.put("comment_id", GremlinUtils.makeIid(Entity.COMMENT, ldbcShortQuery7MessageReplies.messageId()));
+
+        String statement = "g.V().hasLabel(label1, label2).has('iid', within(post_id, comment_id))" +
+                           ".out('hasCreator').out('knows')";
 
         List<Result> authorKnowsResults = null;
         try {
-            authorKnowsResults = client.submit("message = g.V().has('iid', message_id).out('hasCreator').out('knows')", params).all().get();
+            authorKnowsResults = client.submit(statement, params).all().get();
 
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
@@ -40,7 +46,7 @@ public class LdbcShortQuery7Handler implements OperationHandler<LdbcShortQuery7M
         List<Vertex> authorKnows = new ArrayList<>();
         authorKnowsResults.forEach(res -> { authorKnows.add(res.getVertex());});
 
-        String statement = "g.V().has('iid', message_id)" +
+        statement = "g.V().hasLabel(label1, label2).has('iid', within(post_id, comment_id))" +
                 ".in('replyOf').as('reply')" +
                 ".out('hasCreator').as('creator')" +
                 ".select('reply', 'creator')";
