@@ -1,7 +1,7 @@
 package ca.uwaterloo.cs.ldbc.interactive.gremlin.handler;
 
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.Entity;
-import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinKafkaDbConnectionState;
+import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinDbConnectionState;
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinUtils;
 import com.ldbc.driver.DbConnectionState;
 import com.ldbc.driver.DbException;
@@ -23,7 +23,7 @@ import java.util.concurrent.ExecutionException;
 public class LdbcComplexQuery13Handler implements OperationHandler<LdbcQuery13, DbConnectionState> {
     @Override
     public void executeOperation(LdbcQuery13 ldbcQuery13, DbConnectionState dbConnectionState, ResultReporter resultReporter) throws DbException {
-        Client client = ((GremlinKafkaDbConnectionState) dbConnectionState).getClient();
+        Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
         params.put("person1_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery13.person1Id()));
         params.put("person2_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery13.person2Id()));

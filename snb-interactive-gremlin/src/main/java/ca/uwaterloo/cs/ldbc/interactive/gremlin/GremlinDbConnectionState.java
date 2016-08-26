@@ -10,6 +10,7 @@ import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -31,7 +32,7 @@ public class GremlinDbConnectionState extends DbConnectionState {
         Properties prop = new Properties();
         InputStream input = null;
         try {
-            input = GremlinDbConnectionState.class.getClassLoader().getResourceAsStream(config_file);
+            input = new FileInputStream(config_file);
             if (input == null) {
                 System.out.println( "Sorry, unable to find " + config_file);
                 return;
@@ -52,7 +53,7 @@ public class GremlinDbConnectionState extends DbConnectionState {
         producer = new KafkaProducer<String, GremlinStatement>(prop);
     }
 
-    public GremlinDbConnectionState( Map<String, String> properties) {
+    public GremlinDbConnectionState(Map<String, String> properties) {
         String backend;
         if (properties.containsKey("backend")) {
             backend = properties.get("backend");
