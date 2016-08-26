@@ -9,8 +9,6 @@ import com.ldbc.driver.OperationHandler;
 import com.ldbc.driver.ResultReporter;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery7;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery7Result;
-import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcShortQuery7MessageReplies;
-import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcShortQuery7MessageRepliesResult;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Result;
 import org.apache.tinkerpop.gremlin.structure.Edge;
@@ -31,11 +29,12 @@ public class LdbcComplexQuery7Handler implements OperationHandler<LdbcQuery7, Db
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery7.personId()));
+        params.put("person_label", Entity.PERSON.getName());
         params.put("result_limit", ldbcQuery7.limit());
 
         List<Result> authorKnowsResults = null;
         try {
-            authorKnowsResults = client.submit(" g.V().has('iid', person_id).out('knows')").all().get();
+            authorKnowsResults = client.submit(" g.V().has('iid', person_id).out('knows')", params).all().get();
 
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
@@ -44,14 +43,15 @@ public class LdbcComplexQuery7Handler implements OperationHandler<LdbcQuery7, Db
         List<Vertex> authorKnows = new ArrayList<>();
         authorKnowsResults.forEach(res -> { authorKnows.add(res.getVertex());});
 
+        String statement = "g.V().has(person_label, 'iid', person_id)" +
+                ".in('hasCreator').as('post')" +
+                ".inE('likes').as('like')" +
+                ".outV().as('liker')" +
+                ".select('post', 'like', 'liker')";
+
         List<Result> results = null;
         try {
-            results = client.submit("g.V().has('iid', person_id)" +
-                    ".in('hasCreator').as('post')" +
-                    ".inE('likes').as('like')" +
-                    ".outV().as('liker')" +
-                    ".select('post', 'like', 'liker')").all().get();
-
+            results = client.submit(statement, params).all().get();
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
         }

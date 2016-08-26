@@ -12,7 +12,6 @@ import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcShortQuery2PersonPosts
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Result;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,10 +29,17 @@ public class LdbcShortQuery2Handler implements OperationHandler<LdbcShortQuery2P
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcShortQuery2PersonPosts.personId()));
         params.put("result_limit", ldbcShortQuery2PersonPosts.limit());
+        params.put("person_label", Entity.PERSON.getName());
+
+        String statement = "g.V().has(person_label, 'iid', person_id)" +
+                ".in('hasCreator').order().by('creationDate', decr).by('iid', decr).limit(result_limit).as('message')" +
+                ".until(hasLabel('post')).repeat(out('replyOf')).as('original')" +
+                ".out('hasCreator').as('owner')" +
+                ".select('message', 'original', 'owner')";
 
         List<Result> results = null;
         try {
-            results = client.submit("g.V().has('iid', person_id).in('hasCreator').order().by('creationDate', decr).by('iid', decr).limit(result_limit).as('message').repeat(out('replyOf')).until(hasLabel('post')).as('original').out('hasCreator').as('owner').select('message', 'original', 'owner')", params).all().get();
+            results = client.submit(statement, params).all().get();
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
         }
@@ -46,13 +52,20 @@ public class LdbcShortQuery2Handler implements OperationHandler<LdbcShortQuery2P
             Vertex original = (Vertex) resultMap.get("original");
             Vertex owner = (Vertex) resultMap.get("owner");
 
+            String content = message.<String>property("content").value();
+            if(content == null || content.isEmpty()) {
+                content = message.<String>property("imageFile").value();
+            }
+
             LdbcShortQuery2PersonPostsResult result = new LdbcShortQuery2PersonPostsResult(GremlinUtils.getSNBId(message),
-                    message.<String>property("content").value(),
+                    content,
                     Long.parseLong(message.<String>property("creationDate").value()),
                     GremlinUtils.getSNBId(original),
                     GremlinUtils.getSNBId(owner),
-                    message.<String>property("firstName").value(),
-                    message.<String>property("lastName").value());
+                    owner.<String>property("firstName").value(),
+                    owner.<String>property("lastName").value());
+
+            resultList.add(result);
         }
 
         resultReporter.report(resultList.size(), resultList, ldbcShortQuery2PersonPosts);

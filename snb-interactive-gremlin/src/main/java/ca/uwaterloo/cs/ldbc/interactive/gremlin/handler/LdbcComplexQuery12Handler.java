@@ -9,7 +9,6 @@ import com.ldbc.driver.OperationHandler;
 import com.ldbc.driver.ResultReporter;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery12;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery12Result;
-import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery13Result;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Result;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
@@ -29,12 +28,19 @@ public class LdbcComplexQuery12Handler implements OperationHandler<LdbcQuery12, 
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery12.personId()));
+        params.put("person_label", Entity.PERSON.getName());
         params.put("tagclass", ldbcQuery12.tagClassName());
         params.put("result_limit", ldbcQuery12.limit());
 
+        String statement = "g.V().has(person_label, 'iid', person_id)" +
+                ".out('knows').limit(result_limit).as('friends')" +
+                ".in('hasCreator').where(out('replyOf').hasLabel('post').out('hasTag').repeat(out('hasType')).until(has('name', tagclass))).as('messages')" +
+                ".out('hasTag').values('name').as('tags')" +
+                ".select('friends', 'messages', 'tags')";
+
         List<Result> results = null;
         try {
-            results = client.submit("g.V().has('iid', person_id).out('knows').limit(result_limit).as('friends').in('hasCreator').where(out('replyOf').hasLabel('post').out('hasTag').repeat(out('hasType')).until(has('name', tagclass))).as('messages').out('hasTag').values('name').as('tags').select('friends', 'messages', 'tags')", params).all().get();
+            results = client.submit(statement, params).all().get();
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
         }

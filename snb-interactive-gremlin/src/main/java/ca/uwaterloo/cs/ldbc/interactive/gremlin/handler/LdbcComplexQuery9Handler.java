@@ -7,12 +7,10 @@ import com.ldbc.driver.DbConnectionState;
 import com.ldbc.driver.DbException;
 import com.ldbc.driver.OperationHandler;
 import com.ldbc.driver.ResultReporter;
-import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery11Result;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery9;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery9Result;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Result;
-import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 import java.util.ArrayList;
@@ -30,13 +28,19 @@ public class LdbcComplexQuery9Handler implements OperationHandler<LdbcQuery9, Db
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery9.personId()));
+        params.put("person_label", Entity.PERSON.getName());
         params.put("max_date", Long.toString(ldbcQuery9.maxDate().getTime()));
         params.put("result_limit", ldbcQuery9.limit());
 
+        String statement = "g.V().has(person_label, 'iid', person_id)" +
+                ".repeat(out('knows').simplePath()).until(loops().is(gt(1))).as('person')" +
+                ".in('hasCreator').has('creationDate', lt(max_date)).limit(result_limit).as('message')" +
+                ".order().by('creationDate', decr).by('iid', incr)" +
+                ".select('person', 'message')";
 
         List<Result> results = null;
         try {
-            results = client.submit("g.V().has('iid', person_id).repeat(out('knows').simplePath()).until(loops().is(gt(1))).as('person').in('hasCreator').has('creationDate', lt(max_date)).limit(result_limit).as('message').order().by('creationDate', decr).by('iid', incr).select('person', 'message')", params).all().get();
+            results = client.submit(statement, params).all().get();
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
         }

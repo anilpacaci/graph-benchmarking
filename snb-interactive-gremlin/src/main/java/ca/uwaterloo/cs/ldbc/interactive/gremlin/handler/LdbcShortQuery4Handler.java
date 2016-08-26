@@ -26,21 +26,31 @@ public class LdbcShortQuery4Handler implements OperationHandler<LdbcShortQuery4M
     public void executeOperation(LdbcShortQuery4MessageContent ldbcShortQuery4MessageContent, DbConnectionState dbConnectionState, ResultReporter resultReporter) throws DbException {
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
-        params.put("message_id", GremlinUtils.makeIid(Entity.MESSAGE, ldbcShortQuery4MessageContent.messageId()));
+        params.put("label1", Entity.POST.getName());
+        params.put("label2", Entity.COMMENT.getName());
+        params.put("post_id", GremlinUtils.makeIid(Entity.POST, ldbcShortQuery4MessageContent.messageId()));
+        params.put("comment_id", GremlinUtils.makeIid(Entity.COMMENT, ldbcShortQuery4MessageContent.messageId()));
+
+        String statement = "g.V().hasLabel(label1, label2).has('iid', within(post_id, comment_id))";
 
         List<Result> results = null;
         try {
-            results = client.submit("g.V().has('iid', message_id)", params).all().get();
+            results = client.submit(statement, params).all().get();
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
         }
 
         Vertex message = results.get(0).getVertex();
 
+        String content = message.<String>property( "content" ).value();
+        if(content == null || content.isEmpty()) {
+            content = message.<String>property("imageFile").value();
+        }
+
         LdbcShortQuery4MessageContentResult result =
-                new LdbcShortQuery4MessageContentResult(
-                        message.<String>property("content").value(),
-                        Long.decode(message.<String>property("creationDate").value()));
+            new LdbcShortQuery4MessageContentResult(
+                content,
+                Long.decode( message.<String>property( "creationDate" ).value() ) );
 
         resultReporter.report(1, result, ldbcShortQuery4MessageContent);
     }

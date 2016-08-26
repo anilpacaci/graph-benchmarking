@@ -9,7 +9,6 @@ import com.ldbc.driver.OperationHandler;
 import com.ldbc.driver.ResultReporter;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery6;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery6Result;
-import com.sun.corba.se.spi.orb.Operation;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Result;
 
@@ -25,15 +24,18 @@ public class LdbcComplexQuery6Handler implements OperationHandler<LdbcQuery6, Db
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery6.personId()));
+        params.put("person_label", Entity.PERSON.getName());
         params.put("tag_name", ldbcQuery6.tagName());
         params.put("result_limit", ldbcQuery6.limit());
 
+        String statement = "g.V().has(person_label, 'iid', person_id).aggregate('start').repeat(out('knows').simplePath()).until(loops().is(gte(2)))" +
+                ".in('hasCreator').hasLabel('post').where(out('hasTag').has('name', tag_name))" +
+                ".out('hasTag').has('name', neq(tag_name)).groupCount('temp').by('name').cap('temp').next()" +
+                ".sort({-it.getValue()})[0..result_limit]";
+
         List<Result> results = null;
         try {
-            results = client.submit("g.V().has('iid', person_id).aggregate('start').repeat(out('knows').simplePath()).until(loops().is(gte(2)))." +
-                    ".in('hasCreator').hasLabel('post').where(out('hasTag').has('name', tag_name))." +
-                    "out('hasTag').has('name', neq(tag_name)).groupCount('temp').by('name').cap('temp').next()." +
-                    "sort({-it.getValue()})[0..resultLimit]", params).all().get();
+            results = client.submit(statement, params).all().get();
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
         }

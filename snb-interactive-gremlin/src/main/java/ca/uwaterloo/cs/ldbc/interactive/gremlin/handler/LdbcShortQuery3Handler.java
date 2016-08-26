@@ -31,10 +31,17 @@ public class LdbcShortQuery3Handler implements OperationHandler<LdbcShortQuery3P
         List<LdbcShortQuery3PersonFriendsResult> result = new ArrayList<>();
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcShortQuery3PersonFriends.personId()));
+        params.put("person_label", Entity.PERSON.getName());
+
+        String statement = "g.V().has(person_label, 'iid', person_id)" +
+                ".outE('knows').as('relation')" +
+                ".order().by('creationDate', decr).by(inV().values('iid'), incr)" +
+                ".inV().as('friend')" +
+                ".select('relation', 'friend')";
 
         List<Result> results = null;
         try {
-            results = client.submit("g.V().has('iid', person_id).outE('knows').as('relation').inV().as('friend').order().by('creationDate', decr).by('iid', incr).select('relation', 'friend')", params).all().get();
+            results = client.submit(statement, params).all().get();
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
         }

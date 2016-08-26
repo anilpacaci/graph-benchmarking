@@ -23,27 +23,23 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery3.personId()));
+        params.put("person_label", Entity.PERSON.getName());
         params.put("countryX", ldbcQuery3.countryXName());
         params.put("countryY", ldbcQuery3.countryYName());
         Date start = ldbcQuery3.startDate();
-        String end  = Long.toString(new DateTime(start ).plusDays(ldbcQuery3.durationDays()).toDate().getTime());
+        String end  = Long.toString(new DateTime(start).plusDays(ldbcQuery3.durationDays()).toDate().getTime());
         params.put("start_date", Long.toString(start.getTime()));
         params.put("end_date", end);
+        params.put("result_limit", ldbcQuery3.limit());
 
-        String statement = "g.V().has('iid', person_id)" +
+        String statement = "g.V().has(person_label, 'iid', person_id)" +
             ".repeat(out('knows')).times(2).emit().as('person')" +
-            ".where(has('place', neq(countryX)).and(has('place', neq(countryY))))" +
-            ".order().by('iid', incr)" +
+            ".where(out('isLocatedIn').out('isPartOf').has('name', neq(countryX)).and().out('isLocatedIn').out('isPartOf').has('name', neq(countryY)))" +
             ".in('hasCreator')" +
-            ".where(has('place', countryX)).or(has('place, countryY))))" +
+            ".where(out('isLocatedIn').has('name', countryX).or().out('isLocatedIn').has('name', countryY))" +
             ".has('creationDate', inside(start_date, end_date))" +
-            ".group().by('hasCreator')" +
-            ".by(fold().match(__.as('p').unfold().has('place', countryX).count(local).as('countx')," +
-            "                 __.as('p').unfold().has('place', countryY).count(local).as('county')," +
-            "                )" +
-            ".select('person', 'countx', 'county')" +
-            ".order().by('countx', decr))" +
-            ".limit(20)";
+            ".group().by(out('hasCreator'))" +
+            ".by(groupCount().by(out('isLocatedIn').values('name')))";
 
         List<Result> results;
         try {
@@ -52,15 +48,30 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
             throw new DbException("Remote execution failed", e);
         }
 
+        HashMap<Vertex, HashMap> resultMap = results.get(0).get(HashMap.class);
+
+
         List<LdbcQuery3Result> resultList = new ArrayList<>();
-        for (Result r : results) {
-            HashMap map = r.get(HashMap.class);
-            Vertex person = (Vertex) map.get("person");
-            int countx = (int) map.get("countx");
-            int county = (int) map.get("county");
+        for ( Map.Entry r : resultMap.entrySet()) {
+
+            Vertex person = (Vertex) r.getKey();
+            HashMap count = (HashMap) r.getValue();
+
+            Object countxObject = count.get(ldbcQuery3.countryXName());
+            Object countyObject = count.get(ldbcQuery3.countryYName());
+
+            long countx = 0;
+            long county = 0;
+
+            if(countxObject != null) {
+                countx = (long) countxObject;
+            }
+            if(countyObject != null) {
+                county = (long) countyObject;
+            }
 
             LdbcQuery3Result ldbcQuery3Result = new LdbcQuery3Result(
-                Long.valueOf(person.<String>property("iid").value()),
+                GremlinUtils.getSNBId(person),
                 person.<String>property("firstName").value(),
                 person.<String>property("lastName").value(),
                 countx,
@@ -70,6 +81,20 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
 
             resultList.add(ldbcQuery3Result);
         }
-        resultReporter.report(resultList.size(), resultList, ldbcQuery3);
+
+        Collections.sort(resultList, (o1, o2) -> {
+            long o1count = o1.xCount() + o1.yCount();
+            long o2count = o2.xCount() + o2.yCount();
+            if (o1count < o2count) return 1;
+            else if (o1count > o2count) return -1;
+            else return o1.personId() < o2.personId() ? -1 : 1;
+        });
+
+
+        if(resultList.size() > ldbcQuery3.limit()) {
+            resultReporter.report(ldbcQuery3.limit(), resultList.subList(0, ldbcQuery3.limit()), ldbcQuery3);
+        } else {
+            resultReporter.report(resultList.size(), resultList, ldbcQuery3);
+        }
     }
 }

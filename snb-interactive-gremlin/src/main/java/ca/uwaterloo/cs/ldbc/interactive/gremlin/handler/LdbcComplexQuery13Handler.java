@@ -27,23 +27,34 @@ public class LdbcComplexQuery13Handler implements OperationHandler<LdbcQuery13, 
         Map<String, Object> params = new HashMap<>();
         params.put("person1_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery13.person1Id()));
         params.put("person2_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery13.person2Id()));
+        params.put("person_label", Entity.PERSON.getName());
 
         if(ldbcQuery13.person1Id() == ldbcQuery13.person2Id()) {
             // same person, return 0
-            resultReporter.report(1, new LdbcQuery13Result(-1), ldbcQuery13);
+            resultReporter.report(1, new LdbcQuery13Result(0), ldbcQuery13);
             return;
         }
+
+        // In only goes to depth 10
+        String statement = "g.V().has(person_label, 'iid', person1_id)" +
+                ".repeat(out('knows').simplePath()).until(has(person_label, 'iid', person2_id).or().loops().is(4))" +
+                ".limit(1).path().count(local)";
 
         // TODO: is it possible to have no path between source & target. What is the length then?
         List<Result> results = null;
         try {
-            results = client.submit("g.V().has('iid', person1_id).repeat(out('knows').simplePath()).until(has('iid', person2_id)).limit(1).path().count(local)", params).all().get();
+            results = client.submit(statement, params).all().get();
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
         }
 
-        int pathLength = results.get(0).getInt();
+        if(results == null || results.isEmpty()) {
+            // no path exists between two
+            resultReporter.report(1, new LdbcQuery13Result(-1), ldbcQuery13);
+            return;
+        }
 
+        int pathLength = results.get(0).getInt();
         // path includes both source and target vertices
         resultReporter.report(1, new LdbcQuery13Result(pathLength - 1), ldbcQuery13);
     }
