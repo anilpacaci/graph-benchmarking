@@ -1,8 +1,7 @@
 package ca.uwaterloo.cs.ldbc.interactive.gremlin.handler;
 
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.Entity;
-import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinKafkaDbConnectionState;
-import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinStatement;
+import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinDbConnectionState;
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinUtils;
 import com.ldbc.driver.DbConnectionState;
 import com.ldbc.driver.DbException;
@@ -10,8 +9,6 @@ import com.ldbc.driver.OperationHandler;
 import com.ldbc.driver.ResultReporter;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcNoResult;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcUpdate7AddComment;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerRecord;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,8 +19,7 @@ public class LdbcUpdate7Handler implements OperationHandler<LdbcUpdate7AddCommen
     @Override
     public void executeOperation( LdbcUpdate7AddComment ldbcUpdate7AddComment, DbConnectionState dbConnectionState, ResultReporter resultReporter ) throws DbException
     {
-        KafkaProducer<String, GremlinStatement> producer = ((GremlinKafkaDbConnectionState) dbConnectionState).getKafkaProducer();
-        String topic = ((GremlinKafkaDbConnectionState) dbConnectionState).getKafkaTopic();
+        UpdateHandler updateHandler = ((GremlinDbConnectionState) dbConnectionState).getUpdateHandler();
         Map<String, Object> params = new HashMap<>();
         params.put("comment_label", Entity.COMMENT.getName());
         params.put("place_label", Entity.PLACE.getName());
@@ -63,7 +59,7 @@ public class LdbcUpdate7Handler implements OperationHandler<LdbcUpdate7AddCommen
 
         statement += "tag_ids.forEach{t ->  tag = g.V().has(tag_label, 'iid', t).next(); comment.addEdge('hasTag', tag); }";
 
-        producer.send(new ProducerRecord<String, GremlinStatement>(topic, new GremlinStatement(statement, params)));
+        updateHandler.submitQuery( statement, params );
 
         resultReporter.report( 0, LdbcNoResult.INSTANCE, ldbcUpdate7AddComment );
 
