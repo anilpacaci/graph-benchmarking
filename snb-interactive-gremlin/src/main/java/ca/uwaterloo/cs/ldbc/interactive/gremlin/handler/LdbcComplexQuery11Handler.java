@@ -9,7 +9,6 @@ import com.ldbc.driver.OperationHandler;
 import com.ldbc.driver.ResultReporter;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery11;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery11Result;
-import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery12Result;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Result;
 import org.apache.tinkerpop.gremlin.structure.Edge;
@@ -27,11 +26,12 @@ public class LdbcComplexQuery11Handler implements OperationHandler<LdbcQuery11, 
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery11.personId()));
+        params.put("person_label", Entity.PERSON.getName());
         params.put("country_name", ldbcQuery11.countryName());
         params.put("start_year", Integer.toString(ldbcQuery11.workFromYear()));
         params.put("result_limit", ldbcQuery11.limit());
 
-        String statement = "g.V().has('iid', person_id)" +
+        String statement = "g.V().has(person_label, 'iid', person_id)" +
                 ".repeat(out('knows').simplePath()).until(loops().is(gte(2))).dedup().as('friend')" +
                 ".outE('workAt').has('workFrom', lte(start_year)).as('startDate').inV().as('organization')" +
                 ".out('isLocatedIn').has('name', country_name)" +

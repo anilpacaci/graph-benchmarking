@@ -9,8 +9,6 @@ import com.ldbc.driver.OperationHandler;
 import com.ldbc.driver.ResultReporter;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery8;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery8Result;
-import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery9;
-import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery9Result;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Result;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
@@ -30,9 +28,10 @@ public class LdbcComplexQuery8Handler implements OperationHandler<LdbcQuery8, Db
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery8.personId()));
+        params.put("person_label", Entity.PERSON.getName());
         params.put("result_limit", ldbcQuery8.limit());
 
-        String statement = "g.V().has('iid', person_id)" +
+        String statement = "g.V().has(person_label, 'iid', person_id)" +
                 ".in('hasCreator').in('replyOf')" +
                 ".order().by('creationDate', decr).by('iid', incr).limit(result_limit).as('comment')" +
                 ".out('hasCreator').as('person')" +

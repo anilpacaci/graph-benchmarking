@@ -40,13 +40,14 @@ public class LdbcComplexQuery4Handler implements OperationHandler<LdbcQuery4, Db
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery4.personId()));
+        params.put("person_label", Entity.PERSON.getName());
         Date start = ldbcQuery4.startDate();
         Date end = new DateTime( start ).plusDays( ldbcQuery4.durationDays() ).toDate();
         params.put("start_date", String.valueOf(start.getTime()));
         params.put("end_date", String.valueOf(end.getTime()));
         params.put("result_limit", ldbcQuery4.limit());
 
-        String statement = "g.V().has('iid', person_id).out('knows')" +
+        String statement = "g.V().has(person_label, 'iid', person_id).out('knows')" +
             ".in('hasCreator').as('friend_posts')" +
             ".has('creationDate',lt(start_date))" +
             ".out('hasTag').as('before_tags')" +

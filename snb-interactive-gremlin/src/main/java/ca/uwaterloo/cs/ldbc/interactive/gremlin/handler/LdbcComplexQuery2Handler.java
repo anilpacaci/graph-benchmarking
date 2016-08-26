@@ -26,10 +26,11 @@ public class LdbcComplexQuery2Handler implements OperationHandler<LdbcQuery2, Db
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery2.personId()));
+        params.put("person_label", Entity.PERSON.getName());
         params.put("max_date", Long.toString(ldbcQuery2.maxDate().getTime()));
         params.put("result_limit", ldbcQuery2.limit());
 
-        String statement = "g.V().has('iid', person_id)" +
+        String statement = "g.V().has(person_label, 'iid', person_id)" +
             ".out('knows').as('person')" +
             ".in('hasCreator').as('message')" +
             ".has('creationDate', lte(max_date))" +

@@ -12,9 +12,7 @@ import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery3Result;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Result;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 import org.joda.time.DateTime;
-import org.neo4j.cypher.internal.compiler.v1_9.commands.Has;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -25,6 +23,7 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery3.personId()));
+        params.put("person_label", Entity.PERSON.getName());
         params.put("countryX", ldbcQuery3.countryXName());
         params.put("countryY", ldbcQuery3.countryYName());
         Date start = ldbcQuery3.startDate();
@@ -33,7 +32,7 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
         params.put("end_date", end);
         params.put("result_limit", ldbcQuery3.limit());
 
-        String statement = "g.V().has('iid', person_id)" +
+        String statement = "g.V().has(person_label, 'iid', person_id)" +
             ".repeat(out('knows')).times(2).emit().as('person')" +
             ".where(out('isLocatedIn').out('isPartOf').has('name', neq(countryX)).and().out('isLocatedIn').out('isPartOf').has('name', neq(countryY)))" +
             ".in('hasCreator')" +

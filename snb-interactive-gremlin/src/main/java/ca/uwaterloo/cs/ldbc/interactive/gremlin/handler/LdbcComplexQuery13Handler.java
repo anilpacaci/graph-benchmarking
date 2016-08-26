@@ -27,6 +27,7 @@ public class LdbcComplexQuery13Handler implements OperationHandler<LdbcQuery13, 
         Map<String, Object> params = new HashMap<>();
         params.put("person1_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery13.person1Id()));
         params.put("person2_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery13.person2Id()));
+        params.put("person_label", Entity.PERSON.getName());
 
         if(ldbcQuery13.person1Id() == ldbcQuery13.person2Id()) {
             // same person, return 0
@@ -35,8 +36,8 @@ public class LdbcComplexQuery13Handler implements OperationHandler<LdbcQuery13, 
         }
 
         // In only goes to depth 10
-        String statement = "g.V().has('iid', person1_id)" +
-                ".repeat(out('knows').simplePath()).until(has('iid', person2_id).or().loops().is(4))" +
+        String statement = "g.V().has(person_label, 'iid', person1_id)" +
+                ".repeat(out('knows').simplePath()).until(has(person_label, 'iid', person2_id).or().loops().is(4))" +
                 ".limit(1).path().count(local)";
 
         // TODO: is it possible to have no path between source & target. What is the length then?
