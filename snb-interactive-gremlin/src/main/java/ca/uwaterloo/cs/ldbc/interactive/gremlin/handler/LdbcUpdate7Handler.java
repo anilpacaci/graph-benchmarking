@@ -46,7 +46,7 @@ public class LdbcUpdate7Handler implements OperationHandler<LdbcUpdate7AddCommen
             "comment.addEdge('isLocatedIn', country);" +
             "comment.addEdge('hasCreator', creator);";
         if (ldbcUpdate7AddComment.replyToCommentId() != -1) {
-            statement += "\nreplied_comment = g.V().has(vlabel, 'iid', reply_to_c_id).next();" +
+            statement += "\nreplied_comment = g.V().has(comment_label, 'iid', reply_to_c_id).next();" +
                 "comment.addEdge('replyOf', replied_comment);";
         }
         if (ldbcUpdate7AddComment.replyToPostId() != -1) {
