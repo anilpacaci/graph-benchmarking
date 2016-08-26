@@ -26,9 +26,12 @@ public class LdbcUpdate5Handler implements OperationHandler<LdbcUpdate5AddForumM
         params.put("forum_id", GremlinUtils.makeIid(Entity.FORUM, ldbcUpdate5AddForumMembership.forumId()));
         params.put("join_date", String.valueOf(ldbcUpdate5AddForumMembership.joinDate().getTime()));
 
+        params.put("person_label", Entity.PERSON.getName());
+        params.put("forum_label", Entity.FORUM.getName());
+
         try {
-            client.submit("person = g.V().has('iid', person_id).next();" +
-                          "forum = g.V().has('iid', forum_id).next();" +
+            client.submit("person = g.V().has(person_label, 'iid', person_id).next();" +
+                          "forum = g.V().has(forum_label, 'iid', forum_id).next();" +
                           "edge = forum.addEdge('hasMember', person);" +
                           "edge.property('joinDate', join_date);", params).all().get();
         } catch (InterruptedException | ExecutionException e) {
