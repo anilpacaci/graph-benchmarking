@@ -27,6 +27,7 @@ public class GremlinDb extends Db{
 
         // Complex Queries
         // TODO 1, 10 and 14 are dummy implementation.
+        registerOperationHandler(LdbcQuery1.class, LdbcComplexQuery1Handler.class);
         registerOperationHandler(LdbcQuery2.class, LdbcComplexQuery2Handler.class);
         registerOperationHandler(LdbcQuery3.class, LdbcComplexQuery3Handler.class);
         registerOperationHandler(LdbcQuery4.class, LdbcComplexQuery4Handler.class);
