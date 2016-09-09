@@ -32,8 +32,8 @@ public class LdbcShortQuery7Handler implements OperationHandler<LdbcShortQuery7M
         params.put("post_id", GremlinUtils.makeIid(Entity.POST, ldbcShortQuery7MessageReplies.messageId()));
         params.put("comment_id", GremlinUtils.makeIid(Entity.COMMENT, ldbcShortQuery7MessageReplies.messageId()));
 
-        String statement = "g.V().hasLabel(label1, label2).has('iid', within(post_id, comment_id))" +
-                           ".out('hasCreator').out('knows')";
+        String statement = " t = g.V().has(label1, 'iid', post_id); if(!t.clone().hasNext()) t = g.V().has(label2, 'iid', comment_id);" +
+                           "t.out('hasCreator').out('knows')";
 
         List<Result> authorKnowsResults = null;
         try {
@@ -46,8 +46,8 @@ public class LdbcShortQuery7Handler implements OperationHandler<LdbcShortQuery7M
         List<Vertex> authorKnows = new ArrayList<>();
         authorKnowsResults.forEach(res -> { authorKnows.add(res.getVertex());});
 
-        statement = "g.V().hasLabel(label1, label2).has('iid', within(post_id, comment_id))" +
-                ".in('replyOf').as('reply').order().by('creationDate', decr).by(out('hasCreator').values('iid'), incr)" +
+        statement = "t = g.V().has(label1, 'iid', post_id); if(!t.clone().hasNext()) t = g.V().has(label2, 'iid', comment_id);" +
+                "t.in('replyOf').as('reply').order().by('creationDate', decr).by(out('hasCreator').values('iid'), incr)" +
                 ".out('hasCreator').as('creator')" +
                 ".select('reply', 'creator')";
 

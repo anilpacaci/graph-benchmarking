@@ -21,20 +21,20 @@ import java.util.concurrent.ExecutionException;
 public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, DbConnectionState> {
     @Override
     public void executeOperation(LdbcQuery5 ldbcQuery5, DbConnectionState dbConnectionState, ResultReporter resultReporter) throws DbException {
- //     • Description: Given a start Person,
- //     find the Forums which that Person’s friends and friends of friends (excluding start Person)
- //     became Members of after a given date.
- //     For each forum find the number of Posts that were created by any of these Persons.
- //     For each Forum and consider only those Persons which joined that particular Forum after the given date.
- //     • Parameters: Person.id ID
- //     date Date
- //     • Results:
- //     Forum.title String
- //     count 32-bit Integer // number of Posts made in Forum that were created by friends
- //     • Sort:
- //     1st count (descending)
- //         2nd Forum.id (ascending)
- //     • Limit: 20
+        //     * Description: Given a start Person,
+        //     find the Forums which that Person's friends and friends of friends (excluding start Person)
+        //     became Members of after a given date.
+        //     For each forum find the number of Posts that were created by any of these Persons.
+        //     For each Forum and consider only those Persons which joined that particular Forum after the given date.
+        //     * Parameters: Person.id ID
+        //     date Date
+        //     * Results:
+        //     Forum.title String
+        //     count 32-bit Integer // number of Posts made in Forum that were created by friends
+        //     * Sort:
+        //     1st count (descending)
+        //         2nd Forum.id (ascending)
+        //     * Limit: 20
 
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();

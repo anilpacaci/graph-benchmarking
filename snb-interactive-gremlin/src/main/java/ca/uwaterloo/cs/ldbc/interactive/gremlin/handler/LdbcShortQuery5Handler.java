@@ -31,7 +31,7 @@ public class LdbcShortQuery5Handler implements OperationHandler<LdbcShortQuery5M
         params.put("post_id", GremlinUtils.makeIid(Entity.POST, ldbcShortQuery5MessageCreator.messageId()));
         params.put("comment_id", GremlinUtils.makeIid(Entity.COMMENT, ldbcShortQuery5MessageCreator.messageId()));
 
-        String statement = "g.V().hasLabel(label1, label2).has('iid', within(post_id, comment_id)).outE('hasCreator').inV()";
+        String statement = "  t = g.V().has(label1, 'iid', post_id); if(!t.clone().hasNext()) t = g.V().has(label2, 'iid', comment_id); t.out('hasCreator')";
 
         List<Result> results = null;
         try {

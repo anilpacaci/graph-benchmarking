@@ -19,23 +19,23 @@ import java.util.concurrent.ExecutionException;
 public class LdbcComplexQuery4Handler implements OperationHandler<LdbcQuery4, DbConnectionState> {
     @Override
     public void executeOperation(LdbcQuery4 ldbcQuery4, DbConnectionState dbConnectionState, ResultReporter resultReporter) throws DbException {
-       // Description: Given a start Person, find Tags that are attached to Posts that were created by that Person’s friends.
-       // Only include Tags that were attached to friends’ Posts created within a given time interval, and that were never
-       // attached to friends’ Posts created before this interval.
-       // • Parameters:
-       // Person.id ID
-       // startDate Date
-       // duration 32-bit Integer
-       // • Results:
-       // Tag.name String
-       // count 32-bit Integer
-       // • Sort:
-       // 1st count (descending)
-       // 2nd Tag.name (ascending)
-       // • Limit: 10
-       // duration of requested period, in days
-       // the interval [startDate, startDate + Duration) is closed-open
-       // number of Posts made within the given time interval that have this Tag
+        // Description: Given a start Person, find Tags that are attached to Posts that were created by that Person's friends.
+        // Only include Tags that were attached to friends' Posts created within a given time interval, and that were never
+        // attached to friends' Posts created before this interval.
+        // * Parameters:
+        // Person.id ID
+        // startDate Date
+        // duration 32-bit Integer
+        // * Results:
+        // Tag.name String
+        // count 32-bit Integer
+        // * Sort:
+        // 1st count (descending)
+        // 2nd Tag.name (ascending)
+        // * Limit: 10
+        // duration of requested period, in days
+        // the interval [startDate, startDate + Duration) is closed-open
+        // number of Posts made within the given time interval that have this Tag
 
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
