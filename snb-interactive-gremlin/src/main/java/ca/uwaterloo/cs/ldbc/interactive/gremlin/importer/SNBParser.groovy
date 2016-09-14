@@ -16,12 +16,15 @@
  */
 
 
+import org.apache.commons.io.FileUtils
+import org.apache.commons.io.LineIterator
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
 import org.apache.tinkerpop.gremlin.structure.Graph
 import org.apache.tinkerpop.gremlin.structure.T
 import org.apache.tinkerpop.gremlin.structure.Vertex
 import org.apache.tinkerpop.gremlin.structure.VertexProperty
 
+import javax.sound.sampled.Line
 import java.nio.file.Files
 import java.nio.file.NoSuchFileException
 import java.nio.file.Path
@@ -52,8 +55,10 @@ class SNBParser {
         String[] fileNameParts = filePath.getFileName().toString().split("_");
         String entityName = fileNameParts[0];
 
-        List<String> lines = Files.readAllLines(filePath);
-        colNames = lines.get(0).split("\\|");
+        LineIterator it = FileUtils.lineIterator(filePath.toFile())
+        // because very large files cannot be read into memory
+        //List<String> lines = Files.readAllLines(filePath);
+        colNames = it.nextLine().split("\\|");
         long lineCount = 0;
         boolean txSucceeded;
         long txFailCount;
@@ -63,12 +68,16 @@ class SNBParser {
         long nextProgReportTime = startTime + progReportPeriod * 1000;
         long lastLineCount = 0;
 
-        for (int startIndex = 1; startIndex < lines.size(); startIndex += batchSize) {
-            int endIndex = Math.min(startIndex + batchSize, lines.size());
+        for (int startIndex = 1; it.hasNext(); startIndex += batchSize) {
+            List<String> lines = new ArrayList<>(batchSize)
+            for(int i = 0 ; i < batchSize && it.hasNext() ; i++) {
+                lines.add(i, it.nextLine())
+            }
+            int endIndex = Math.min(batchSize, lines.size());
             txSucceeded = false;
             txFailCount = 0;
             while (!txSucceeded) {
-                for (int i = startIndex; i < endIndex; i++) {
+                for (int i = 0; i < endIndex; i++) {
                     String line = lines.get(i);
 
                     String[] colVals = line.split("\\|");
@@ -126,6 +135,8 @@ class SNBParser {
                 lastLineCount = lineCount;
             }
         }
+        LineIterator.closeQuietly(it)
+
     }
 
     static void loadProperties(Graph graph, Path filePath, boolean printLoadingDots, int batchSize, long progReportPeriod) throws IOException {
@@ -133,8 +144,10 @@ class SNBParser {
         String[] fileNameParts = filePath.getFileName().toString().split("_");
         String entityName = fileNameParts[0];
 
-        List<String> lines = Files.readAllLines(filePath);
-        colNames = lines.get(0).split("\\|");
+        LineIterator it = FileUtils.lineIterator(filePath.toFile())
+        // because very large files cannot be read into memory
+        //List<String> lines = Files.readAllLines(filePath);
+        colNames = it.nextLine().split("\\|");
         long lineCount = 0;
         boolean txSucceeded;
         long txFailCount;
@@ -144,12 +157,16 @@ class SNBParser {
         long nextProgReportTime = startTime + progReportPeriod * 1000;
         long lastLineCount = 0;
 
-        for (int startIndex = 1; startIndex < lines.size(); startIndex += batchSize) {
-            int endIndex = Math.min(startIndex + batchSize, lines.size());
+        for (int startIndex = 1; it.hasNext(); startIndex += batchSize) {
+            List<String> lines = new ArrayList<>(batchSize)
+            for(int i = 0 ; i < batchSize && it.hasNext() ; i++) {
+                lines.add(i, it.nextLine())
+            }
+            int endIndex = Math.min(batchSize, lines.size());
             txSucceeded = false;
             txFailCount = 0;
             while (!txSucceeded) {
-                for (int i = startIndex; i < endIndex; i++) {
+                for (int i = 0; i < endIndex; i++) {
                     String line = lines.get(i);
 
                     String[] colVals = line.split("\\|");
@@ -191,6 +208,8 @@ class SNBParser {
                 lastLineCount = lineCount;
             }
         }
+        LineIterator.closeQuietly(it)
+
     }
 
     static void loadEdges(Graph graph, Path filePath, boolean undirected, boolean printLoadingDots, int batchSize, long progReportPeriod) throws IOException, ParseException {
@@ -207,8 +226,10 @@ class SNBParser {
         String edgeLabel = fileNameParts[1];
         String v2EntityName = fileNameParts[2];
 
-        List<String> lines = Files.readAllLines(filePath);
-        colNames = lines.get(0).split("\\|");
+        LineIterator it = FileUtils.lineIterator(filePath.toFile())
+        // because very large files cannot be read into memory
+        //List<String> lines = Files.readAllLines(filePath);
+        colNames = it.nextLine().split("\\|");
         long lineCount = 0;
         boolean txSucceeded;
         long txFailCount;
@@ -218,12 +239,16 @@ class SNBParser {
         long nextProgReportTime = startTime + progReportPeriod * 1000;
         long lastLineCount = 0;
 
-        for (int startIndex = 1; startIndex < lines.size(); startIndex += batchSize) {
-            int endIndex = Math.min(startIndex + batchSize, lines.size());
+        for (int startIndex = 1; it.hasNext(); startIndex += batchSize) {
+            List<String> lines = new ArrayList<>(batchSize)
+            for(int i = 0 ; i < batchSize && it.hasNext() ; i++) {
+                lines.add(i, it.nextLine())
+            }
+            int endIndex = Math.min(batchSize, lines.size());
             txSucceeded = false;
             txFailCount = 0;
             while (!txSucceeded) {
-                for (int i = startIndex; i < endIndex; i++) {
+                for (int i = 0; i < endIndex; i++) {
                     String line = lines.get(i);
 
                     String[] colVals = line.split("\\|");
@@ -287,6 +312,7 @@ class SNBParser {
                 lastLineCount = lineCount;
             }
         }
+        LineIterator.closeQuietly(it)
     }
 
     public static void loadSNBGraph(Graph graph, String inputBaseDir, int batchSize, long progReportPeriod) throws IOException {

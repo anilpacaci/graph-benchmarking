@@ -167,5 +167,4 @@ Graph initializeTitan(String propertiesFile) {
     }
 
     return titanGraph
-
 }
