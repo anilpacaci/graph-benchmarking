@@ -48,7 +48,7 @@ public class LdbcUpdate1Handler implements OperationHandler<LdbcUpdate1AddPerson
             ".property('browserUsed', browser_used).next();" +
             "city = g.V().has(place_label, 'iid', located_in).next();" +
             "person.addEdge('isLocatedIn', city);" +
-            "languages.forEach{l ->  person.property('speaks', l); };" +
+            "languages.forEach{l ->  person.property('language', l); };" +
             "emails.forEach{l ->  person.property('email', l); };" +
             "tag_ids.forEach{t ->  tag = g.V().has(tag_label, 'iid', t).next(); person.addEdge('hasInterest', tag); }";
 
