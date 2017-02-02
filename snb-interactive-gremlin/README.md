@@ -4,7 +4,7 @@ This repository contains [Linked Data Benchmark Council](http://www.ldbcouncil.o
 All SNB Interactive queries are implemented as Gremlin Traversal's and can be submitted to any TP3 Blueprint
 compliant graph database behind a Gremlin Server. See [LDBC Driver](https://github.com/ldbc/ldbc_driver) for configuration and execution of the SNB Interactive Workload.
 
-Scripts directory includes various Gremlin scripts to import LDBC SNB datasets into TP3 Blueprint graph databases (Neo4j, TitanDB, Sqlg).
+`Scripts` directory includes various Gremlin scripts to import LDBC SNB datasets into TP3 Blueprint graph databases (Neo4j, TitanDB, Sqlg).
 Following can be used to import into TitanDB from Gremlin Console;
 
 ```shell
