@@ -16,6 +16,9 @@
  */
 
 
+import com.thinkaurelius.titan.graphdb.idmanagement.IDManager
+import org.apache.commons.configuration.Configuration
+import org.apache.commons.configuration.PropertiesConfiguration
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.LineIterator
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
@@ -32,6 +35,8 @@ import java.nio.file.Paths
 import java.text.ParseException
 import java.text.SimpleDateFormat
 
+import com.whalin.MemCached.MemCachedClient;
+import com.whalin.MemCached.SockIOPool;
 
 /**
  * This is a Groovy Script to run inside gremlin console, for loading LDBC SNB data into Tinkerpop Competible Graph.
@@ -42,6 +47,10 @@ import java.text.SimpleDateFormat
 class SNBParser {
 
     static TX_MAX_RETRIES = 1000
+
+    static isIdMappingEnabled = false
+
+    static IDMapping idMappingServer = null
 
     static void loadVertices(Graph graph, Path filePath, boolean printLoadingDots, int batchSize, long progReportPeriod) throws IOException, ParseException {
 
@@ -83,9 +92,11 @@ class SNBParser {
                     String[] colVals = line.split("\\|");
                     propertiesMap = new HashMap<>();
 
+                    String identifier;
                     for (int j = 0; j < colVals.length; ++j) {
                         if (colNames[j].equals("id")) {
-                            propertiesMap.put("iid", entityName + ":" + colVals[j]);
+                            identifier = entityName + ":" + colVals[j]
+                            propertiesMap.put("iid", identifier);
                         } else if (colNames[j].equals("birthday")) {
                             propertiesMap.put(colNames[j], String.valueOf(
                                     birthdayDateFormat.parse(colVals[j]).getTime()));
@@ -105,7 +116,13 @@ class SNBParser {
                         keyValues.add(val);
                     }
 
-                    graph.addVertex(keyValues.toArray());
+                    Vertex vertex = graph.addVertex(keyValues.toArray());
+
+                    //populate IDMapping if enabled
+                    if(isIdMappingEnabled) {
+                        Long id = (Long) vertex.id()
+                        idMappingServer.setId(identifier, id)
+                    }
 
                     lineCount++;
                 }
@@ -172,8 +189,14 @@ class SNBParser {
                     String[] colVals = line.split("\\|");
 
                     GraphTraversalSource g = graph.traversal();
-                    Vertex vertex =
-                            g.V().has(entityName, "iid", entityName + ":" + colVals[0]).next();
+
+                    Vertex vertex = null;
+                    if(isIdMappingEnabled) {
+                        Long id = idMappingServer.getId(entityName + ":" + colVals[0]);
+                        vertex = g.V(id).next()
+                    } else {
+                        vertex = g.V().has(entityName, "iid", entityName + ":" + colVals[0]).next();
+                    }
 
                     for (int j = 1; j < colVals.length; ++j) {
                         vertex.property(VertexProperty.Cardinality.list, colNames[j],
@@ -254,10 +277,19 @@ class SNBParser {
                     String[] colVals = line.split("\\|");
 
                     GraphTraversalSource g = graph.traversal();
-                    Vertex vertex1 =
-                            g.V().has(v1EntityName, "iid", v1EntityName + ":" + colVals[0]).next();
-                    Vertex vertex2 =
-                            g.V().has(v2EntityName, "iid", v2EntityName + ":" + colVals[1]).next();
+                    Vertex vertex1, vertex2;
+
+                    if(isIdMappingEnabled) {
+                        Long id1 = idMappingServer.getId(v1EntityName + ":" + colVals[0])
+                        Long id2 = idMappingServer.getId(v2EntityName + ":" + colVals[1])
+                        vertex1 = g.V(id1).next()
+                        vertex2 = g.V(id2).next()
+                    } else {
+                        vertex1 =
+                                g.V().has(v1EntityName, "iid", v1EntityName + ":" + colVals[0]).next();
+                        vertex2 =
+                                g.V().has(v2EntityName, "iid", v2EntityName + ":" + colVals[1]).next();
+                    }
 
                     propertiesMap = new HashMap<>();
                     for (int j = 2; j < colVals.length; ++j) {
@@ -315,42 +347,20 @@ class SNBParser {
         LineIterator.closeQuietly(it)
     }
 
-    public static void loadSNBGraph(Graph graph, String inputBaseDir, int batchSize, long progReportPeriod) throws IOException {
+    public static void loadSNBGraph(Graph graph, String inputBaseDir, String configurationFile, int batchSize, long progReportPeriod) throws IOException {
 
-        // TODO: Make file list generation programmatic. This method of loading,
-        // however, will be far too slow for anything other than the very
-        // smallest of SNB graphs, and is therefore quite transient. This will
-        // do for now.
-        List<String> nodeFiles = ["person_0_0.csv", "comment_0_0.csv", "forum_0_0.csv", "organisation_0_0.csv", "place_0_0.csv", "post_0_0.csv", "tag_0_0.csv", "tagclass_0_0.csv"]
+        Configuration configuration = new PropertiesConfiguration(configurationFile);
 
-        List<String> propertiesFiles = [
-                "person_email_emailaddress_0_0.csv",
-                "person_speaks_language_0_0.csv"]
+        String[] nodeFiles = configuration.getStringArray("nodes")
+        String[] propertiesFiles = configuration.getStringArray("properties")
+        String[] edgeFiles = configuration.getStringArray("edges")
 
-        List<String> edgeFiles = [
-                "comment_hasCreator_person_0_0.csv",
-                "comment_hasTag_tag_0_0.csv",
-                "comment_isLocatedIn_place_0_0.csv",
-                "comment_replyOf_comment_0_0.csv",
-                "comment_replyOf_post_0_0.csv",
-                "forum_containerOf_post_0_0.csv",
-                "forum_hasMember_person_0_0.csv",
-                "forum_hasModerator_person_0_0.csv",
-                "forum_hasTag_tag_0_0.csv",
-                "organisation_isLocatedIn_place_0_0.csv",
-                "person_hasInterest_tag_0_0.csv",
-                "person_isLocatedIn_place_0_0.csv",
-                "person_knows_person_0_0.csv",
-                "person_likes_comment_0_0.csv",
-                "person_likes_post_0_0.csv",
-                "person_studyAt_organisation_0_0.csv",
-                "person_workAt_organisation_0_0.csv",
-                "place_isPartOf_place_0_0.csv",
-                "post_hasCreator_person_0_0.csv",
-                "post_hasTag_tag_0_0.csv",
-                "post_isLocatedIn_place_0_0.csv",
-                "tag_hasType_tagclass_0_0.csv",
-                "tagclass_isSubclassOf_tagclass_0_0.csv"]
+        isIdMappingEnabled = configuration.getBoolean("id.mapping")
+
+        if(isIdMappingEnabled) {
+            String[] servers = configuration.getStringArray("memcached.address")
+            idMappingServer = new IDMapping(servers)
+        }
 
         try {
             for (String fileName : nodeFiles) {
@@ -396,6 +406,42 @@ class SNBParser {
             e.printStackTrace();
         } finally {
             graph.close();
+        }
+    }
+
+
+    static class IDMapping {
+
+        private static String INSTANCE_NAME = "id-mapping";
+
+        private MemCachedClient client;
+
+        public IDMapping(String... servers) {
+            SockIOPool pool = SockIOPool.getInstance(INSTANCE_NAME);
+            pool.setServers(servers);
+            pool.setFailover(true);
+            pool.setInitConn(10);
+            pool.setMinConn(5);
+            pool.setMaxConn(250);
+            pool.setMaintSleep(30);
+            pool.setNagle(false);
+            pool.setSocketTO(3000);
+            pool.setAliveCheck(true);
+            pool.initialize();
+
+            client = new MemCachedClient(INSTANCE_NAME);
+            client.flushAll();
+        }
+
+        public Long getId(String identifier) {
+            Object value = client.get(identifier);
+            if (value == null)
+                return null;
+            return (Long) value;
+        }
+
+        public void setId(String identifier, Long id) {
+            client.set(identifier, id)
         }
     }
 

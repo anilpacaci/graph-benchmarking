@@ -259,6 +259,8 @@ class SqlgSNBImporter {
         long nextProgReportTime = startTime + progReportPeriod * 1000;
         long lastLineCount = 0;
 
+
+        graph.tx().streamingBatchModeOn();
         for (int startIndex = 1; it.hasNext(); startIndex += batchSize) {
             List<String> lines = new ArrayList<>(batchSize)
             for(int i = 0 ; i < batchSize && it.hasNext() ; i++) {
@@ -268,52 +270,55 @@ class SqlgSNBImporter {
             txSucceeded = false;
             txFailCount = 0;
             while (!txSucceeded) {
+                List<Pair<String, String>> identifiers = new ArrayList<>()
                 for (int i = 0; i < endIndex; i++) {
                     String line = lines.get(i);
 
                     String[] colVals = line.split("\\|");
 
-//                    List<Pair<String, String>> identifiers = new ArrayList<>()
-//                    identifiers.add(Pair.of(v1EntityName + ":" + colVals[0], v2EntityName + ":" + colVals[1]))
-//                    graph.bulkAddEdges(v1EntityName, v2EntityName, edgeLabel, Pair.of("iid", "iid"), identifiers )
 
-                    GraphTraversalSource g = graph.traversal();
-                    Vertex vertex1 =
-                            g.V().has(v1EntityName, "iid", v1EntityName + ":" + colVals[0]).next();
-                    Vertex vertex2 =
-                            g.V().has(v2EntityName, "iid", v2EntityName + ":" + colVals[1]).next();
+                    identifiers.add(Pair.of(v1EntityName + ":" + colVals[0], v2EntityName + ":" + colVals[1]))
 
-                    propertiesMap = new HashMap<>();
-                    for (int j = 2; j < colVals.length; ++j) {
-                        if (colNames[j].equals("creationDate")) {
-                            propertiesMap.put(colNames[j], String.valueOf(
-                                    creationDateDateFormat.parse(colVals[j]).getTime()));
-                        } else if (colNames[j].equals("joinDate")) {
-                            propertiesMap.put(colNames[j], String.valueOf(
-                                    joinDateDateFormat.parse(colVals[j]).getTime()));
-                        } else {
-                            propertiesMap.put(colNames[j], colVals[j]);
-                        }
-                    }
 
-                    List<Object> keyValues = new ArrayList<>();
-                    propertiesMap.forEach { key, val ->
-                        keyValues.add(key);
-                        keyValues.add(val);
-                    }
-
-                    vertex1.addEdge(edgeLabel, vertex2, keyValues.toArray());
-
-                    if (undirected) {
-                        vertex2.addEdge(edgeLabel, vertex1, keyValues.toArray());
-                    }
+//                    GraphTraversalSource g = graph.traversal();
+//                    Vertex vertex1 =
+//                            g.V().has(v1EntityName, "iid", v1EntityName + ":" + colVals[0]).next();
+//                    Vertex vertex2 =
+//                            g.V().has(v2EntityName, "iid", v2EntityName + ":" + colVals[1]).next();
+//
+//                    propertiesMap = new HashMap<>();
+//                    for (int j = 2; j < colVals.length; ++j) {
+//                        if (colNames[j].equals("creationDate")) {
+//                            propertiesMap.put(colNames[j], String.valueOf(
+//                                    creationDateDateFormat.parse(colVals[j]).getTime()));
+//                        } else if (colNames[j].equals("joinDate")) {
+//                            propertiesMap.put(colNames[j], String.valueOf(
+//                                    joinDateDateFormat.parse(colVals[j]).getTime()));
+//                        } else {
+//                            propertiesMap.put(colNames[j], colVals[j]);
+//                        }
+//                    }
+//
+//                    List<Object> keyValues = new ArrayList<>();
+//                    propertiesMap.forEach { key, val ->
+//                        keyValues.add(key);
+//                        keyValues.add(val);
+//                    }
+//
+//                    vertex1.addEdge(edgeLabel, vertex2, keyValues.toArray());
+//
+//                    if (undirected) {
+//                        vertex2.addEdge(edgeLabel, vertex1, keyValues.toArray());
+//                    }
 
                     lineCount++;
                 }
+                graph.bulkAddEdges(v1EntityName, v2EntityName, edgeLabel, Pair.of("iid", "iid"), identifiers )
 
                 try {
                     graph.tx().commit();
                     txSucceeded = true;
+                    graph.tx().streamingBatchModeOn();
                 } catch (Exception e) {
                     txFailCount++;
                 }
