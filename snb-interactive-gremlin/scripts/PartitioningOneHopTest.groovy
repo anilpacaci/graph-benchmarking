@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit
  */
 class PartitioningOneHopTest {
 
-    private static String[] CSV_HEADERS = {"VERTEX_ID"; "VERTEX_PARTITION"; "TOTAL_PARTITION"; "PARTITION_0"; "PARTITION_1"; "PARTITION_2"; "PARTITION_3"; "NEIGHBOURHOOD_RETRIEVAL_DURATION"; "TOTAL_DURATION" }
+    private static String[] CSV_HEADERS = ["IID", "VERTEX_PARTITION", "NEIGHBOUR_COUNT", "TOTAL_PARTITION", "PARTITION_0", "PARTITION_1", "PARTITION_2", "PARTITION_3", "NEIGHBOURHOOD_RETRIEVAL_DURATION", "TOTAL_DURATION" ]
 
     static void run(Graph graph, String parametersFile, String outputFile) {
 
@@ -56,10 +56,11 @@ class PartitioningOneHopTest {
             int totalPartitions = neighbourPartitionCounts.size()
 
             List<String> queryRecord = new ArrayList();
-            queryRecord.add(vertexId.toString())
+            queryRecord.add(iid)
             queryRecord.add(partitionId.toString())
+            queryRecord.add(neighbourhoodCount.toString())
             queryRecord.add(totalPartitions.toString())
-            for(int i = 0 ; i < 4 ; i++) {
+            for(Long i = 0 ; i < 4 ; i++) {
                 queryRecord.add(neighbourPartitionCounts.get(i).toString())
             }
             queryRecord.add(neighbourhoodRetrievalInMicroSeconds.toString())
@@ -72,10 +73,10 @@ class PartitioningOneHopTest {
             g.tx().rollback()
 
             if(totalPartitions == 1)
-            println(String.format("Vertex: %d \t Partition: %d \t Count: %d \t TotalDuration: %d \t Neighbourhood Duration: %d", vertexId, partitionId, neighbourhoodCount, totalQueryDurationInMicroSeconds, neighbourhoodRetrievalInMicroSeconds))
+            println(String.format("Vertex: %s \t Partition: %d \t Count: %d \t TotalDuration: %d \t Neighbourhood Duration: %d", iid, partitionId, neighbourhoodCount, totalQueryDurationInMicroSeconds, neighbourhoodRetrievalInMicroSeconds))
         }
 
-        fileWriter.close()
+        // close csvWriter
         csvPrinter.close()
     }
 
