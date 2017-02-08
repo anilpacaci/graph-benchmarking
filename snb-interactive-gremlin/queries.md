@@ -11,41 +11,62 @@ pattern match part
 
 ### Complex Query 10
 
-g.V().has('iid', 'person:{}').as('startPerson')
-   .out('hasInterest').aggregate('persontags')
-   .select('startPerson')
-   .repeat(out()).times(2).path().by('knows')
-   .has('birthDay',inside((year, month, 21),(year, month+1, 22))).as('fof')
-   .map(
-     in('hasCreator').hasLabel('post').where(out('hasTag')).match(
-        __.as('tag').where(within('persontags')).count().as('commonCount')
-        __.as('tag').where(without('persontags')).count().as('uncommonCount')
-        __.as('uncommonCount').map(union(identity(), constant(-1))).fold(1, mult)
-        __.as('commonCount').map(union(identity(), select('uncommonCount')).sum()).as('similarity')
-        )
-     )
-   ).select('fof', 'similarity').order().by('similarity').limit(10)
++"Calendar cal = Calendar.getInstance();                                                              "
++"Calendar lowercal = Calendar.getInstance();                                                         "
++"Calendar highercal = Calendar.getInstance();                                                        "
++"g.V().has('iid', 'person:{}').as('startPerson')                                                     "
++"   .out('hasInterest').aggregate('persontags')                                                      "
++"   .select('startPerson')                                                                           "
++"   .repeat(out()).times(2).path().by('knows')                                                       "
++"   .filter{ it => {                                                                                 "
++"       ts = it.get().value('birthDay')                                                              "
++"       cal.setTime(new java.util.Date((long)ts**1000));                                             "
++"       int day = cal.get(Calendar.DAY_OF_MONTH);                                                    "
++"       int month = cal.get(Calendar.MONTH);                                                         "
++"       int year = cal.get(Calendar.YEAR);                                                           "
++"                                                                                                    "
++"       if (day < 21) {                                                                              "
++"         lowercal.set(year, month-1, 21)                                                            "
++"         highercal.set(year, month, 22)                                                             "
++"       } else {                                                                                     "
++"         lowercal.set(year, month, 21)                                                              "
++"         highercal.set(year, month+1, 22)                                                           "
++"       }                                                                                            "
++"                                                                                                    "
++"       return lowercal.compareTo(cal) <= 0 && highercal.compareTo(cal) > 0;                         "
++"     }                                                                                              "
++"   }                                                                                                "
++"   .has('birthDay',inside((year, month, 21),(year, month+1, 22))).as('fof')                         "
++"   .map(                                                                                            "
++"     in('hasCreator').hasLabel('post').where(out('hasTag')).match(                                  "
++"        __.as('tag').where(within('persontags')).count().as('commonCount')                          "
++"        __.as('tag').where(without('persontags')).count().as('uncommonCount')                       "
++"        __.as('uncommonCount').map(union(identity(), constant(-1))).fold(1, mult)                   "
++"        __.as('commonCount').map(union(identity(), select('uncommonCount')).sum()).as('similarity') "
++"        )                                                                                           "
++"     )                                                                                              "
++"   ).select('fof', 'similarity').order().by('similarity').limit(10)                                 "
 
 ### Complex Query 14
 
-g.V().has('id', 'person:{person1}')
-  .repeat(out('knows').simplePath()).until(has('id', 'person:{person2}')).path()
-  .union(identity(), count(local)).as('path', 'length')
-  .match(
-     __.as('a').unfold().select('length').min().as('min'),
-     __.as('a').filter(eq('min', 'length')).as('shortpaths')
-  )
-  .select('path')
-  .map(
-    unfold().as('p1').out('knows').as('p2')
-      .match(
-        __.as('a').select('p1').in('hasCreator').out('replyOf').as('replies')
-        __.as('replies').where(hasLabel('post').and().in('hasCreator').eq('p2')).as('p1p')
-        __.as('a').select('p2').in('hasCreator').out('replyOf').where(hasLabel('post').and().in('hasCreator').eq('p1'))
-        __.as('a').select('p1').in('hasCreator').out('replyOf').where(hasLabel('comment').and().in('hasCreator').eq('p2c'))
-        __.as('a').select('p2').in('hasCreator').out('replyOf').where(hasLabel('comment').and().in('hasCreator').eq('p1c'))
-        __.as('p1p').union(identity(), 'p2').count(local).as('postweight')
-        __.as('p1c').union(identity(), 'p2c').count(local).union(identity(), constant(0.5)).mult().as('commentweight')
-        __.as('postweight').union(identity(), 'commentweight').sum().as('weight')
-      ).sum().as('totalweight')
-  ).select('path', 'totalweight').order().by('totalweight', decr)
++"g.V().has('id', 'person:{person1}')                                                                                                 "
++"  .repeat(out('knows').simplePath()).until(has('id', 'person:{person2}')).path()                                                    "
++"  .union(identity(), count(local)).as('path', 'length')                                                                             "
++"  .match(                                                                                                                           "
++"     __.as('a').unfold().select('length').min().as('min'),                                                                          "
++"     __.as('a').filter(eq('min', 'length')).as('shortpaths')                                                                        "
++"  )                                                                                                                                 "
++"  .select('path')                                                                                                                   "
++"  .map(                                                                                                                             "
++"    unfold().as('p1').out('knows').as('p2')                                                                                         "
++"      .match(                                                                                                                       "
++"        __.as('a').select('p1').in('hasCreator').out('replyOf').as('replies')                                                       "
++"        __.as('replies').where(hasLabel('post').and().in('hasCreator').eq('p2')).as('p1p')                                          "
++"        __.as('a').select('p2').in('hasCreator').out('replyOf').where(hasLabel('post').and().in('hasCreator').eq('p1'))             "
++"        __.as('a').select('p1').in('hasCreator').out('replyOf').where(hasLabel('comment').and().in('hasCreator').eq('p2c'))         "
++"        __.as('a').select('p2').in('hasCreator').out('replyOf').where(hasLabel('comment').and().in('hasCreator').eq('p1c'))         "
++"        __.as('p1p').union(identity(), 'p2').count(local).as('postweight')                                                          "
++"        __.as('p1c').union(identity(), 'p2c').count(local).union(identity(), constant(0.5)).mult().as('commentweight')              "
++"        __.as('postweight').union(identity(), 'commentweight').sum().as('weight')                                                   "
++"      ).sum().as('totalweight')                                                                                                     "
++"  ).select('path', 'totalweight').order().by('totalweight', decr)                                                                   "
