@@ -9,12 +9,10 @@ import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery10Result;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery8Result;
 import org.apache.tinkerpop.gremlin.driver.*;
 import org.apache.tinkerpop.gremlin.driver.Client;
+import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 public class LdbcComplexQuery10Handler implements OperationHandler<LdbcQuery10, DbConnectionState> {
@@ -29,45 +27,33 @@ public class LdbcComplexQuery10Handler implements OperationHandler<LdbcQuery10, 
     params.put( "month", ldbcQuery10.month() );
 
     String statement =
-      "Calendar cal = Calendar.getInstance();                                                              "
-        + "Calendar lowercal = Calendar.getInstance();                                                         "
-        + "Calendar highercal = Calendar.getInstance();                                                        "
-        + "g.V().has(person_label, 'iid', person_id).as('startPerson')                                                     "
-        + "   .out('hasInterest').aggregate('persontags')                                                      "
-        + "   .select('startPerson')                                                                           "
-        + "   .repeat(out()).times(2).path().by('knows')                                                       "
-        + "   .filter{ it => {                                                                                 "
-        + "       ts = it.get().value('birthDay')                                                              "
-        + "       cal.setTime(new java.util.Date((long)ts**1000));                                             "
-        + "       int day = cal.get(Calendar.DAY_OF_MONTH);                                                    "
-        + "       int month = cal.get(Calendar.MONTH);                                                         "
-        + "       int year = cal.get(Calendar.YEAR);                                                           "
-        + "                                                                                                    "
-        + "       if (day < 21) {                                                                              "
-        + "         lowercal.set(year, month-1, 21)                                                            "
-        + "         highercal.set(year, month, 22)                                                             "
-        + "       } else {                                                                                     "
-        + "         lowercal.set(year, month, 21)                                                              "
-        + "         highercal.set(year, month+1, 22)                                                           "
-        + "       }                                                                                            "
-        + "                                                                                                    "
-        + "       return lowercal.compareTo(cal) <= 0 && highercal.compareTo(cal) > 0;                         "
-        + "     }                                                                                              "
-        + "   }                                                                                                "
-        + "   .has('birthDay',inside((year, month, 21),(year, month+1, 22))).as('fof')                         "
-        + "   .map(                                                                                            "
-        + "     in('hasCreator').hasLabel('post').where(out('hasTag')).match(                                  "
-        + "        __.as('tag').where(within('persontags')).count().as('commonCount')                          "
-        + "        __.as('tag').where(without('persontags')).count().as('uncommonCount')                       "
-        + "        __.as('uncommonCount').map(union(identity(), constant(-1))).fold(1, mult)                   "
-        + "        __.as('commonCount').map(union(identity(), select('uncommonCount')).sum()).as('similarity') "
-        + "        )                                                                                           "
-        + "     )                                                                                              "
-        + "   ).select('fof', 'similarity').order().by('similarity').limit(result_limit)                                 ";
+            "g.V().has(person_label, 'iid', person_id).as('startPerson').                    "
+                    +"   out('hasInterest').aggregate('persontags').                                 "
+                    +"   select('startPerson').                                                      "
+                    +"   repeat(out('knows')).times(2).dedup().                                      "
+                    +"   filter{ it -> ts = it.get().value('birthday');                              "
+                    +"       Calendar cal = Calendar.getInstance();                                  "
+                    +"       Calendar lowercal = Calendar.getInstance();                             "
+                    +"       Calendar highercal = Calendar.getInstance();                            "
+                    +"       cal.setTime(new java.util.Date(Long.parseLong(ts)));                    "
+                    +"       int day = cal.get(Calendar.DAY_OF_MONTH);                               "
+                    +"       int month = cal.get(Calendar.MONTH);                                    "
+                    +"       int year = cal.get(Calendar.YEAR);                                      "
+                    +"       month = day < 21 ? month -1 : month;                                    "
+                    +"       lowercal.set(year, month, 21);                                          "
+                    +"       highercal.set(year, month+1, 22);                                       "
+                    +"       return lowercal.compareTo(cal) <= 0 && highercal.compareTo(cal) > 0;    "
+                    +"   }.as('fof').match(                                                                                                             "
+                    +"      __.as('p').in('hasCreator').hasLabel('post').out('hasTag').where(within('persontags')).count().fold(2, mult).as('common2'), "
+                    +"      __.as('p').in('hasCreator').hasLabel('post').out('hasTag').count().fold(-1, mult).as('totaln'),                             "
+                    +"        __.as('common2').map(union(identity(), select('totaln')).sum()).as('similarity')                                          "
+                    +"      ).select('p').out('isLocatedIn').as('city').select('p', 'city', 'similarity').sort{-it.get('similarity')}                                                                                               ";
 
     List<Result> results = null;
+
     try {
       results = client.submit( statement, params ).all().get();
+
     } catch (InterruptedException | ExecutionException e) {
       throw new DbException( "Remote execution failed", e );
     }
@@ -76,19 +62,21 @@ public class LdbcComplexQuery10Handler implements OperationHandler<LdbcQuery10, 
     List<LdbcQuery10Result> resultList = new ArrayList<>();
     for (Result r : results) {
       HashMap map = r.get( HashMap.class );
-      Vertex person = (Vertex) map.get( "person" );
-      int similarity = (int) map.get( "similarity" );
+      Vertex person = (Vertex) map.get( "p" );
+      Vertex city = (Vertex) map.get( "city" );
+      Long similarity = (Long) map.get( "similarity" );
 
       LdbcQuery10Result ldbcQuery10Result = new LdbcQuery10Result( GremlinUtils.getSNBId( person ),
         person.<String>property( "firstName" ).value(),
         person.<String>property( "lastName" ).value(),
-        similarity,
+        similarity.intValue(),
         person.<String>property( "gender" ).value(),
-        person.<String>property( "cityName" ).value()
+        city.<String>property( "name" ).value()
       );
 
       resultList.add( ldbcQuery10Result );
     }
-    resultReporter.report( resultList.size(), resultList, ldbcQuery10 );
+
+    resultReporter.report( resultList.size(), resultList.subList(0, ldbcQuery10.limit()), ldbcQuery10 );
   }
 }
