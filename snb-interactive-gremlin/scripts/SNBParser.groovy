@@ -98,11 +98,9 @@ class SNBParser {
                             identifier = entityName + ":" + colVals[j]
                             propertiesMap.put("iid", identifier);
                         } else if (colNames[j].equals("birthday")) {
-                            propertiesMap.put(colNames[j], String.valueOf(
-                                    birthdayDateFormat.parse(colVals[j]).getTime()));
+                            propertiesMap.put(colNames[j], birthdayDateFormat.parse(colVals[j]).getTime());
                         } else if (colNames[j].equals("creationDate")) {
-                            propertiesMap.put(colNames[j], String.valueOf(
-                                    creationDateDateFormat.parse(colVals[j]).getTime()));
+                            propertiesMap.put(colNames[j], creationDateDateFormat.parse(colVals[j]).getTime());
                         } else {
                             propertiesMap.put(colNames[j], colVals[j]);
                         }
@@ -294,11 +292,9 @@ class SNBParser {
                     propertiesMap = new HashMap<>();
                     for (int j = 2; j < colVals.length; ++j) {
                         if (colNames[j].equals("creationDate")) {
-                            propertiesMap.put(colNames[j], String.valueOf(
-                                    creationDateDateFormat.parse(colVals[j]).getTime()));
+                            propertiesMap.put(colNames[j], creationDateDateFormat.parse(colVals[j]).getTime());
                         } else if (colNames[j].equals("joinDate")) {
-                            propertiesMap.put(colNames[j], String.valueOf(
-                                    joinDateDateFormat.parse(colVals[j]).getTime()));
+                            propertiesMap.put(colNames[j], joinDateDateFormat.parse(colVals[j]).getTime());
                         } else {
                             propertiesMap.put(colNames[j], colVals[j]);
                         }
@@ -362,45 +358,45 @@ class SNBParser {
             idMappingServer = new IDMapping(servers)
         }
 
+        List<Thread> threads = new ArrayList<>()
+
         try {
             for (String fileName : nodeFiles) {
-                System.out.print("Loading node file " + fileName + " ");
-                try {
-                    loadVertices(graph, Paths.get(inputBaseDir + "/" + fileName),
-                            true, batchSize, progReportPeriod);
-                    System.out.println("Finished");
-                } catch (NoSuchFileException e) {
-                    System.out.println(" File not found.");
-                }
+                LoadTask t = new LoadTask(fileName, ElementType.VERTEX, graph, inputBaseDir, batchSize, progReportPeriod)
+                Thread thread = new Thread(t)
+                threads.add(thread)
+                thread.run()
             }
+
+            for(Thread thread : threads) {
+                thread.join()
+            }
+            threads.clear()
 
             for (String fileName : propertiesFiles) {
-                System.out.print("Loading properties file " + fileName + " ");
-                try {
-                    loadProperties(graph, Paths.get(inputBaseDir + "/" + fileName),
-                            true, batchSize, progReportPeriod);
-                    System.out.println("Finished");
-                } catch (NoSuchFileException e) {
-                    System.out.println(" File not found.");
-                }
+                LoadTask t = new LoadTask(fileName, ElementType.PROPERTY, graph, inputBaseDir, batchSize, progReportPeriod)
+                Thread thread = new Thread(t)
+                threads.add(thread)
+                thread.start()
             }
+
+            for(Thread thread : threads) {
+                thread.join()
+            }
+            threads.clear()
 
             for (String fileName : edgeFiles) {
-                System.out.print("Loading edge file " + fileName + " ");
-                try {
-                    if (fileName.contains("person_knows_person")) {
-                        loadEdges(graph, Paths.get(inputBaseDir + "/" + fileName), true,
-                                true, batchSize, progReportPeriod);
-                    } else {
-                        loadEdges(graph, Paths.get(inputBaseDir + "/" + fileName), false,
-                                true, batchSize, progReportPeriod);
-                    }
-
-                    System.out.println("Finished");
-                } catch (NoSuchFileException e) {
-                    System.out.println(" File not found.");
-                }
+                LoadTask t = new LoadTask(fileName, ElementType.EDGE, graph, inputBaseDir, batchSize, progReportPeriod)
+                Thread thread = new Thread(t)
+                threads.add(thread)
+                thread.start()
             }
+
+            for(Thread thread : threads) {
+                thread.join()
+            }
+            threads.clear()
+
         } catch (Exception e) {
             System.out.println("Exception: " + e);
             e.printStackTrace();
@@ -444,5 +440,67 @@ class SNBParser {
             client.set(identifier, id)
         }
     }
+
+    static class LoadTask implements Runnable {
+
+        private String fileName;
+        private ElementType elementType;
+
+        private Graph graph
+        private String inputBaseDir
+        private int batchSize
+        private long reportingPeriod
+
+        LoadTask(String fileName, ElementType elementType, Graph graph, String inputBaseDir, int batchSize, long reportingPeriod) {
+            this.fileName = fileName
+            this.elementType = elementType
+            this.graph = graph
+            this.inputBaseDir = inputBaseDir
+            this.batchSize = batchSize
+            this.reportingPeriod = reportingPeriod
+        }
+
+        @Override
+        void run() {
+
+            if(elementType.equals(ElementType.VERTEX)) {
+                System.out.println("Loading node file " + fileName + " ");
+                try {
+                    loadVertices(   graph, Paths.get(inputBaseDir + "/" + fileName),
+                            true, batchSize, reportingPeriod);
+                    System.out.println("Finished");
+                } catch (NoSuchFileException e) {
+                    System.out.println(" File not found.");
+                }
+            } else if(elementType.equals(ElementType.PROPERTY)) {
+                System.out.println("Loading properties file " + fileName + " ");
+                try {
+                    loadProperties(graph, Paths.get(inputBaseDir + "/" + fileName),
+                            true, batchSize, reportingPeriod);
+                    System.out.println("Finished");
+                } catch (NoSuchFileException e) {
+                    System.out.println(" File not found.");
+                }
+            } else {
+                System.out.println("Loading edge file " + fileName + " ");
+                try {
+                    if (fileName.contains("person_knows_person")) {
+                        loadEdges(graph, Paths.get(inputBaseDir + "/" + fileName), true,
+                                true, batchSize, reportingPeriod);
+                    } else {
+                        loadEdges(graph, Paths.get(inputBaseDir + "/" + fileName), false,
+                                true, batchSize, reportingPeriod);
+                    }
+
+                    System.out.println("Finished");
+                } catch (NoSuchFileException e) {
+                    System.out.println(" File not found.");
+                }
+            }
+
+        }
+    }
+
+    enum ElementType {VERTEX, PROPERTY, EDGE}
 
 }
