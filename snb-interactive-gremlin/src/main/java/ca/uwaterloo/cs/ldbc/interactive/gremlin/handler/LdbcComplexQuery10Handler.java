@@ -47,7 +47,7 @@ public class LdbcComplexQuery10Handler implements OperationHandler<LdbcQuery10, 
                     +"      __.as('p').in('hasCreator').hasLabel('post').out('hasTag').where(within('persontags')).count().fold(2, mult).as('common2'), "
                     +"      __.as('p').in('hasCreator').hasLabel('post').out('hasTag').count().fold(-1, mult).as('totaln'),                             "
                     +"        __.as('common2').map(union(identity(), select('totaln')).sum()).as('similarity')                                          "
-                    +"      ).select('p').out('isLocatedIn').as('city').select('p', 'city', 'similarity').sort{-it.get('similarity')}                                                                                               ";
+                    +"      ).select('p').out('isLocatedIn').as('city').select('p', 'city', 'similarity').sort{-it.get('similarity')}[0..resultLimit]                                                                                               ";
 
     List<Result> results = null;
 
