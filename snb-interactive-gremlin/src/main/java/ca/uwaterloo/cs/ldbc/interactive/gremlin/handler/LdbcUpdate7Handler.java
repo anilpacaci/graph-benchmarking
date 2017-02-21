@@ -32,7 +32,7 @@ public class LdbcUpdate7Handler implements OperationHandler<LdbcUpdate7AddCommen
         params.put("content", ldbcUpdate7AddComment.content() );
         params.put("location_ip", ldbcUpdate7AddComment.locationIp() );
         params.put("browser_used", ldbcUpdate7AddComment.browserUsed());
-        params.put("creation_date", String.valueOf(ldbcUpdate7AddComment.creationDate().getTime()));
+        params.put("creation_date", ldbcUpdate7AddComment.creationDate().getTime());
         params.put("tag_ids", GremlinUtils.makeIid(Entity.TAG, ldbcUpdate7AddComment.tagIds()));
 
         String statement = "comment = g.addV(label, comment_label).property('iid', comment_id)" +

@@ -46,8 +46,8 @@ public class LdbcShortQuery1Handler implements OperationHandler<LdbcShortQuery1P
         Vertex person = (Vertex) r.get(HashMap.class).get("person");
         Vertex place = (Vertex) r.get(HashMap.class).get("place");
 
-        Iterator<VertexProperty<String>> props = person.properties();
-        Map<String, String> propertyMap = new HashMap<>();
+        Iterator<VertexProperty<Object>> props = person.properties();
+        Map<String, Object> propertyMap = new HashMap<>();
         props.forEachRemaining((prop) -> {
             propertyMap.put(prop.key(), prop.value());
         });
@@ -56,14 +56,14 @@ public class LdbcShortQuery1Handler implements OperationHandler<LdbcShortQuery1P
 
         LdbcShortQuery1PersonProfileResult res =
                 new LdbcShortQuery1PersonProfileResult(
-                        propertyMap.get("firstName"),
-                        propertyMap.get("lastName"),
-                        Long.parseLong(propertyMap.get("birthday")),
-                        propertyMap.get("locationIP"),
-                        propertyMap.get("browserUsed"),
+                        (String) propertyMap.get("firstName"),
+                        (String) propertyMap.get("lastName"),
+                        (Long) propertyMap.get("birthday"),
+                        (String) propertyMap.get("locationIP"),
+                        (String) propertyMap.get("browserUsed"),
                         placeId,
-                        propertyMap.get("gender"),
-                        Long.parseLong(propertyMap.get("creationDate")));
+                        (String) propertyMap.get("gender"),
+                        (Long) propertyMap.get("creationDate"));
 
         resultReporter.report(0, res, ldbcShortQuery1PersonProfile);
     }

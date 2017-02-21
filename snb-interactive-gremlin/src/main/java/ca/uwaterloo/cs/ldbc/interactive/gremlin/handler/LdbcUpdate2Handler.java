@@ -22,7 +22,7 @@ public class LdbcUpdate2Handler implements OperationHandler<LdbcUpdate2AddPostLi
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcUpdate2AddPostLike.personId()));
         params.put("post_id", GremlinUtils.makeIid(Entity.POST, ldbcUpdate2AddPostLike.postId()));
-        params.put("creation_date", String.valueOf(ldbcUpdate2AddPostLike.creationDate().getTime()));
+        params.put("creation_date", ldbcUpdate2AddPostLike.creationDate().getTime());
 
         params.put("person_label", Entity.PERSON.getName());
         params.put("post_label", Entity.POST.getName());

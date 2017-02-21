@@ -25,8 +25,8 @@ public class LdbcUpdate1Handler implements OperationHandler<LdbcUpdate1AddPerson
         params.put("firstName", ldbcUpdate1AddPerson.personFirstName());
         params.put("lastName", ldbcUpdate1AddPerson.personLastName());
         params.put("gender", ldbcUpdate1AddPerson.gender());
-        params.put("birthday", String.valueOf(ldbcUpdate1AddPerson.birthday().getTime()));
-        params.put("creation_date", String.valueOf(ldbcUpdate1AddPerson.creationDate().getTime()));
+        params.put("birthday", ldbcUpdate1AddPerson.birthday().getTime());
+        params.put("creation_date", ldbcUpdate1AddPerson.creationDate().getTime());
         params.put("location_ip", ldbcUpdate1AddPerson.locationIp());
         params.put("browser_used", ldbcUpdate1AddPerson.browserUsed());
 

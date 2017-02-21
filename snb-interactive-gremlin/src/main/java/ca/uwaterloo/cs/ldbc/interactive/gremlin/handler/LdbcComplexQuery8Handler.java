@@ -54,7 +54,7 @@ public class LdbcComplexQuery8Handler implements OperationHandler<LdbcQuery8, Db
             LdbcQuery8Result ldbcQuery8Result = new LdbcQuery8Result(GremlinUtils.getSNBId(person),
                     person.<String>property("firstName").value(),
                     person.<String>property("lastName").value(),
-                    Long.parseLong(comment.<String>property("creationDate").value()),
+                    comment.<Long>property("creationDate").value(),
                     GremlinUtils.getSNBId(comment),
                     comment.<String>property("content").value());
 

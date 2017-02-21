@@ -59,7 +59,7 @@ public class LdbcShortQuery2Handler implements OperationHandler<LdbcShortQuery2P
 
             LdbcShortQuery2PersonPostsResult result = new LdbcShortQuery2PersonPostsResult(GremlinUtils.getSNBId(message),
                     content,
-                    Long.parseLong(message.<String>property("creationDate").value()),
+                    message.<Long>property("creationDate").value(),
                     GremlinUtils.getSNBId(original),
                     GremlinUtils.getSNBId(owner),
                     owner.<String>property("firstName").value(),

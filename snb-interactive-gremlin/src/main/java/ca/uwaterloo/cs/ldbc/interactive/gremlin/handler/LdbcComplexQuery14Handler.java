@@ -30,15 +30,15 @@ public class LdbcComplexQuery14Handler implements OperationHandler<LdbcQuery14, 
     params.put( "person2_id", GremlinUtils.makeIid( Entity.PERSON, ldbcQuery14.person2Id() ) );
     params.put( "person_label", Entity.PERSON.getName() );
 
-    String statement = "g.V().has(person_label, 'iid', person1_id)                                                                                                 "
-      + "  .repeat(out('knows').simplePath()).until(has(person_label, 'iid', person2_id)).path()                                                    "
-      + "  .union(identity(), count(local)).as('path', 'length')                                                                             "
-      + "  .match(                                                                                                                           "
+    String statement = "g.V().has(person_label, 'iid', person1_id).                                                                                                 "
+      + "  repeat(out('knows').simplePath()).until(has(person_label, 'iid', person2_id)).path().                                                    "
+      + "  union(identity(), count(local)).as('path', 'length').                                                                             "
+      + "  match(                                                                                                                           "
       + "     __.as('a').unfold().select('length').min().as('min'),                                                                          "
       + "     __.as('a').filter(eq('min', 'length')).as('shortpaths')                                                                        "
-      + "  )                                                                                                                                 "
-      + "  .select('path')                                                                                                                   "
-      + "  .map(                                                                                                                             "
+      + "  ).                                                                                                                                 "
+      + "  select('path').                                                                                                                   "
+      + "  map(                                                                                                                             "
       + "    unfold().as('p1').out('knows').as('p2')                                                                                         "
       + "      .match(                                                                                                                       "
       + "        __.as('a').select('p1').in('hasCreator').out('replyOf').as('replies')                                                       "
@@ -50,7 +50,7 @@ public class LdbcComplexQuery14Handler implements OperationHandler<LdbcQuery14, 
       + "        __.as('p1c').union(identity(), 'p2c').count(local).union(identity(), constant(0.5)).mult().as('commentweight')              "
       + "        __.as('postweight').union(identity(), 'commentweight').sum().as('weight')                                                   "
       + "      ).sum().as('totalweight')                                                                                                     "
-      + "  ).select('path', 'totalweight').order().by('totalweight', decr)                                                                   "
+      + "  ).select('path', 'totalweight').order().by('totalweight', decr)                                                                   ";
 
     List<Result> results = null;
     try {

@@ -57,7 +57,7 @@ public class LdbcComplexQuery9Handler implements OperationHandler<LdbcQuery9, Db
                     person.<String>property("lastName").value(),
                     GremlinUtils.getSNBId(message),
                     message.<String>property("content").value(),
-                    Long.parseLong(message.<String>property("creationDate").value()));
+                    message.<Long>property("creationDate").value());
 
             resultList.add(ldbcQuery9Result);
         }

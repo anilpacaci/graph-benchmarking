@@ -22,7 +22,7 @@ public class LdbcUpdate3Handler implements OperationHandler<LdbcUpdate3AddCommen
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcUpdate3AddCommentLike.personId()));
         params.put("comment_id", GremlinUtils.makeIid(Entity.COMMENT, ldbcUpdate3AddCommentLike.commentId()));
-        params.put("creation_date", String.valueOf(ldbcUpdate3AddCommentLike.creationDate().getTime()));
+        params.put("creation_date", ldbcUpdate3AddCommentLike.creationDate().getTime());
 
         params.put("person_label", Entity.PERSON.getName());
         params.put("comment_label", Entity.COMMENT.getName());

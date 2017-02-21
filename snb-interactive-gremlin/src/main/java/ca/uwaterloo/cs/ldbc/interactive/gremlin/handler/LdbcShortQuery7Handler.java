@@ -70,7 +70,7 @@ public class LdbcShortQuery7Handler implements OperationHandler<LdbcShortQuery7M
 
             result.add(new LdbcShortQuery7MessageRepliesResult(GremlinUtils.getSNBId(reply),
                     reply.<String>property("content").value(),
-                    Long.parseLong(reply.<String>property("creationDate").value()),
+                    reply.<Long>property("creationDate").value(),
                     GremlinUtils.getSNBId(creator),
                     creator.<String>property("firstName").value(),
                     creator.<String>property("lastName").value(),

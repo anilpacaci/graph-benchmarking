@@ -56,7 +56,7 @@ public class LdbcShortQuery3Handler implements OperationHandler<LdbcShortQuery3P
                             GremlinUtils.getSNBId(friend),
                             friend.<String>property("firstName").value(),
                             friend.<String>property("lastName").value(),
-                            Long.decode(edge.<String>property("creationDate").value()));
+                            edge.<Long>property("creationDate").value());
             result.add(res);
         }
 

@@ -23,7 +23,7 @@ public class LdbcUpdate6Handler implements OperationHandler<LdbcUpdate6AddPost,D
         params.put("vlabel", Entity.POST.getName());
         params.put("post_id", GremlinUtils.makeIid( Entity.POST, ldbcUpdate6AddPost.postId() ) );
         params.put("image_file", ldbcUpdate6AddPost.imageFile() );
-        params.put("creation_date", String.valueOf( ldbcUpdate6AddPost.creationDate().getTime() ) );
+        params.put("creation_date", ldbcUpdate6AddPost.creationDate().getTime() );
         params.put("location_ip", ldbcUpdate6AddPost.locationIp() );
         params.put("browser_used", ldbcUpdate6AddPost.browserUsed() );
         params.put("language", ldbcUpdate6AddPost.language() );

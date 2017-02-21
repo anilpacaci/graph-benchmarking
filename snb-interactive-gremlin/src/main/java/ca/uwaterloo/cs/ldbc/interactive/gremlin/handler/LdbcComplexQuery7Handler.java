@@ -69,8 +69,8 @@ public class LdbcComplexQuery7Handler implements OperationHandler<LdbcQuery7, Db
             long id = GremlinUtils.getSNBId(liker);
             String firstName = liker.<String>property("firstName").value();
             String lastName = liker.<String>property("lastName").value();
-            long likeDate = Long.parseLong(like.<String>property("creationDate").value());
-            long postDate = Long.parseLong(post.<String>property("creationDate").value());
+            long likeDate = like.<Long>property("creationDate").value();
+            long postDate = post.<Long>property("creationDate").value();
             long postID = GremlinUtils.getSNBId(post);
             String content = post.<String>property("content").value();
             if (content.length() == 0) {
