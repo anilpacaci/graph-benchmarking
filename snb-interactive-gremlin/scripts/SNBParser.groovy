@@ -16,7 +16,6 @@
  */
 
 
-import com.thinkaurelius.titan.graphdb.idmanagement.IDManager
 import org.apache.commons.configuration.Configuration
 import org.apache.commons.configuration.PropertiesConfiguration
 import org.apache.commons.io.FileUtils
@@ -27,8 +26,6 @@ import org.apache.tinkerpop.gremlin.structure.T
 import org.apache.tinkerpop.gremlin.structure.Vertex
 import org.apache.tinkerpop.gremlin.structure.VertexProperty
 
-import javax.sound.sampled.Line
-import java.nio.file.Files
 import java.nio.file.NoSuchFileException
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -96,9 +93,9 @@ class SNBParser {
                     String identifier;
                     for (int j = 0; j < colVals.length; ++j) {
                         if (colNames[j].equals("id")) {
-                            //identifier = entityName + ":" + colVals[j]
-                            //propertiesMap.put("iid", identifier);
-                            propertiesMap.put("iid", Long.parseLong(colVals[j]))
+                            identifier = entityName + ":" + colVals[j]
+                            propertiesMap.put("iid", identifier);
+                            //propertiesMap.put("iid", Long.parseLong(colVals[j]))
                         } else if (colNames[j].equals("birthday")) {
                             propertiesMap.put(colNames[j], birthdayDateFormat.parse(colVals[j]).getTime());
                         } else if (colNames[j].equals("creationDate")) {
@@ -381,7 +378,7 @@ class SNBParser {
                 LoadTask t = new LoadTask(fileName, ElementType.PROPERTY, graph, inputBaseDir, batchSize, progReportPeriod)
                 Thread thread = new Thread(t)
                 threads.add(thread)
-                thread.start()
+                thread.run()
             }
 
             for(Thread thread : threads) {
@@ -393,7 +390,7 @@ class SNBParser {
                 LoadTask t = new LoadTask(fileName, ElementType.EDGE, graph, inputBaseDir, batchSize, progReportPeriod)
                 Thread thread = new Thread(t)
                 threads.add(thread)
-                thread.start()
+                thread.run()
             }
 
             for(Thread thread : threads) {
