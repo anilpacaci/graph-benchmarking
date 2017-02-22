@@ -11,6 +11,7 @@ import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery5;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery5Result;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Result;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,14 +41,11 @@ public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, Db
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery5.personId()));
         params.put("person_label", Entity.PERSON.getName());
-        params.put("min_date", String.valueOf(ldbcQuery5.minDate().getTime()));
+        params.put("min_date", ldbcQuery5.minDate().getTime());
 
-        String statement = "g.V().has(person_label, 'iid', person_id).repeat(out('knows')).times(2).emit()" +
-            ".inE('hasMember').has('joinDate',gte(min_date)).outV().as('forum_name')" +
-            ".in('hasCreator').as('post').out('hasContainer').select('post').count().where(is(gt(0))).as('cnt')" +
-            ".order().by('cnt',decr)" +
-            ".select('forum_name','cnt')" +
-            ".by('name')" +
+        String statement = "g.V().has(person_label, 'iid', person_id).repeat(out('knows')).times(2).emit().dedup().aggregate('member')" +
+                ".inE('hasMember').has('joinDate',gte(min_date)).outV().as('forum_name')" +
+                ".out('containerOf').as('post').out('hasCreator').where(within('member')).select('post').groupCount().by(__.in('containerOf'))" +
             ".limit(20);";
         List<Result> results;
         try {
@@ -56,11 +54,13 @@ public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, Db
             throw new DbException("Remote execution failed", e);
         }
 
+        HashMap<Vertex, Integer> resultMap = results.get(0).get(HashMap.class);
+
         List<LdbcQuery5Result> resultList = new ArrayList<>();
-        for (Result r : results) {
-            HashMap map = r.get(HashMap.class);
-            String forum_name = (String) map.get("forum_name");
-            int count = (int) map.get("post_count");
+        for (Map.Entry<Vertex, Integer> r : resultMap.entrySet()) {
+            Vertex forum = (Vertex) r.getKey();
+            String forum_name = forum.<String>property("title").value();
+            int count = r.getValue();
 
             LdbcQuery5Result ldbcQuery5Result = new LdbcQuery5Result(
                 forum_name,

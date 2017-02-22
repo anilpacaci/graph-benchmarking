@@ -96,8 +96,9 @@ class SNBParser {
                     String identifier;
                     for (int j = 0; j < colVals.length; ++j) {
                         if (colNames[j].equals("id")) {
-                            identifier = entityName + ":" + colVals[j]
-                            propertiesMap.put("iid", identifier);
+                            //identifier = entityName + ":" + colVals[j]
+                            //propertiesMap.put("iid", identifier);
+                            propertiesMap.put("iid", Long.parseLong(colVals[j]))
                         } else if (colNames[j].equals("birthday")) {
                             propertiesMap.put(colNames[j], birthdayDateFormat.parse(colVals[j]).getTime());
                         } else if (colNames[j].equals("creationDate")) {

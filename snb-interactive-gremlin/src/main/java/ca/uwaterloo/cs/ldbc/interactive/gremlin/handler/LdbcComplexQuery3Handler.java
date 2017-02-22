@@ -27,8 +27,8 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
         params.put("countryX", ldbcQuery3.countryXName());
         params.put("countryY", ldbcQuery3.countryYName());
         Date start = ldbcQuery3.startDate();
-        String end  = Long.toString(new DateTime(start).plusDays(ldbcQuery3.durationDays()).toDate().getTime());
-        params.put("start_date", Long.toString(start.getTime()));
+        Long end  = new DateTime(start).plusDays(ldbcQuery3.durationDays()).toDate().getTime();
+        params.put("start_date", start.getTime());
         params.put("end_date", end);
         params.put("result_limit", ldbcQuery3.limit());
 

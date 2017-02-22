@@ -43,8 +43,8 @@ public class LdbcComplexQuery4Handler implements OperationHandler<LdbcQuery4, Db
         params.put("person_label", Entity.PERSON.getName());
         Date start = ldbcQuery4.startDate();
         Date end = new DateTime( start ).plusDays( ldbcQuery4.durationDays() ).toDate();
-        params.put("start_date", String.valueOf(start.getTime()));
-        params.put("end_date", String.valueOf(end.getTime()));
+        params.put("start_date", start.getTime());
+        params.put("end_date", end.getTime());
         params.put("result_limit", ldbcQuery4.limit());
 
         String statement = "g.V().has(person_label, 'iid', person_id).out('knows')" +
