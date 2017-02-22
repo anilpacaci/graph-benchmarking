@@ -61,7 +61,8 @@ class SNBParser {
         SimpleDateFormat creationDateDateFormat =
                 new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         creationDateDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-        String[] fileNameParts = filePath.getFileName().toString().split("_");
+        String fileName = filePath.getFileName().toString()
+        String[] fileNameParts = fileName.split("_");
         String entityName = fileNameParts[0];
 
         LineIterator it = FileUtils.lineIterator(filePath.toFile())
@@ -144,8 +145,8 @@ class SNBParser {
                 long timeElapsed = System.currentTimeMillis() - startTime;
                 long linesLoaded = lineCount - lastLineCount;
                 System.out.println(String.format(
-                        "Time Elapsed: %03dm.%02ds, Lines Loaded: +%d",
-                        (timeElapsed.intdiv(1000)).intdiv(60), (timeElapsed.intdiv(1000)) % 60, linesLoaded));
+                        "Time Elapsed: %03dm.%02ds, Lines Loaded: +%d,\tFile: %s",
+                        (timeElapsed.intdiv(1000)).intdiv(60), (timeElapsed.intdiv(1000)) % 60, linesLoaded, fileName));
                 nextProgReportTime += progReportPeriod * 1000;
                 lastLineCount = lineCount;
             }
@@ -156,7 +157,8 @@ class SNBParser {
 
     static void loadProperties(Graph graph, Path filePath, boolean printLoadingDots, int batchSize, long progReportPeriod) throws IOException {
         String[] colNames;
-        String[] fileNameParts = filePath.getFileName().toString().split("_");
+        String fileName = filePath.getFileName().toString()
+        String[] fileNameParts = fileName.split("_");
         String entityName = fileNameParts[0];
 
         LineIterator it = FileUtils.lineIterator(filePath.toFile())
@@ -223,8 +225,8 @@ class SNBParser {
                 long timeElapsed = System.currentTimeMillis() - startTime;
                 long linesLoaded = lineCount - lastLineCount;
                 System.out.println(String.format(
-                        "Time Elapsed: %03dm.%02ds, Lines Loaded: +%d",
-                        (timeElapsed.intdiv(1000)).intdiv(60), (timeElapsed.intdiv(1000)) % 60, linesLoaded));
+                        "Time Elapsed: %03dm.%02ds, Lines Loaded: +%d,\tFile: %s",
+                        (timeElapsed.intdiv(1000)).intdiv(60), (timeElapsed.intdiv(1000)) % 60, linesLoaded, fileName));
                 nextProgReportTime += progReportPeriod * 1000;
                 lastLineCount = lineCount;
             }
@@ -242,7 +244,8 @@ class SNBParser {
         SimpleDateFormat joinDateDateFormat =
                 new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         joinDateDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-        String[] fileNameParts = filePath.getFileName().toString().split("_");
+        String fileName = filePath.getFileName().toString()
+        String[] fileNameParts = fileName.split("_");
         String v1EntityName = fileNameParts[0];
         String edgeLabel = fileNameParts[1];
         String v2EntityName = fileNameParts[2];
@@ -334,8 +337,8 @@ class SNBParser {
                 long timeElapsed = System.currentTimeMillis() - startTime;
                 long linesLoaded = lineCount - lastLineCount;
                 System.out.println(String.format(
-                        "Time Elapsed: %03dm.%02ds, Lines Loaded: +%d",
-                        (timeElapsed.intdiv(1000)).intdiv(60), (timeElapsed.intdiv(1000)) % 60, linesLoaded));
+                        "Time Elapsed: %03dm.%02ds, Lines Loaded: +%d,\tFile: %s",
+                        (timeElapsed.intdiv(1000)).intdiv(60), (timeElapsed.intdiv(1000)) % 60, linesLoaded, fileName));
                 nextProgReportTime += progReportPeriod * 1000;
                 lastLineCount = lineCount;
             }
