@@ -35,7 +35,7 @@ public class LdbcComplexQuery10Handler implements OperationHandler<LdbcQuery10, 
                     +"       Calendar cal = Calendar.getInstance();                                  "
                     +"       Calendar lowercal = Calendar.getInstance();                             "
                     +"       Calendar highercal = Calendar.getInstance();                            "
-                    +"       cal.setTime(new java.util.Date(Long.parseLong(ts)));                    "
+                    +"       cal.setTime(new java.util.Date(ts));                                    "
                     +"       int day = cal.get(Calendar.DAY_OF_MONTH);                               "
                     +"       int month = cal.get(Calendar.MONTH);                                    "
                     +"       int year = cal.get(Calendar.YEAR);                                      "
@@ -47,7 +47,7 @@ public class LdbcComplexQuery10Handler implements OperationHandler<LdbcQuery10, 
                     +"      __.as('p').in('hasCreator').hasLabel('post').out('hasTag').where(within('persontags')).count().fold(2, mult).as('common2'), "
                     +"      __.as('p').in('hasCreator').hasLabel('post').out('hasTag').count().fold(-1, mult).as('totaln'),                             "
                     +"        __.as('common2').map(union(identity(), select('totaln')).sum()).as('similarity')                                          "
-                    +"      ).select('p').out('isLocatedIn').as('city').select('p', 'city', 'similarity').sort{-it.get('similarity')}[0..resultLimit]                                                                                               ";
+                    +"      ).select('p').out('isLocatedIn').as('city').select('p', 'city', 'similarity').sort{-it.get('similarity')}.collect().subList(0, result_limit)                                                                                               ";
 
     List<Result> results = null;
 

@@ -22,6 +22,7 @@ public class LdbcUpdate6Handler implements OperationHandler<LdbcUpdate6AddPost,D
         Map<String,Object> params = new HashMap<>();
         params.put("vlabel", Entity.POST.getName());
         params.put("post_id", GremlinUtils.makeIid( Entity.POST, ldbcUpdate6AddPost.postId() ) );
+        params.put("post_id_long", ldbcUpdate6AddPost.postId());
         params.put("image_file", ldbcUpdate6AddPost.imageFile() );
         params.put("creation_date", ldbcUpdate6AddPost.creationDate().getTime() );
         params.put("location_ip", ldbcUpdate6AddPost.locationIp() );
@@ -41,6 +42,7 @@ public class LdbcUpdate6Handler implements OperationHandler<LdbcUpdate6AddPost,D
         params.put("tag_label", Entity.TAG.getName());
 
         String statement = "post = g.addV(label, vlabel).property('iid', post_id)" +
+                ".property('iid_long', post_id_long)" +
                 ".property('imageFile', image_file)" +
                 ".property('creationDate', creation_date)" +
                 ".property('locationIP', location_ip)" +

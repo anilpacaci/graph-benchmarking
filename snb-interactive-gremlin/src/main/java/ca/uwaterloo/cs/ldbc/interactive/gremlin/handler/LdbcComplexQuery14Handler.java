@@ -14,10 +14,7 @@ import org.apache.tinkerpop.gremlin.driver.Result;
 import org.apache.tinkerpop.gremlin.process.traversal.Path;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 public class LdbcComplexQuery14Handler implements OperationHandler<LdbcQuery14, DbConnectionState> {
@@ -30,29 +27,28 @@ public class LdbcComplexQuery14Handler implements OperationHandler<LdbcQuery14, 
     params.put( "person2_id", GremlinUtils.makeIid( Entity.PERSON, ldbcQuery14.person2Id() ) );
     params.put( "person_label", Entity.PERSON.getName() );
 
-    String statement = "g.V().has(person_label, 'iid', person1_id).                                                                                                 "
-      + "  repeat(out('knows').simplePath()).until(has(person_label, 'iid', person2_id)).path().                                                    "
-      + "  union(identity(), count(local)).as('path', 'length').                                                                             "
-      + "  match(                                                                                                                           "
-      + "     __.as('a').unfold().select('length').min().as('min'),                                                                          "
-      + "     __.as('a').filter(eq('min', 'length')).as('shortpaths')                                                                        "
-      + "  ).                                                                                                                                 "
-      + "  select('path').                                                                                                                   "
-      + "  map(                                                                                                                             "
-      + "    unfold().as('p1').out('knows').as('p2')                                                                                         "
-      + "      .match(                                                                                                                       "
-      + "        __.as('a').select('p1').in('hasCreator').out('replyOf').as('replies')                                                       "
-      + "        __.as('replies').where(hasLabel('post').and().in('hasCreator').eq('p2')).as('p1p')                                          "
-      + "        __.as('a').select('p2').in('hasCreator').out('replyOf').where(hasLabel('post').and().in('hasCreator').eq('p1'))             "
-      + "        __.as('a').select('p1').in('hasCreator').out('replyOf').where(hasLabel('comment').and().in('hasCreator').eq('p2c'))         "
-      + "        __.as('a').select('p2').in('hasCreator').out('replyOf').where(hasLabel('comment').and().in('hasCreator').eq('p1c'))         "
-      + "        __.as('p1p').union(identity(), 'p2').count(local).as('postweight')                                                          "
-      + "        __.as('p1c').union(identity(), 'p2c').count(local).union(identity(), constant(0.5)).mult().as('commentweight')              "
-      + "        __.as('postweight').union(identity(), 'commentweight').sum().as('weight')                                                   "
-      + "      ).sum().as('totalweight')                                                                                                     "
-      + "  ).select('path', 'totalweight').order().by('totalweight', decr)                                                                   ";
+    String statement =
+    "static double calculateWeight(GraphTraversalSource g, Long v1, Long v2) {" +
+            "long postForward = g.V(v1).in('hasCreator').hasLabel('post').in('replyOf').out('hasCreator').hasId(v2).count().next(); " +
+            "long postBackward = g.V(v2).in('hasCreator').hasLabel('post').in('replyOf').out('hasCreator').hasId(v1).count().next(); " +
+            "long commentForward = g.V(v1).in('hasCreator').hasLabel('comment').in('replyOf').out('hasCreator').hasId(v2).count().next(); " +
+            "long  commentBackward = g.V(v2).in('hasCreator').hasLabel('comment').in('replyOf').out('hasCreator').hasId(v1).count().next(); " +
+            "long score = postForward + postBackward + 0.5 * (commentForward + commentBackward); return score;}; "
+            +"scoreMap = [:];"
+            +"shortestPathLength = g.V().has(person_label, 'iid', person1_id).repeat(out('knows').simplePath())" +
+            ".until(has(person_label, 'iid', person2_id)).path().limit(1).count(local).next();"
+            +"g.V().has(person_label, 'iid', person1_id).repeat(out('knows').simplePath()).until(loops().is(gte(shortestPathLength - 1))).   "
+            +"filter(has(person_label, 'iid', person2_id)).path().as('shortestPaths').sideEffect{"
+            +"        path = it.get(); "
+            +"        totalScore = 0;"
+            +"        for(int i = 0; i < path.size() - 2; i++) "
+            +"            totalScore += calculateWeight(g, path.get(i).id(), path.get(i + 1).id());"
+            +"        scoreMap.put(path, totalScore);   "
+            +"};"
+            +"scoreMap;";
 
     List<Result> results = null;
+
     try {
       results = client.submit( statement, params ).all().get();
     } catch (InterruptedException | ExecutionException e) {

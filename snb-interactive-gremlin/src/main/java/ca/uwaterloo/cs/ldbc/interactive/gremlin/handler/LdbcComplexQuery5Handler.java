@@ -46,7 +46,7 @@ public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, Db
         String statement = "g.V().has(person_label, 'iid', person_id).repeat(out('knows')).times(2).emit().dedup().aggregate('member')" +
                 ".inE('hasMember').has('joinDate',gte(min_date)).outV().as('forum_name')" +
                 ".out('containerOf').as('post').out('hasCreator').where(within('member')).select('post').groupCount().by(__.in('containerOf'))" +
-            ".limit(20);";
+            ".limit(local, 20);";
         List<Result> results;
         try {
             results = client.submit(statement, params).all().get();
@@ -54,17 +54,17 @@ public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, Db
             throw new DbException("Remote execution failed", e);
         }
 
-        HashMap<Vertex, Integer> resultMap = results.get(0).get(HashMap.class);
+        HashMap<Vertex, Long> resultMap = results.get(0).get(HashMap.class);
 
         List<LdbcQuery5Result> resultList = new ArrayList<>();
-        for (Map.Entry<Vertex, Integer> r : resultMap.entrySet()) {
+        for (Map.Entry<Vertex, Long> r : resultMap.entrySet()) {
             Vertex forum = (Vertex) r.getKey();
             String forum_name = forum.<String>property("title").value();
-            int count = r.getValue();
+            Long count = r.getValue();
 
             LdbcQuery5Result ldbcQuery5Result = new LdbcQuery5Result(
                 forum_name,
-                count
+                count.intValue()
             );
 
             resultList.add(ldbcQuery5Result);

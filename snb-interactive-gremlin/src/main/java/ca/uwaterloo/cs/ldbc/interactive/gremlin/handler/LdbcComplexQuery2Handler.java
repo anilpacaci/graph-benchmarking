@@ -34,8 +34,7 @@ public class LdbcComplexQuery2Handler implements OperationHandler<LdbcQuery2, Db
             ".out('knows').as('person')" +
             ".in('hasCreator').as('message')" +
             ".has('creationDate', lte(max_date))" +
-            ".order().by('creationDate', decr)" +
-            ".order().by('iid', incr)" +
+            ".order().by('creationDate', decr).by('iid_long', incr)" +
             ".limit(result_limit)" +
             ".select('person','message');";
         List<Result> results;
@@ -59,7 +58,7 @@ public class LdbcComplexQuery2Handler implements OperationHandler<LdbcQuery2, Db
                 GremlinUtils.getSNBId(message),
                 message.property("content") == VertexProperty.empty() ?
                 message.<String>property("imageFile").value() : message.<String>property("content").value(),
-                Long.valueOf(message.<String>property("creationDate").value())
+                message.<Long>property("creationDate").value()
             );
 
             resultList.add(ldbcQuery2Result);

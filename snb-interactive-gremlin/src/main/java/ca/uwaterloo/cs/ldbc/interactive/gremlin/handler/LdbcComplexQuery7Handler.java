@@ -45,8 +45,8 @@ public class LdbcComplexQuery7Handler implements OperationHandler<LdbcQuery7, Db
 
         String statement = "g.V().has(person_label, 'iid', person_id)" +
                 ".in('hasCreator').as('post')" +
-                ".inE('likes').as('like')" +
-                ".outV().as('liker')" +
+                ".inE('likes').order().by('creationDate', decr).as('like')" +
+                ".outV().order().by('iid_long').as('liker')" +
                 ".select('post', 'like', 'liker')";
 
         List<Result> results = null;

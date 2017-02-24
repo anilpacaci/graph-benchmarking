@@ -15,6 +15,7 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 public class LdbcComplexQuery1Handler implements OperationHandler<LdbcQuery1, DbConnectionState> {
     @Override
@@ -29,11 +30,11 @@ public class LdbcComplexQuery1Handler implements OperationHandler<LdbcQuery1, Db
 
         String statement = "matchList = []; distList = [] ; g.withSideEffect('x', matchList).withSideEffect('d', distList).V().has(person_label, 'iid', person_id).aggregate('done')" +
                 ".out('knows').where(without('done')).dedup().fold()" +
-                ".sideEffect(unfold().has('firstName', firstName).order().by('lastName', incr).by(id(), incr).limit(result_limit).as('person').select('x').by(count(Scope.local)).is(lt(result_limit)).store('x').by(select('person')))" +
+                ".sideEffect(unfold().has('firstName', firstName).order().by('lastName', incr).by('iid_long', incr).limit(result_limit).as('person').select('x').by(count(Scope.local)).is(lt(result_limit)).store('x').by(select('person')))" +
                 ".filter(select('x').count(Scope.local).is(lt(result_limit)).store('d')).unfold().aggregate('done').out('knows').where(without('done')).dedup().fold()" +
-                ".sideEffect(unfold().has('firstName', firstName).order().by('lastName', incr).by(id(), incr).limit(result_limit).as('person').select('x').by(count(Scope.local)).is(lt(result_limit)).store('x').by(select('person')))" +
+                ".sideEffect(unfold().has('firstName', firstName).order().by('lastName', incr).by('iid_long', incr).limit(result_limit).as('person').select('x').by(count(Scope.local)).is(lt(result_limit)).store('x').by(select('person')))" +
                 ".filter(select('x').count(Scope.local).is(lt(result_limit)).store('d')).unfold().aggregate('done').out('knows').where(without('done')).dedup().fold()" +
-                ".sideEffect(unfold().has('firstName', firstName).order().by('lastName', incr).by(id(), incr).limit(result_limit).as('person').select('x').by(count(Scope.local)).is(lt(result_limit)).store('x').by(select('person')))" +
+                ".sideEffect(unfold().has('firstName', firstName).order().by('lastName', incr).by('iid_long', incr).limit(result_limit).as('person').select('x').by(count(Scope.local)).is(lt(result_limit)).store('x').by(select('person')))" +
                 ".select('x').count(Scope.local).store('d').iterate(); " +
                 "matchListIds = matchList.collect({i -> i.property('iid').value()}); " +
                 "propertiesMap = [:]; " +
@@ -71,7 +72,7 @@ public class LdbcComplexQuery1Handler implements OperationHandler<LdbcQuery1, Db
 
         List<Vertex> matchList = (List<Vertex>) results.get(0).get(AbstractMap.SimpleEntry.class).getValue();
         List<Long> distList = (List<Long>) results.get(1).get(AbstractMap.SimpleEntry.class).getValue();
-        Map<Vertex, Map<String, List<String>>> propertiesMap = (Map<Vertex, Map<String, List<String>>>) results.get(2).get(AbstractMap.SimpleEntry.class).getValue();
+        Map<Vertex, Map<String, List<Object>>> propertiesMap = (Map<Vertex, Map<String, List<Object>>>) results.get(2).get(AbstractMap.SimpleEntry.class).getValue();
         Map<Vertex, String> placeNameMap = (Map<Vertex, String>) results.get(3).get(AbstractMap.SimpleEntry.class).getValue();
         Map<Vertex, List<List<Object>>> universityInfoMap = (Map<Vertex, List<List<Object>>>) results.get(4).get(AbstractMap.SimpleEntry.class).getValue();
         Map<Vertex, List<List<Object>>> companyInfoMap = (Map<Vertex, List<List<Object>>>) results.get(5).get(AbstractMap.SimpleEntry.class).getValue();
@@ -80,12 +81,12 @@ public class LdbcComplexQuery1Handler implements OperationHandler<LdbcQuery1, Db
             Vertex match = matchList.get(i);
             int distance = (i < distList.get(0)) ? 1
                     : (i < distList.get(1)) ? 2 : 3;
-            Map<String, List<String>> properties = propertiesMap.get(match);
-            List<String> emails = properties.get("email");
+            Map<String, List<Object>> properties = propertiesMap.get(match);
+            List<String> emails = properties.get("email") == null ? null : properties.get("email").stream().map(s -> s.toString()).collect(Collectors.toList());
             if (emails == null) {
                 emails = new ArrayList<>();
             }
-            List<String> languages = properties.get("language");
+            List<String> languages = properties.get("language") == null ? null : properties.get("language").stream().map(s -> s.toString()).collect(Collectors.toList());
             if (languages == null) {
                 languages = new ArrayList<>();
             }
@@ -100,13 +101,13 @@ public class LdbcComplexQuery1Handler implements OperationHandler<LdbcQuery1, Db
             }
             result.add(new LdbcQuery1Result(
                     GremlinUtils.getSNBId(match),
-                    properties.get("lastName").get(0),
+                    properties.get("lastName").get(0).toString(),
                     distance,
-                    Long.decode(properties.get("birthday").get(0)),
-                    Long.decode(properties.get("creationDate").get(0)),
-                    properties.get("gender").get(0),
-                    properties.get("browserUsed").get(0),
-                    properties.get("locationIP").get(0),
+                    (Long) properties.get("birthday").get(0),
+                    (Long) properties.get("creationDate").get(0),
+                    properties.get("gender").get(0).toString(),
+                    properties.get("browserUsed").get(0).toString(),
+                    properties.get("locationIP").get(0).toString(),
                     emails,
                     languages,
                     placeName,

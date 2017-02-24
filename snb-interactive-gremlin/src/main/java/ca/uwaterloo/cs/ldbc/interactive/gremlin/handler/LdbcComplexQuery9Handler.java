@@ -29,13 +29,13 @@ public class LdbcComplexQuery9Handler implements OperationHandler<LdbcQuery9, Db
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery9.personId()));
         params.put("person_label", Entity.PERSON.getName());
-        params.put("max_date", Long.toString(ldbcQuery9.maxDate().getTime()));
+        params.put("max_date", ldbcQuery9.maxDate().getTime());
         params.put("result_limit", ldbcQuery9.limit());
 
         String statement = "g.V().has(person_label, 'iid', person_id)" +
                 ".repeat(out('knows').simplePath()).until(loops().is(gt(1))).as('person')" +
                 ".in('hasCreator').has('creationDate', lt(max_date)).limit(result_limit).as('message')" +
-                ".order().by('creationDate', decr).by('iid', incr)" +
+                ".order().by('creationDate', decr).by('iid_long', incr)" +
                 ".select('person', 'message')";
 
         List<Result> results = null;
