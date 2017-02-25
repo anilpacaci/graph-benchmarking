@@ -91,7 +91,7 @@ public class LdbcComplexQuery12Handler implements OperationHandler<LdbcQuery12, 
             HashMap map = r.get( HashMap.class );
             Vertex person = (Vertex) map.get( "friends" );
             Long count = (Long) map.get( "count" );
-            List<Object> tags = (List<Object>) map.get( "tags" );
+            List<Object> tags = (List<Object>) map.get( "tagnames" );
             List<String> tagList = tags.size() == 0 ? new ArrayList<>() : tags.stream().map( Object::toString ).collect( Collectors.toList() );
 
             LdbcQuery12Result ldbcQuery12Result = new LdbcQuery12Result( GremlinUtils.getSNBId( person ), person.<String>property( "firstName" ).value(),
