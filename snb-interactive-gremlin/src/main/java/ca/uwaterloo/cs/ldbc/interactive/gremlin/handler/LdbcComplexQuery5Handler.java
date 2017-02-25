@@ -13,15 +13,15 @@ import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Result;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
-public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, DbConnectionState> {
+public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, DbConnectionState>
+{
     @Override
-    public void executeOperation(LdbcQuery5 ldbcQuery5, DbConnectionState dbConnectionState, ResultReporter resultReporter) throws DbException {
+    public void executeOperation( LdbcQuery5 ldbcQuery5, DbConnectionState dbConnectionState, ResultReporter resultReporter ) throws DbException
+    {
         //     * Description: Given a start Person,
         //     find the Forums which that Person's friends and friends of friends (excluding start Person)
         //     became Members of after a given date.
@@ -39,17 +39,25 @@ public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, Db
 
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
-        params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery5.personId()));
-        params.put("person_label", Entity.PERSON.getName());
-        params.put("min_date", ldbcQuery5.minDate().getTime());
+        params.put( "person_id", GremlinUtils.makeIid( Entity.PERSON, ldbcQuery5.personId() ) );
+        params.put( "person_label", Entity.PERSON.getName() );
+        params.put( "min_date", ldbcQuery5.minDate().getTime() );
+        params.put( "result_limit", ldbcQuery5.limit() );
 
-        String statement = "g.V().has(person_label, 'iid', person_id).repeat(out('knows')).times(2).emit().dedup().aggregate('member')" +
-                ".inE('hasMember').has('joinDate',gte(min_date)).outV().as('forum_name')" +
-                ".out('containerOf').as('post').out('hasCreator').where(within('member')).select('post')" +
-                ".groupCount().by(__.in('containerOf'))" +
-                ".order(local).by(value, decr)" +
-                //".order(local).by(key, incr)" +
-                ".limit(local, 20);";
+        // String statement = "g.V().has(person_label, 'iid', person_id).repeat(out('knows')).times(2).emit().dedup().aggregate('member')" +
+        //         ".inE('hasMember').has('joinDate',gte(min_date)).outV().as('forum_name')" +
+        //         ".out('containerOf').as('post').out('hasCreator').where(within('member')).select('post')" +
+        //         ".groupCount().by(__.in('containerOf'))" +
+        //         ".order(local).by(value, decr)" +
+        //         //".order(local).by(key, incr)" +
+        //         ".limit(local, 20);";
+        String statement = "g.V().has(person_label, 'iid', person_id)." +
+                "repeat(out('knows').simplePath()).times(2).dedup().aggregate('member')." +
+                "inE('hasMember').has('joinDate',gte(min_date)).outV().as('forum_name')." +
+                "out('containerOf').as('post').out('hasCreator').where(within('member')).select('post')." +
+                "groupCount().by(__.in('containerOf'))." +
+                "order(local).by(values, decr)." +
+                "limit(local, result_limit)";
         /*
         g.V().has('person', 'iid', 'person:234').
         repeat(out('knows').simplePath()).times(2).dedup().aggregate('member').
@@ -60,30 +68,36 @@ public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, Db
         limit(local, 20)
 
 
-        // order(local).by(keys, incr) in java
          */
         List<Result> results;
-        try {
-            results = client.submit(statement, params).all().get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new DbException("Remote execution failed", e);
+        try
+        {
+            results = client.submit( statement, params ).all().get();
+        }
+        catch ( InterruptedException | ExecutionException e )
+        {
+            throw new DbException( "Remote execution failed", e );
         }
 
-        HashMap<Vertex, Long> resultMap = results.get(0).get(HashMap.class);
+        HashMap<Vertex, Long> resultMap = results.get( 0 ).get( HashMap.class );
 
         List<LdbcQuery5Result> resultList = new ArrayList<>();
-        for (Map.Entry<Vertex, Long> r : resultMap.entrySet()) {
+        List<Map.Entry<Vertex, Long>> sortedList = resultMap.entrySet().stream().collect( Collectors.toList() );
+        sortedList.sort( Comparator.comparing( r2 -> r2.getKey().<Long>property( "iid_long" ).value() ) );
+        for ( Map.Entry<Vertex, Long> r : sortedList )
+        {
             Vertex forum = r.getKey();
-            String forum_name = forum.<String>property("title").value();
+            String forum_name = forum.<String>property( "title" ).value();
             Long count = r.getValue();
 
             LdbcQuery5Result ldbcQuery5Result = new LdbcQuery5Result(
-                forum_name,
-                count.intValue()
+                    forum_name,
+                    count.intValue()
             );
 
-            resultList.add(ldbcQuery5Result);
+            resultList.add( ldbcQuery5Result );
         }
-        resultReporter.report(resultList.size(), resultList, ldbcQuery5);
+
+        resultReporter.report( resultList.size(), resultList, ldbcQuery5 );
     }
 }
