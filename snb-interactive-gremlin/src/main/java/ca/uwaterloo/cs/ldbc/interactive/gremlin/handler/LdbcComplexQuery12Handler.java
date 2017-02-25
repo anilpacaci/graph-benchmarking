@@ -49,7 +49,7 @@ public class LdbcComplexQuery12Handler implements OperationHandler<LdbcQuery12, 
                 "        repeat(out('hasType')).until(has('name', tagclass))).fold().as('comments')," +
                 "__.as('comments').unfold().out('hasTag').values('name').fold().as('tagnames')," +
                 "__.as('comments').unfold().count().as('count')" +
-                ").select('comments').where(unfold().count().is(gt(0)))."+
+                ").where(select('comments').unfold().count().is(gt(0)))."+
                 "select('pid', 'friends', 'count', 'tagnames')." +
                 "sort{-it.get('count')}." +
                 "sort{it.get('pid')};";
@@ -64,7 +64,7 @@ public class LdbcComplexQuery12Handler implements OperationHandler<LdbcQuery12, 
             repeat(out('hasType')).until(has('name', 'Politician'))).fold().as('comments'),
         __.as('comments').unfold().out('hasTag').values('name').fold().as('tagnames'),
         __.as('comments').unfold().count().as('count')
-        ).select('comments').where(unfold().count().is(gt(0))).
+        ).where(select('comments').unfold().count().is(gt(0))).
         select('pid', 'friends', 'count', 'tagnames').
         sort{-it.get('count')}.
         sort{it.get('pid')}
