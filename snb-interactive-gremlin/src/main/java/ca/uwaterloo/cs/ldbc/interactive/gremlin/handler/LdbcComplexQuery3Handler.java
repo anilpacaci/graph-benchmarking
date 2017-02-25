@@ -58,7 +58,7 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
                 " ).select('pid', 'person', 'countx', 'county')." +
                 " sort{-it.get('countx')}." +
                 " sort{it.get('pid')}." +
-                " collect().subList(0, result_limit)";
+                " collect();";
         /*
         g= Neo4jGraph.open('/hdd1/ldbc/datasets/neo4j/validation/').traversal()
         g.V().has('person', 'iid', 'person:234').
@@ -86,11 +86,13 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
         }
 
         List<LdbcQuery3Result> resultList = new ArrayList<>();
-        for (Result r : results) {
+        for ( Result r : results.subList( 0,
+                results.size() > ldbcQuery3.limit() ? ldbcQuery3.limit() : results.size() ) )
+        {
             HashMap map = r.get( HashMap.class );
-            Vertex person = (Vertex) map.get("person");
-            long countx = (long) map.get("countx");
-            long county = (long) map.get("county");
+            Vertex person = (Vertex) map.get( "person" );
+            long countx = (long) map.get( "countx" );
+            long county = (long) map.get( "county" );
 
             LdbcQuery3Result ldbcQuery3Result = new LdbcQuery3Result(
                     GremlinUtils.getSNBId( person ),

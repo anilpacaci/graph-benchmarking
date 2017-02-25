@@ -84,18 +84,16 @@ public class LdbcComplexQuery11Handler implements OperationHandler<LdbcQuery11, 
             resultList.add(ldbcQuery11Result);
         }
 
-        resultList.sort(new Comparator<LdbcQuery11Result>() {
-            @Override
-            public int compare(LdbcQuery11Result o1, LdbcQuery11Result o2) {
-                if (o1.organizationWorkFromYear() == o2.organizationWorkFromYear()) {
-                    if (o1.personId() == o2.personId())
-                        return o2.organizationName().compareTo(o1.organizationName());
-                    else
-                        return Long.compare(o1.personId(), o2.personId());
-                } else
-                    return Integer.compare(o1.organizationWorkFromYear(), o2.organizationWorkFromYear());
-            }
-        });
+        resultList.sort( ( o1, o2 ) ->
+        {
+            if (o1.organizationWorkFromYear() == o2.organizationWorkFromYear()) {
+                if (o1.personId() == o2.personId())
+                    return o2.organizationName().compareTo(o1.organizationName());
+                else
+                    return Long.compare(o1.personId(), o2.personId());
+            } else
+                return Integer.compare(o1.organizationWorkFromYear(), o2.organizationWorkFromYear());
+        } );
 
         if(resultList.size() > ldbcQuery11.limit()) {
             resultList = resultList.subList(0, ldbcQuery11.limit());

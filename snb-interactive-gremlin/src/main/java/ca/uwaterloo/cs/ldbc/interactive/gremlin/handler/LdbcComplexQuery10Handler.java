@@ -71,7 +71,8 @@ public class LdbcComplexQuery10Handler implements OperationHandler<LdbcQuery10, 
 
 
         List<LdbcQuery10Result> resultList = new ArrayList<>();
-        for ( Result r : results )
+        for ( Result r : results.subList( 0,
+                results.size() > ldbcQuery10.limit() ? ldbcQuery10.limit() : results.size() ) )
         {
             HashMap map = r.get( HashMap.class );
             Vertex person = (Vertex) map.get( "fof" );
@@ -89,6 +90,6 @@ public class LdbcComplexQuery10Handler implements OperationHandler<LdbcQuery10, 
             resultList.add( ldbcQuery10Result );
         }
 
-        resultReporter.report( resultList.size(), resultList.subList( 0, ldbcQuery10.limit() ), ldbcQuery10 );
+        resultReporter.report( resultList.size(), resultList, ldbcQuery10 );
     }
 }
