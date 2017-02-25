@@ -54,9 +54,9 @@ public class LdbcComplexQuery6Handler implements OperationHandler<LdbcQuery6, Db
             throw new DbException("Remote execution failed", e);
         }
 
+        HashMap<String, Long> resultMap = results.get(0).get(HashMap.class);
         List<LdbcQuery6Result> resultList = new ArrayList<>();
-        for(Result r: results) {
-            AbstractMap.SimpleEntry<String, Long> entry = r.get(AbstractMap.SimpleEntry.class);
+        for (HashMap.Entry<String, Long> entry : resultMap.entrySet()) {
             String tagName = entry.getKey();
             int tagCount = Math.toIntExact(entry.getValue());
 

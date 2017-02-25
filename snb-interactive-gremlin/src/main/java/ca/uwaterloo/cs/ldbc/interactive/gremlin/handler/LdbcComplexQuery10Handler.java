@@ -55,7 +55,7 @@ public class LdbcComplexQuery10Handler implements OperationHandler<LdbcQuery10, 
                 "select('pid', 'fof', 'city', 'similarity')." +
                 "sort{-it.get('similarity')}." +
                 "sort{it.get('pid')}." +
-                "collect().subList(0, result_limit)";
+                "collect();";
 
         List<Result> results = null;
 
