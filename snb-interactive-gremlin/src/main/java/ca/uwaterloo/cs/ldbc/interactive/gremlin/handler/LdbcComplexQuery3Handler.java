@@ -56,22 +56,30 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
                 "         __.as('p').in('hasCreator').where(out('isLocatedIn').has('name', countryX)).count().as('countx')," +
                 "         __.as('p').in('hasCreator').where(out('isLocatedIn').has('name', countryY)).count().as('county')" +
                 " ).select('pid', 'person', 'countx', 'county')." +
-                " sort{-it.get('countx')}." +
-                " sort{it.get('pid')};";
+                " sort{it.get('pid')}." +
+                " sort{-it.get('countx')}";
         /*
         g= Neo4jGraph.open('/hdd1/ldbc/datasets/neo4j/validation/').traversal()
-        g.V().has('person', 'iid', 'person:234').
+        g.V().has('person', 'iid', 'person:2202').
         repeat(out('knows').simplePath()).times(2).dedup().as('person').
         values('iid_long').as('pid').
-        select('person').where(out('isLocatedIn').out('isPartOf').has('name', neq('Canada')).
-        and().out('isLocatedIn').out('isPartOf').has('name', neq('United States'))).
+        select('person').where(out('isLocatedIn').out('isPartOf').has('name', neq('Switzerland')).
+        and().out('isLocatedIn').out('isPartOf').has('name', neq('Rwanda'))).
         match(
-           __.as('p').in('hasCreator').where(out('isLocatedIn').has('name', 'Canada')).count().as('countx'),
-           __.as('p').in('hasCreator').where(out('isLocatedIn').has('name', 'United States')).count().as('county')
+           __.as('p').in('hasCreator').where(out('isLocatedIn').has('name', 'Switzerland')).count().as('countx'),
+           __.as('p').in('hasCreator').where(out('isLocatedIn').has('name', 'Rwanda')).count().as('county')
         ).select('pid', 'person', 'countx', 'county').
-        sort{-it.get('countx')}.
         sort{it.get('pid')}.
-        collect().subList(0, 10)
+        sort{-it.get('countx')}
+
+
+      "com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery3",
+      2202,
+      "Switzerland",
+      "Rwanda",
+      1285891200000,
+      31,
+      20
          */
 
         List<Result> results;

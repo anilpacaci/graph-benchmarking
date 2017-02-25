@@ -57,13 +57,13 @@ public class LdbcComplexQuery7Handler implements OperationHandler<LdbcQuery7, Db
             throw new DbException("Remote execution failed", e);
         }
 
-        Map<Vertex, LdbcQuery7Result> qRes = new HashMap<>();
+        List<LdbcQuery7Result> result = new ArrayList<>();
 
         for(Result r : results) {
             HashMap map = r.get(HashMap.class);
-            Edge like = (Edge) r.get(HashMap.class).get("like");
-            Vertex liker = (Vertex) r.get(HashMap.class).get("liker");
-            Vertex post = (Vertex) r.get(HashMap.class).get("post");
+            Edge like = (Edge) map.get("like");
+            Vertex liker = (Vertex) map.get("liker");
+            Vertex post = (Vertex) map.get("post");
 
             boolean notKnows = !authorKnows.contains(liker);
 
@@ -79,32 +79,9 @@ public class LdbcComplexQuery7Handler implements OperationHandler<LdbcQuery7, Db
             }
             int latency = (int) ((likeDate - postDate) / 60000);
 
-            LdbcQuery7Result res = new LdbcQuery7Result(id, firstName, lastName, likeDate, postID, content, latency, notKnows);
+            result.add(new LdbcQuery7Result(id, firstName, lastName, likeDate, postID, content, latency, notKnows));
 
-            if (qRes.containsKey(liker)) {
-                LdbcQuery7Result other = qRes.get(liker);
-                if (other.likeCreationDate() > res.likeCreationDate()) {
-                    continue;
-                }
-                else if (other.likeCreationDate() == res.likeCreationDate() && other.commentOrPostId() < res.commentOrPostId()) {
-                    continue;
-                }
-            }
-
-            qRes.put(liker, res);
         }
-
-        List<LdbcQuery7Result> result = new ArrayList<>(qRes.values());
-        Collections.sort(result, new Comparator<LdbcQuery7Result>() {
-            @Override
-            public int compare(LdbcQuery7Result o1, LdbcQuery7Result o2) {
-                if (o1.likeCreationDate() == o2.likeCreationDate())
-                    return Long.compare(o1.personId(), o2.personId());
-                return Long.compare(o2.likeCreationDate(), o1.likeCreationDate());
-            }
-        });
-        if (result.size() > ldbcQuery7.limit())
-            result = result.subList(0, ldbcQuery7.limit());
 
         resultReporter.report(result.size(), result, ldbcQuery7);
     }

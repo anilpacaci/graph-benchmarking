@@ -53,8 +53,8 @@ public class LdbcComplexQuery10Handler implements OperationHandler<LdbcQuery10, 
                 "   __.as('common2').map(union(identity(), select('totaln')).sum()).as('similarity')" +
                 ").select('fof').out('isLocatedIn').as('city').select('fof').values('iid_long').as('pid')." +
                 "select('pid', 'fof', 'city', 'similarity')." +
-                "sort{-it.get('similarity')}." +
-                "sort{it.get('pid')};";
+                "sort{it.get('pid')}." +
+                "sort{-it.get('similarity')};";
 
         List<Result> results = null;
 

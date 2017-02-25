@@ -51,8 +51,8 @@ public class LdbcComplexQuery12Handler implements OperationHandler<LdbcQuery12, 
                 "__.as('comments').unfold().count().as('count')" +
                 ").where(select('comments').unfold().count().is(gt(0)))." +
                 "select('pid', 'friends', 'count', 'tagnames')." +
-                "sort{-it.get('count')}." +
-                "sort{it.get('pid')};";
+                "sort{it.get('pid')}." +
+                "sort{-it.get('count')}";
         /*
         g= Neo4jGraph.open('/hdd1/ldbc/datasets/neo4j/validation/').traversal()
         g.V().has('person', 'iid', 'person:939').

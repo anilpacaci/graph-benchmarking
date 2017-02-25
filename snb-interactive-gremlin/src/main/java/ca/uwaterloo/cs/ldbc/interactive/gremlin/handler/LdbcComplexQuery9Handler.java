@@ -39,8 +39,9 @@ public class LdbcComplexQuery9Handler implements OperationHandler<LdbcQuery9, Db
         //        ".select('person', 'message')";
         String statement = "g.V().has(person_label, 'iid', person_id)."+
         "repeat(out('knows').simplePath()).times(2).dedup().as('person')."+
-        "in('hasCreator').has('creationDate', lt(max_date)).limit(result_limit).as('message')."+
-        "order().by('creationDate', decr).by('iid_long', incr)."+
+        "in('hasCreator').has('creationDate', lt(max_date)).as('message')."+
+        "order().by('creationDate', decr).by('iid_long', incr)." +
+        "limit(result_limit)."+
         "select('person', 'message')";
         /*
                 g.V().has('person', 'iid', 'person:234').
