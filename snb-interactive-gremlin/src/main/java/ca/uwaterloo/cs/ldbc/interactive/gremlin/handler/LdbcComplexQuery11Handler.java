@@ -41,9 +41,9 @@ public class LdbcComplexQuery11Handler implements OperationHandler<LdbcQuery11, 
         "outE('workAt').has('workFrom', lte(start_year)).as('workEdge')."+
         "inV().as('organization').out('isLocatedIn').has('name', country_name)."+
         "limit(result_limit)."+
-        "select('workEdge').order().by('workFrom')."+
-        "select('friend').order().by('iid_long')."+
         "select('organization').order().by('name', decr)."+
+        "select('friend').order().by('iid_long')."+
+        "select('workEdge').order().by('workFrom')."+
         "select('friend', 'workEdge', 'organization')";
         /*
         g.V().has('person', 'iid', 'person:234').

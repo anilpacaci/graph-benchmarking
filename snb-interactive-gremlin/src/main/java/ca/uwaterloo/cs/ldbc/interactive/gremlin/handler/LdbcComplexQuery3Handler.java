@@ -55,31 +55,20 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
                 " match(" +
                 "         __.as('p').in('hasCreator').where(out('isLocatedIn').has('name', countryX)).count().as('countx')," +
                 "         __.as('p').in('hasCreator').where(out('isLocatedIn').has('name', countryY)).count().as('county')" +
-                " ).select('pid', 'person', 'countx', 'county')." +
-                " sort{it.get('pid')}." +
-                " sort{-it.get('countx')}";
+                " ).order().by(select('countx'), decr).by(select('pid')).limit(result_limit)." +
+                "select('person', 'countx', 'county')";
         /*
         g= Neo4jGraph.open('/hdd1/ldbc/datasets/neo4j/validation/').traversal()
         g.V().has('person', 'iid', 'person:2202').
-        repeat(out('knows').simplePath()).times(2).dedup().as('person').
-        values('iid_long').as('pid').
-        select('person').where(out('isLocatedIn').out('isPartOf').has('name', neq('Switzerland')).
+        repeat(out('knows').simplePath().aggregate('x')).times(2).select('x').unfold().dedup().
+        as('person').
+        where(out('isLocatedIn').out('isPartOf').has('name', neq('Switzerland')).
         and().out('isLocatedIn').out('isPartOf').has('name', neq('Rwanda'))).
         match(
            __.as('p').in('hasCreator').where(out('isLocatedIn').has('name', 'Switzerland')).count().as('countx'),
            __.as('p').in('hasCreator').where(out('isLocatedIn').has('name', 'Rwanda')).count().as('county')
-        ).select('pid', 'person', 'countx', 'county').
-        sort{it.get('pid')}.
-        sort{-it.get('countx')}
-
-
-      "com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery3",
-      2202,
-      "Switzerland",
-      "Rwanda",
-      1285891200000,
-      31,
-      20
+        ).order().by(select('countx'), decr).by(select('person').values('iid_long')).limit(20).
+        select('person', 'countx', 'county')
          */
 
         List<Result> results;
@@ -93,8 +82,7 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
         }
 
         List<LdbcQuery3Result> resultList = new ArrayList<>();
-        for ( Result r : results.subList( 0,
-                results.size() > ldbcQuery3.limit() ? ldbcQuery3.limit() : results.size() ) )
+        for ( Result r : results )
         {
             HashMap map = r.get( HashMap.class );
             Vertex person = (Vertex) map.get( "person" );

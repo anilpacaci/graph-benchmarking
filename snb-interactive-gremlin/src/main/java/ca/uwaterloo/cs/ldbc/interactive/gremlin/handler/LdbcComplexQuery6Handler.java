@@ -33,18 +33,21 @@ public class LdbcComplexQuery6Handler implements OperationHandler<LdbcQuery6, Db
         "in('hasCreator').hasLabel('post')."+
         "where(out('hasTag').has('name', tag_name))."+
         "out('hasTag').has('name', neq(tag_name)).groupCount().by('name')."+
-        "order(local).by(values, decr)."+
-        "order(local).by(keys)."+
+        "order(local).by(keys).by(values, decr)."+
         "limit(local, result_limit)";
         /*
-                g.V().has('person', 'iid', 'person:234').
+                g.V().has('person', 'iid', 'person:2738').
                 repeat(out('knows').simplePath()).times(2).dedup().
                 in('hasCreator').hasLabel('post').
-                where(out('hasTag').has('name', 'Augustine_of_Hippo')).
-                out('hasTag').has('name', neq('Augustine_of_Hippo')).groupCount().by('name').
-                order(local).by(values, decr).
-                order(local).by(keys).
-                limit(local, 20)
+                where(out('hasTag').has('name', 'James_Monroe')).
+                out('hasTag').has('name', neq('James_Monroe')).groupCount().by('name').
+                order(local).by(values, decr).by(keys).
+                limit(local, 10)
+
+
+                      2738,
+      "James_Monroe",
+      10
                 */
 
         List<Result> results = null;

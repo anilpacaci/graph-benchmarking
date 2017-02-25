@@ -59,13 +59,18 @@ public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, Db
                 "order(local).by(values, decr)." +
                 "limit(local, result_limit)";
         /*
-        g.V().has('person', 'iid', 'person:234').
+        g.V().has('person', 'iid', 'person:2202').
         repeat(out('knows').simplePath()).times(2).dedup().aggregate('member').
-        inE('hasMember').has('joinDate',gte(12345)).outV().as('forum_name').
-        out('containerOf').as('post').out('hasCreator').where(within('member')).select('post').
+        inE('hasMember').has('joinDate',gte(1289520000000)).outV().as('forum_name').
+        out('containerOf').as('post').out('hasCreator').where(within('member')).
+        select('post').
         groupCount().by(__.in('containerOf')).
         order(local).by(values, decr).
         limit(local, 20)
+
+         2202,
+      ,
+      20
 
 
          */

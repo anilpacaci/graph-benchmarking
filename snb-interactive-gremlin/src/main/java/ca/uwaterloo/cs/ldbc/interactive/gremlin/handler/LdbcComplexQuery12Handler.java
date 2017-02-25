@@ -50,12 +50,11 @@ public class LdbcComplexQuery12Handler implements OperationHandler<LdbcQuery12, 
                 "__.as('comments').unfold().out('hasTag').values('name').fold().as('tagnames')," +
                 "__.as('comments').unfold().count().as('count')" +
                 ").where(select('comments').unfold().count().is(gt(0)))." +
-                "select('pid', 'friends', 'count', 'tagnames')." +
-                "sort{it.get('pid')}." +
-                "sort{-it.get('count')}";
+                "order().by(select('count'), decr).by(select('pid'))." +
+                "select('friends', 'count', 'tagnames')";
         /*
         g= Neo4jGraph.open('/hdd1/ldbc/datasets/neo4j/validation/').traversal()
-        g.V().has('person', 'iid', 'person:939').
+        g.V().has('person', 'iid', 'person:1129').
         out('knows').as('friends').values('iid_long').as('pid').
         select('friends').
         match(
@@ -64,12 +63,9 @@ public class LdbcComplexQuery12Handler implements OperationHandler<LdbcQuery12, 
             repeat(out('hasType')).until(has('name', 'Politician'))).fold().as('comments'),
         __.as('comments').unfold().out('hasTag').values('name').fold().as('tagnames'),
         __.as('comments').unfold().count().as('count')
-        ).where(select('comments').unfold().count().is(gt(0))).
-        select('pid', 'friends', 'count', 'tagnames').
-        sort{-it.get('count')}.
-        sort{it.get('pid')}
-        .
-        collect()
+        ).where(select('count').is(gt(0))).
+        order().by(select('count'), decr).by(select('friends').value('iid_long')).
+        select('friends', 'count', 'tagnames')
 
         tagclass=Politician, result_limit=20, person_label=person, person_id=person:939
          */
@@ -85,8 +81,7 @@ public class LdbcComplexQuery12Handler implements OperationHandler<LdbcQuery12, 
         }
 
         ArrayList<LdbcQuery12Result> ldbcQuery12Results = new ArrayList<>();
-        for ( Result r : results.subList( 0,
-                results.size() > ldbcQuery12.limit() ? ldbcQuery12.limit() : results.size() ) )
+        for ( Result r : results )
         {
             HashMap map = r.get( HashMap.class );
             Vertex person = (Vertex) map.get( "friends" );

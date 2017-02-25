@@ -52,9 +52,9 @@ public class LdbcComplexQuery10Handler implements OperationHandler<LdbcQuery10, 
                 "   __.as('p').in('hasCreator').hasLabel('post').out('hasTag').count().fold(-1, mult).as('totaln')," +
                 "   __.as('common2').map(union(identity(), select('totaln')).sum()).as('similarity')" +
                 ").select('fof').out('isLocatedIn').as('city').select('fof').values('iid_long').as('pid')." +
-                "select('pid', 'fof', 'city', 'similarity')." +
-                "sort{it.get('pid')}." +
-                "sort{-it.get('similarity')};";
+                "order().by(select('similarity'), decr).by(select('pid'))." +
+                "limit(result_limit)." +
+                "select('pid', 'fof', 'city', 'similarity')";
 
         List<Result> results = null;
 
@@ -70,8 +70,7 @@ public class LdbcComplexQuery10Handler implements OperationHandler<LdbcQuery10, 
 
 
         List<LdbcQuery10Result> resultList = new ArrayList<>();
-        for ( Result r : results.subList( 0,
-                results.size() > ldbcQuery10.limit() ? ldbcQuery10.limit() : results.size() ) )
+        for ( Result r : results)
         {
             HashMap map = r.get( HashMap.class );
             Vertex person = (Vertex) map.get( "fof" );
