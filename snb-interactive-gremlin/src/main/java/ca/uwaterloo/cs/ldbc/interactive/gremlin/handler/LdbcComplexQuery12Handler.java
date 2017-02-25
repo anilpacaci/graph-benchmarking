@@ -53,8 +53,7 @@ public class LdbcComplexQuery12Handler implements OperationHandler<LdbcQuery12, 
                 "select('pid', 'friends', 'count', 'tagnames')." +
                 "sort{-it.get('count')}." +
                 "sort{it.get('pid')}." +
-                "collect()." +
-                "subList(0, result_limit)";
+                "collect();";
         /*
         g= Neo4jGraph.open('/hdd1/ldbc/datasets/neo4j/validation/').traversal()
         g.V().has('person', 'iid', 'person:234').
@@ -70,7 +69,6 @@ public class LdbcComplexQuery12Handler implements OperationHandler<LdbcQuery12, 
         sort{it.get('pid')}.
         collect().
         subList(0, 20)
-
          */
 
         List<Result> results = null;
@@ -84,7 +82,8 @@ public class LdbcComplexQuery12Handler implements OperationHandler<LdbcQuery12, 
         }
 
         ArrayList<LdbcQuery12Result> ldbcQuery12Results = new ArrayList<>();
-        for ( Result r : results )
+        for ( Result r : results.subList( 0,
+                results.size() > ldbcQuery12.limit() ? ldbcQuery12.limit() : results.size() ) )
         {
             HashMap map = r.get( HashMap.class );
             Vertex person = (Vertex) map.get( "friends" );
