@@ -37,7 +37,7 @@ public class LdbcComplexQuery8Handler implements OperationHandler<LdbcQuery8, Db
                 ".by('iid_long', incr).as('comment')" +
                 ".out('hasCreator').as('person')" +
                 ".limit(result_limit)" +
-                ".select('person', 'comment')";
+                ".select('person', 'comment');";
 
         List<Result> results = null;
         try {

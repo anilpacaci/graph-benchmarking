@@ -57,8 +57,7 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
                 "         __.as('p').in('hasCreator').where(out('isLocatedIn').has('name', countryY)).count().as('county')" +
                 " ).select('pid', 'person', 'countx', 'county')." +
                 " sort{-it.get('countx')}." +
-                " sort{it.get('pid')}." +
-                " collect();";
+                " sort{it.get('pid')};";
         /*
         g= Neo4jGraph.open('/hdd1/ldbc/datasets/neo4j/validation/').traversal()
         g.V().has('person', 'iid', 'person:234').

@@ -54,8 +54,7 @@ public class LdbcComplexQuery10Handler implements OperationHandler<LdbcQuery10, 
                 ").select('fof').out('isLocatedIn').as('city').select('fof').values('iid_long').as('pid')." +
                 "select('pid', 'fof', 'city', 'similarity')." +
                 "sort{-it.get('similarity')}." +
-                "sort{it.get('pid')}." +
-                "collect();";
+                "sort{it.get('pid')};";
 
         List<Result> results = null;
 
