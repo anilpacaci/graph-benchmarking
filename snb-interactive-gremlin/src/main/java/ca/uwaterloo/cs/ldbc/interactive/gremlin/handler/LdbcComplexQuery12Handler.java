@@ -49,7 +49,7 @@ public class LdbcComplexQuery12Handler implements OperationHandler<LdbcQuery12, 
                 "        repeat(out('hasType')).until(has('name', tagclass))).fold().as('comments')," +
                 "__.as('comments').unfold().out('hasTag').values('name').fold().as('tagnames')," +
                 "__.as('comments').unfold().count().as('count')" +
-                ").where(select('comments').unfold().count().is(gt(0)))."+
+                ").where(select('comments').unfold().count().is(gt(0)))." +
                 "select('pid', 'friends', 'count', 'tagnames')." +
                 "sort{-it.get('count')}." +
                 "sort{it.get('pid')};";
@@ -92,7 +92,7 @@ public class LdbcComplexQuery12Handler implements OperationHandler<LdbcQuery12, 
             Vertex person = (Vertex) map.get( "friends" );
             Long count = (Long) map.get( "count" );
             List<Object> tags = (List<Object>) map.get( "tags" );
-            List<String> tagList = tags.stream().map( Object::toString ).collect( Collectors.toList() );
+            List<String> tagList = tags.size() == 0 ? new ArrayList<>() : tags.stream().map( Object::toString ).collect( Collectors.toList() );
 
             LdbcQuery12Result ldbcQuery12Result = new LdbcQuery12Result( GremlinUtils.getSNBId( person ), person.<String>property( "firstName" ).value(),
                     person.<String>property( "lastName" ).value(),
