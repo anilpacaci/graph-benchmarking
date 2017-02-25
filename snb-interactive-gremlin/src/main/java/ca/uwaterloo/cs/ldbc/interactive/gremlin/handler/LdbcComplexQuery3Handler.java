@@ -34,12 +34,32 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
 
         String statement = "g.V().has(person_label, 'iid', person_id)" +
             ".repeat(out('knows')).times(2).emit().as('person')" +
-            ".where(out('isLocatedIn').out('isPartOf').has('name', neq(countryX)).and().out('isLocatedIn').out('isPartOf').has('name', neq(countryY)))" +
+            ".where(out('isLocatedIn').out('isPartOf').has('name', neq(countryX))" +
+            ".and().out('isLocatedIn').out('isPartOf').has('name', neq(countryY)))" +
             ".in('hasCreator')" +
-            ".where(out('isLocatedIn').has('name', countryX).or().out('isLocatedIn').has('name', countryY))" +
-            ".has('creationDate', inside(start_date, end_date))" +
-            ".group().by(out('hasCreator'))" +
-            ".by(groupCount().by(out('isLocatedIn').values('name')))";
+            ".where(out('isLocatedIn').has('name', countryX)" +
+            ".or().out('isLocatedIn').has('name', countryY))" +
+            ".has('creationDate', inside(start_date, end_date)).as('message')" +
+            ".out('hasCreator').order().by('iid_long')" +
+            ".select('message').group().by(out('hasCreator'))" +
+            ".by(groupCount().by(out('isLocatedIn')).values('name')))" +
+            ".limit(local, result_limit)";
+
+        /*
+        g= Neo4jGraph.open('/hdd1/ldbc/datasets/neo4j/validation/').traversal()
+        g.V().has('person', 'iid', 'person:234').
+        repeat(out('knows').simplePath()).times(2).dedup().as('person').
+        values('iid_long').as('pid').
+        select('person').where(out('isLocatedIn').out('isPartOf').has('name', neq('Canada')).
+        and().out('isLocatedIn').out('isPartOf').has('name', neq('United States'))).
+        match(
+           __.as('p').in('hasCreator').where(out('isLocatedIn').has('name', 'Canada')).count().as('countx'),
+           __.as('p').in('hasCreator').where(out('isLocatedIn').has('name', 'United States')).count().as('county')
+        ).select('pid', 'person', 'countx', 'county').
+        sort{-it.get('countx')}.
+        sort{it.get('pid')}.
+        collect().subList(0, 10)
+         */
 
         List<Result> results;
         try {

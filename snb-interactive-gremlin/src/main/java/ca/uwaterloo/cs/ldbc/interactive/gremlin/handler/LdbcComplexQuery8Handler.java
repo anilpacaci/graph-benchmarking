@@ -33,8 +33,10 @@ public class LdbcComplexQuery8Handler implements OperationHandler<LdbcQuery8, Db
 
         String statement = "g.V().has(person_label, 'iid', person_id)" +
                 ".in('hasCreator').in('replyOf')" +
-                ".order().by('creationDate', decr).by('iid_long', incr).limit(result_limit).as('comment')" +
+                ".order().by('creationDate', decr)" +
+                ".by('iid_long', incr).as('comment')" +
                 ".out('hasCreator').as('person')" +
+                ".limit(result_limit)" +
                 ".select('person', 'comment')";
 
         List<Result> results = null;

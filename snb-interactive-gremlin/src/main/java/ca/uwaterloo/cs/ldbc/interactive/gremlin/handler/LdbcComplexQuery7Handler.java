@@ -47,6 +47,7 @@ public class LdbcComplexQuery7Handler implements OperationHandler<LdbcQuery7, Db
                 ".in('hasCreator').as('post')" +
                 ".inE('likes').order().by('creationDate', decr).as('like')" +
                 ".outV().order().by('iid_long').as('liker')" +
+                ".limit(result_limit)" +
                 ".select('post', 'like', 'liker')";
 
         List<Result> results = null;

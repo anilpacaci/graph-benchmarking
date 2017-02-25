@@ -32,11 +32,25 @@ public class LdbcComplexQuery11Handler implements OperationHandler<LdbcQuery11, 
         params.put("result_limit", ldbcQuery11.limit());
 
         String statement = "g.V().has(person_label, 'iid', person_id)" +
-                ".repeat(out('knows').simplePath()).until(loops().is(gte(2))).dedup().as('friend')" +
-                ".outE('workAt').has('workFrom', lte(start_year)).as('startDate').inV().as('organization')" +
-                ".out('isLocatedIn').has('name', country_name)" +
+                ".repeat(out('knows').simplePath()).times(2).dedup().as('friend')" +
+                ".outE('workAt').has('workFrom', lte(start_year)).as('startDate')" +
+                ".inV().as('organization').out('isLocatedIn').has('name', country_name)" +
                 ".select('friend', 'startDate', 'organization')";
+        /*
+        g.V().has('person', 'iid', 'person:234').
+        repeat(out('knows').simplePath()).times(2).dedup().as('friend').
+        outE('workAt').has('workFrom', lte('2016')).as('workEdge').
+        inV().as('organization').out('isLocatedIn').has('name', 'Mexico').
+        limit(result_limit).
+        select('workEdge').order().by('workFrom').
+        select('friend').order().by('iid_long').
+        select('organization').order().by('name', decr).
+        select('friend', 'workEdge', 'organization')
+        */
 
+       // 1st Person-worksAt->.worksFrom (ascending)
+       // 2nd Person.id (ascending)
+       // 3st Person-worksAt->Organization.name (descending)
         List<Result> results = null;
         try {
             results = client.submit(statement, params).all().get();
@@ -50,7 +64,7 @@ public class LdbcComplexQuery11Handler implements OperationHandler<LdbcQuery11, 
             HashMap map = r.get(HashMap.class);
             Vertex person = (Vertex) map.get("friend");
             Vertex organization = (Vertex) map.get("organization");
-            Edge workAt = (Edge) map.get("startDate");
+            Edge workAt = (Edge) map.get("workEdge");
 
             LdbcQuery11Result ldbcQuery11Result = new LdbcQuery11Result(GremlinUtils.getSNBId(person),
                     person.<String>property("firstName").value(),

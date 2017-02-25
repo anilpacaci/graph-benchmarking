@@ -56,8 +56,8 @@ public class LdbcComplexQuery4Handler implements OperationHandler<LdbcQuery4, Db
             ".out('hasTag')" +
             ".is(without(select('before_tags')))" +
             ".groupCount().by('name')" +
-            ".order().by(valueDecr)" +
-            ".limit(result_limit)";
+            ".order(local).by(values, decr)" +
+            ".limit(local, result_limit)";
         List<Result> results;
         try {
             results = client.submit(statement, params).all().get();

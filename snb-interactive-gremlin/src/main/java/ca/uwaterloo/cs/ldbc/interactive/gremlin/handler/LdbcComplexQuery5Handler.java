@@ -45,8 +45,23 @@ public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, Db
 
         String statement = "g.V().has(person_label, 'iid', person_id).repeat(out('knows')).times(2).emit().dedup().aggregate('member')" +
                 ".inE('hasMember').has('joinDate',gte(min_date)).outV().as('forum_name')" +
-                ".out('containerOf').as('post').out('hasCreator').where(within('member')).select('post').groupCount().by(__.in('containerOf'))" +
-            ".limit(local, 20);";
+                ".out('containerOf').as('post').out('hasCreator').where(within('member')).select('post')" +
+                ".groupCount().by(__.in('containerOf'))" +
+                ".order(local).by(value, decr)" +
+                //".order(local).by(key, incr)" +
+                ".limit(local, 20);";
+        /*
+        g.V().has('person', 'iid', 'person:234').
+        repeat(out('knows').simplePath()).times(2).dedup().aggregate('member').
+        inE('hasMember').has('joinDate',gte(12345)).outV().as('forum_name').
+        out('containerOf').as('post').out('hasCreator').where(within('member')).select('post').
+        groupCount().by(__.in('containerOf')).
+        order(local).by(values, decr).
+        limit(local, 20)
+
+
+        // order(local).by(keys, incr) in java
+         */
         List<Result> results;
         try {
             results = client.submit(statement, params).all().get();
@@ -58,7 +73,7 @@ public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, Db
 
         List<LdbcQuery5Result> resultList = new ArrayList<>();
         for (Map.Entry<Vertex, Long> r : resultMap.entrySet()) {
-            Vertex forum = (Vertex) r.getKey();
+            Vertex forum = r.getKey();
             String forum_name = forum.<String>property("title").value();
             Long count = r.getValue();
 

@@ -34,9 +34,23 @@ public class LdbcComplexQuery12Handler implements OperationHandler<LdbcQuery12, 
 
         String statement = "g.V().has(person_label, 'iid', person_id)" +
                 ".out('knows').limit(result_limit).as('friends')" +
-                ".in('hasCreator').where(out('replyOf').hasLabel('post').out('hasTag').repeat(out('hasType')).until(has('name', tagclass))).as('messages')" +
+                ".in('hasCreator').where(out('replyOf').hasLabel('post')" +
+                ".out('hasTag').repeat(out('hasType')).until(has('name', tagclass))).as('messages')" +
                 ".out('hasTag').values('name').as('tags')" +
                 ".select('friends', 'messages', 'tags')";
+        /*
+        g.V().has('person', 'iid', 'person:52').
+        out('knows').as('friends').values('iid_long').as('pid').
+        select('friends').match(
+        __.as('f').in('hasCreator').hasLabel('comment').where(out('replyOf').hasLabel('post').out('hasTag').repeat(out('hasType')).until(has('name', 'Person'))).as('comments'),
+        __.as('comments').count().as('count')
+        ).select('comments').out('hasTag').values('name').as('tagnames').
+        select('pid', 'friends', 'count', 'tagnames').
+        sort{-it.get('count')}.
+        sort{it.get('pid')}.
+        collect().
+        subList(0, 20)
+         */
 
         List<Result> results = null;
         try {

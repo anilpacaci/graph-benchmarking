@@ -3,16 +3,20 @@ package ca.uwaterloo.cs.ldbc.interactive.gremlin.handler;
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.Entity;
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinDbConnectionState;
 import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinUtils;
-import com.ldbc.driver.*;
+import com.ldbc.driver.DbConnectionState;
+import com.ldbc.driver.DbException;
+import com.ldbc.driver.OperationHandler;
+import com.ldbc.driver.ResultReporter;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery10;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery10Result;
-import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery8Result;
-import org.apache.tinkerpop.gremlin.driver.*;
 import org.apache.tinkerpop.gremlin.driver.Client;
-import org.apache.tinkerpop.gremlin.structure.Edge;
+import org.apache.tinkerpop.gremlin.driver.Result;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 public class LdbcComplexQuery10Handler implements OperationHandler<LdbcQuery10, DbConnectionState> {
@@ -47,7 +51,33 @@ public class LdbcComplexQuery10Handler implements OperationHandler<LdbcQuery10, 
                     +"      __.as('p').in('hasCreator').hasLabel('post').out('hasTag').where(within('persontags')).count().fold(2, mult).as('common2'), "
                     +"      __.as('p').in('hasCreator').hasLabel('post').out('hasTag').count().fold(-1, mult).as('totaln'),                             "
                     +"        __.as('common2').map(union(identity(), select('totaln')).sum()).as('similarity')                                          "
-                    +"      ).select('p').out('isLocatedIn').as('city').select('p', 'city', 'similarity').sort{-it.get('similarity')}.collect().subList(0, result_limit)                                                                                               ";
+                    +"      ).select('p').out('isLocatedIn').as('city').select('p', 'city', 'similarity').sort{-it.get('similarity')}.collect().subList(0, result_limit)";
+    /*
+    g.V().has(person_label, 'iid', person_id).as('startPerson').
+            out('hasInterest').aggregate('persontags').
+            select('startPerson').repeat(out('knows').simplePath()).times(2).dedup().
+            filter{ it -> ts = it.get().value('birthday');
+                Calendar cal = Calendar.getInstance();
+                Calendar lowercal = Calendar.getInstance();
+                Calendar highercal = Calendar.getInstance();
+                cal.setTime(new java.util.Date(ts));
+                int day = cal.get(Calendar.DAY_OF_MONTH);
+                int month = cal.get(Calendar.MONTH);
+                int year = cal.get(Calendar.YEAR);
+                month = day < 21 ? month-1 : month;
+                lowercal.set(year, month, 21);
+                highercal.set(year, month+1, 22);
+                return lowercal.compareTo(cal) <= 0 && highercal.compareTo(cal) > 0;
+            }.as('fof').match(
+               __.as('p').in('hasCreator').hasLabel('post').out('hasTag').where(within('persontags')).count().fold(2, mult).as('common2'),
+               __.as('p').in('hasCreator').hasLabel('post').out('hasTag').count().fold(-1, mult).as('totaln'),
+               __.as('common2').map(union(identity(), select('totaln')).sum()).as('similarity')
+            ).select('fof').out('isLocatedIn').as('city').select('fof').values('iid_long').as('pid').
+            select('pid', 'fof', 'city', 'similarity').
+            sort{-it.get('similarity')}.
+            sort{it.get('pid')}.
+            collect().subList(0, result_limit)
+      */
 
     List<Result> results = null;
 

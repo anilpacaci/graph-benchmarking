@@ -56,6 +56,7 @@ public class LdbcComplexQuery14Handler implements OperationHandler<LdbcQuery14, 
     }
 
 
+    //TODO: sort results by weight, decr
     List<LdbcQuery14Result> resultList = new ArrayList<>();
     for (Result r : results) {
       HashMap map = r.get( HashMap.class );
