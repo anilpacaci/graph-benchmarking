@@ -43,31 +43,36 @@ public class LdbcComplexQuery12Handler implements OperationHandler<LdbcQuery12, 
         //        ".select('friends', 'messages', 'tags')";
         String statement = "g.V().has(person_label, 'iid', person_id)." +
                 "out('knows').as('friends').values('iid_long').as('pid')." +
-                "select('friends').match(" +
+                "select('friends').where(.match(" +
                 "__.as('f').in('hasCreator').hasLabel('comment')." +
                 "        where(out('replyOf').hasLabel('post').out('hasTag')." +
                 "        repeat(out('hasType')).until(has('name', 'Person'))).fold().as('comments')," +
-                "        __.as('comments').unfold().out('hasTag').values('name').fold().as('tagnames')," +
-                "        __.as('comments').unfold().count().as('count')" +
-                ").select('comments').out('hasTag').values('name').as('tagnames')." +
+                "__.as('comments').unfold().out('hasTag').values('name').fold().as('tagnames')," +
+                "__.as('comments').unfold().count().as('count')" +
+                ").select('comments').unfold().where(count().is(gt(0))."+
                 "select('pid', 'friends', 'count', 'tagnames')." +
+                "filter{it.get('count') > 0}." +
                 "sort{-it.get('count')}." +
                 "sort{it.get('pid')}";
         /*
         g= Neo4jGraph.open('/hdd1/ldbc/datasets/neo4j/validation/').traversal()
-        g.V().has('person', 'iid', 'person:234').
+        g.V().has('person', 'iid', 'person:939').
         out('knows').as('friends').values('iid_long').as('pid').
-        select('friends').match(
+        select('friends').
+        match(
         __.as('f').in('hasCreator').hasLabel('comment').
             where(out('replyOf').hasLabel('post').out('hasTag').
-            repeat(out('hasType')).until(has('name', 'Person'))).fold().as('comments'),
+            repeat(out('hasType')).until(has('name', 'Politician'))).fold().as('comments'),
         __.as('comments').unfold().out('hasTag').values('name').fold().as('tagnames'),
         __.as('comments').unfold().count().as('count')
-        ).select('pid', 'friends', 'count', 'tagnames').
+        ).select('comments').unfold().where(count().is(gt(0))).
+        select('pid', 'friends', 'count', 'tagnames').
         sort{-it.get('count')}.
-        sort{it.get('pid')}.
-        collect().
-        subList(0, 20)
+        sort{it.get('pid')}
+        .
+        collect()
+
+        tagclass=Politician, result_limit=20, person_label=person, person_id=person:939
          */
 
         List<Result> results = null;
