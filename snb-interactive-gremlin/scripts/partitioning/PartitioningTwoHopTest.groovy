@@ -59,7 +59,6 @@ class PartitioningTwoHopTest {
             queryRecord.add(partitionId.toString())
             queryRecord.add(oneHopCount.toString())
             queryRecord.add(twoHopCount.toString())
-            queryRecord.add(totalPartitions.toString())
             queryRecord.add(neighbourhoodRetrievalInMicroSeconds.toString())
             queryRecord.add(propertiesRetrievalInMicroSeconds.toString())
             queryRecord.add(totalQueryDurationInMicroSeconds.toString())
