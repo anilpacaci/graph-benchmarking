@@ -46,8 +46,8 @@ public class LdbcComplexQuery10Handler implements OperationHandler<LdbcQuery10, 
                 "    month = day < 21 ? month-1 : month;" +
                 "    println(month); return month == givenmonth" +
                 "}.as('fof').match(" +
-                "   __.as('p').in('hasCreator').hasLabel('post').out('hasTag').where(within('persontags')).count().fold(2, mult).as('common2')," +
-                "   __.as('p').in('hasCreator').hasLabel('post').out('hasTag').count().fold(-1, mult).as('totaln')," +
+                "   __.as('p').in('hasCreator').hasLabel('post').where(out('hasTag').within('persontags')).count().fold(2, mult).as('common2')," +
+                "   __.as('p').in('hasCreator').hasLabel('post').count().fold(-1, mult).as('totaln')," +
                 "   __.as('common2').map(union(identity(), select('totaln')).sum()).as('similarity')" +
                 ").select('fof').out('isLocatedIn').as('city').select('fof').values('iid_long').as('pid')." +
                 "order().by(select('similarity'), decr).by(select('pid'))." +
