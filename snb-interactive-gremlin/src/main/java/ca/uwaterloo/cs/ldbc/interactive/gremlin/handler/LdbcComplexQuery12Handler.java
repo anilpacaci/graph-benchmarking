@@ -45,10 +45,12 @@ public class LdbcComplexQuery12Handler implements OperationHandler<LdbcQuery12, 
                 "out('knows').as('friends').values('iid_long').as('pid')." +
                 "select('friends').match(" +
                 "__.as('f').in('hasCreator').hasLabel('comment')." +
-                "        where(out('replyOf').hasLabel('post').out('hasTag')." +
-                "        repeat(out('hasType')).until(has('name', tagclass))).fold().as('comments')," +
-                "__.as('comments').unfold().out('hasTag').values('name').fold().as('tagnames')," +
-                "__.as('comments').unfold().count().as('count')" +
+                "        where(out('replyOf').hasLabel('post').out('hasTag').out('hasType')." +
+                "        until(has('name', tagclass)).repeat(out('isSubclassOf')).count().is(gt(0))).fold().as('comments')," +
+                "__.as('comments').unfold().out('replyOf').out('hasTag')." +
+                "        where(out('hasType').until(has('name', tagclass)).repeat(out('isSubclassOf')).count().is(gt(0)))." +
+                "        values('name').fold().as('tagnames')," +
+                "__.as('comments').count().as('count')" +
                 ").where(select('comments').unfold().count().is(gt(0)))." +
                 "order().by(select('count'), decr).by(select('pid'))." +
                 "select('friends', 'count', 'tagnames')";
