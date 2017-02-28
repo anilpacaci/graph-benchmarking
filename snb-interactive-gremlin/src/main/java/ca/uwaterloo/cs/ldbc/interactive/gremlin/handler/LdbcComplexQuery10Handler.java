@@ -30,23 +30,21 @@ public class LdbcComplexQuery10Handler implements OperationHandler<LdbcQuery10, 
         params.put( "person_id", GremlinUtils.makeIid( Entity.PERSON, ldbcQuery10.personId() ) );
         params.put( "person_label", Entity.PERSON.getName() );
         params.put( "result_limit", ldbcQuery10.limit() );
-        params.put( "month", ldbcQuery10.month() );
+        params.put( "givenmonth", ldbcQuery10.month() );
 
-        String statement = "g.V().has(person_label, 'iid', person_id).as('startPerson')." +
+        String statement = "g.V().has(person_label, 'iid', person_id).as('startPerson').aggregate('0')." +
                 "out('hasInterest').aggregate('persontags')." +
-                "select('startPerson').repeat(out('knows').simplePath()).times(2).dedup()." +
+                "select('startPerson').out('knows').aggregate('1')." +
+                "out('knows').where(without('0')).where(without('1')).dedup()." +
                 "filter{ it -> ts = it.get().value('birthday');" +
                 "    Calendar cal = Calendar.getInstance();" +
                 "    Calendar lowercal = Calendar.getInstance();" +
                 "    Calendar highercal = Calendar.getInstance();" +
                 "    cal.setTime(new java.util.Date(ts));" +
                 "    int day = cal.get(Calendar.DAY_OF_MONTH);" +
-                "    int month = cal.get(Calendar.MONTH);" +
-                "    int year = cal.get(Calendar.YEAR);" +
+                "    int month = cal.get(Calendar.MONTH) + 1;" +
                 "    month = day < 21 ? month-1 : month;" +
-                "    lowercal.set(year, month, 21);" +
-                "    highercal.set(year, month+1, 22);" +
-                "    return lowercal.compareTo(cal) <= 0 && highercal.compareTo(cal) > 0;" +
+                "    println(month); return month == givenmonth" +
                 "}.as('fof').match(" +
                 "   __.as('p').in('hasCreator').hasLabel('post').out('hasTag').where(within('persontags')).count().fold(2, mult).as('common2')," +
                 "   __.as('p').in('hasCreator').hasLabel('post').out('hasTag').count().fold(-1, mult).as('totaln')," +
