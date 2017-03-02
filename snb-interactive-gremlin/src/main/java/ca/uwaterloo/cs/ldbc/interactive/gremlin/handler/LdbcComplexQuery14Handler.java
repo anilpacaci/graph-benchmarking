@@ -29,25 +29,24 @@ public class LdbcComplexQuery14Handler implements OperationHandler<LdbcQuery14, 
         params.put( "person2_id", GremlinUtils.makeIid( Entity.PERSON, ldbcQuery14.person2Id() ) );
         params.put( "person_label", Entity.PERSON.getName() );
 
-        String statement =
-                "static double calculateWeight(GraphTraversalSource g, Long v1, Long v2) {" +
-                        "long postForward = g.V(v1).in('hasCreator').hasLabel('post').in('replyOf').out('hasCreator').hasId(v2).count().next(); " +
-                        "long postBackward = g.V(v2).in('hasCreator').hasLabel('post').in('replyOf').out('hasCreator').hasId(v1).count().next(); " +
-                        "long commentForward = g.V(v1).in('hasCreator').hasLabel('comment').in('replyOf').out('hasCreator').hasId(v2).count().next(); " +
-                        "long  commentBackward = g.V(v2).in('hasCreator').hasLabel('comment').in('replyOf').out('hasCreator').hasId(v1).count().next(); " +
-                        "long score = postForward + postBackward + 0.5 * (commentForward + commentBackward); return score;}; "
-                        + "scoreMap = [:];"
-                        + "shortestPathLength = g.V().has(person_label, 'iid', person1_id).repeat(out('knows').simplePath())" +
-                        ".until(has(person_label, 'iid', person2_id)).path().limit(1).count(local).next();"
-                        + "g.V().has(person_label, 'iid', person1_id).repeat(out('knows').simplePath()).until(loops().is(gte(shortestPathLength - 1))).   "
-                        + "filter(has(person_label, 'iid', person2_id)).path().as('shortestPaths').sideEffect{"
-                        + "        path = it.get(); "
-                        + "        totalScore = 0;"
-                        + "        for(int i = 0; i < path.size() - 2; i++) "
-                        + "            totalScore += calculateWeight(g, path.get(i).id(), path.get(i + 1).id());"
-                        + "        scoreMap.put(path, totalScore);   "
-                        + "};"
-                        + "scoreMap;";
+        String statement =             "static double calculateWeight(GraphTraversalSource g, Long v1, Long v2) {" +
+                "long postForward = g.V().has('person', 'iid_long', v1).in('hasCreator').hasLabel('post').in('replyOf').out('hasCreator').has('person', 'iid_long', v2).count().next(); " +
+                "long postBackward = g.V().has('person', 'iid_long', v2).in('hasCreator').hasLabel('post').in('replyOf').out('hasCreator').has('person', 'iid_long', v1).count().next(); " +
+                "long commentForward = g.V().has('person', 'iid_long', v1).in('hasCreator').hasLabel('comment').in('replyOf').out('hasCreator').has('person', 'iid_long', v2).count().next(); " +
+                "long  commentBackward = g.V().has('person', 'iid_long',v2).in('hasCreator').hasLabel('comment').in('replyOf').out('hasCreator').has('person', 'iid_long', v1).count().next(); " +
+                "long score = postForward + postBackward + 0.5 * (commentForward + commentBackward); return score;}; " +
+                "scoreMap = [:];" +
+                "shortestPathLength = g.V().has(person_label, 'iid', person1_id).repeat(out('knows').simplePath())" +
+                ".until(has(person_label, 'iid', person2_id)).path().limit(1).count(local).next();" +
+                "g.V().has(person_label, 'iid', person1_id).repeat(out('knows').simplePath()).until(loops().is(gte(shortestPathLength - 1))).   " +
+                "filter(has(person_label, 'iid', person2_id)).path().by('iid_long').as('path').map{" +
+                "        path = it.get(); " +
+                "        totalScore = 0;" +
+                "        for(int i = 0; i < path.size() - 2; i++) " +
+                "            totalScore += calculateWeight(g, path.get(i), path.get(i + 1));" +
+                "        return totalScore; " +
+                "}.as('length').order().by(select('length'), decr).select('path', 'length')";
+
 
         List<Result> results = null;
 
@@ -65,13 +64,13 @@ public class LdbcComplexQuery14Handler implements OperationHandler<LdbcQuery14, 
         {
             HashMap map = r.get( HashMap.class );
             Path path = (Path) map.get( "path" );
-            double weight = (double) map.get( "weight" );
+            double weight = (double) map.get( "length" );
 
             List<Long> idsInPath = new ArrayList<>();
             for ( Object o : path )
             {
-                Vertex v = (Vertex) o;
-                idsInPath.add( GremlinUtils.getSNBId( v ) );
+                Long v = (Long) o;
+                idsInPath.add( v );
             }
             LdbcQuery14Result ldbcQuery14Result = new LdbcQuery14Result(
                     idsInPath,
@@ -79,7 +78,6 @@ public class LdbcComplexQuery14Handler implements OperationHandler<LdbcQuery14, 
 
             resultList.add( ldbcQuery14Result );
         }
-        resultList.sort( Comparator.comparing( l -> -((Double) l.pathWeight()) ) );
         resultReporter.report( resultList.size(), resultList, ldbcQuery14 );
     }
 }

@@ -44,7 +44,7 @@ public class LdbcComplexQuery10Handler implements OperationHandler<LdbcQuery10, 
                 "    int day = cal.get(Calendar.DAY_OF_MONTH);" +
                 "    int month = cal.get(Calendar.MONTH) + 1;" +
                 "    month = day < 21 ? month-1 : month;" +
-                "    println(month); return month == givenmonth" +
+                "    return month == givenmonth" +
                 "}.as('fof').match(" +
                 "   __.as('p').in('hasCreator').hasLabel('post').where(out('hasTag').where(within('persontags')).count().is(gt(0))).count().fold(2, mult).as('common2')," +
                 "   __.as('p').in('hasCreator').hasLabel('post').count().fold(-1, mult).as('totaln')," +
@@ -52,7 +52,7 @@ public class LdbcComplexQuery10Handler implements OperationHandler<LdbcQuery10, 
                 ").select('fof').out('isLocatedIn').as('city').select('fof').values('iid_long').as('pid')." +
                 "order().by(select('similarity'), decr).by(select('pid'))." +
                 "limit(result_limit)." +
-                "select('pid', 'fof', 'city', 'similarity')"
+                "select('pid', 'fof', 'city', 'similarity')";
 
         List<Result> results = null;
 
