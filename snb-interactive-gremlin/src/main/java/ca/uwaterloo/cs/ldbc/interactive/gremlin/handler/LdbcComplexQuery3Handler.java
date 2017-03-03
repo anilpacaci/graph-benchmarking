@@ -17,84 +17,65 @@ import org.joda.time.DateTime;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
-public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, DbConnectionState> {
+public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, DbConnectionState>
+{
     @Override
-    public void executeOperation(LdbcQuery3 ldbcQuery3, DbConnectionState dbConnectionState, ResultReporter resultReporter) throws DbException {
+    public void executeOperation( LdbcQuery3 ldbcQuery3, DbConnectionState dbConnectionState, ResultReporter resultReporter ) throws DbException
+    {
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
-        params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery3.personId()));
-        params.put("person_label", Entity.PERSON.getName());
-        params.put("countryX", ldbcQuery3.countryXName());
-        params.put("countryY", ldbcQuery3.countryYName());
+        params.put( "person_id", GremlinUtils.makeIid( Entity.PERSON, ldbcQuery3.personId() ) );
+        params.put( "person_label", Entity.PERSON.getName() );
+        params.put( "countryX", ldbcQuery3.countryXName() );
+        params.put( "countryY", ldbcQuery3.countryYName() );
         Date start = ldbcQuery3.startDate();
-        String end  = Long.toString(new DateTime(start).plusDays(ldbcQuery3.durationDays()).toDate().getTime());
-        params.put("start_date", Long.toString(start.getTime()));
-        params.put("end_date", end);
-        params.put("result_limit", ldbcQuery3.limit());
+        Long end = new DateTime( start ).plusDays( ldbcQuery3.durationDays() ).toDate().getTime();
+        params.put( "start_date", start.getTime() );
+        params.put( "end_date", end );
+        params.put( "result_limit", ldbcQuery3.limit() );
 
-        String statement = "g.V().has(person_label, 'iid', person_id)" +
-            ".repeat(out('knows')).times(2).emit().as('person')" +
-            ".where(out('isLocatedIn').out('isPartOf').has('name', neq(countryX)).and().out('isLocatedIn').out('isPartOf').has('name', neq(countryY)))" +
-            ".in('hasCreator')" +
-            ".where(out('isLocatedIn').has('name', countryX).or().out('isLocatedIn').has('name', countryY))" +
-            ".has('creationDate', inside(start_date, end_date))" +
-            ".group().by(out('hasCreator'))" +
-            ".by(groupCount().by(out('isLocatedIn').values('name')))";
+        String statement = " g.V().has(person_label, 'iid', person_id).aggregate('0')." +
+                " repeat(out('knows').simplePath()).times(2).where(without('0')).dedup().as('person')." +
+                " values('iid_long').as('pid')." +
+                " select('person').where(out('isLocatedIn').out('isPartOf').has('name', neq(countryX))." +
+                " and().out('isLocatedIn').out('isPartOf').has('name', neq('countryY')))." +
+                " match(" +
+                "         __.as('p').in('hasCreator').has('creationDate', between(start_date, end_date)).where(out('isLocatedIn').has('name', countryX)).count().as('countx')," +
+                "         __.as('p').in('hasCreator').has('creationDate', between(start_date, end_date)).where(out('isLocatedIn').has('name', 'countryY')).count().as('county')," +
+                "         __.as('countx').map(union(identity(), select('county')).sum()).as('count')  " +
+                " ).order().by(select('count'), decr).by(select('pid')).limit(result_limit)." +
+                "select('person', 'countx', 'county')";
 
         List<Result> results;
-        try {
-            results = client.submit(statement, params).all().get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new DbException("Remote execution failed", e);
+        try
+        {
+            results = client.submit( statement, params ).all().get();
         }
-
-        HashMap<Vertex, HashMap> resultMap = results.get(0).get(HashMap.class);
-
+        catch ( InterruptedException | ExecutionException e )
+        {
+            throw new DbException( "Remote execution failed", e );
+        }
 
         List<LdbcQuery3Result> resultList = new ArrayList<>();
-        for ( Map.Entry r : resultMap.entrySet()) {
-
-            Vertex person = (Vertex) r.getKey();
-            HashMap count = (HashMap) r.getValue();
-
-            Object countxObject = count.get(ldbcQuery3.countryXName());
-            Object countyObject = count.get(ldbcQuery3.countryYName());
-
-            long countx = 0;
-            long county = 0;
-
-            if(countxObject != null) {
-                countx = (long) countxObject;
-            }
-            if(countyObject != null) {
-                county = (long) countyObject;
-            }
+        for ( Result r : results )
+        {
+            HashMap map = r.get( HashMap.class );
+            Vertex person = (Vertex) map.get( "person" );
+            long countx = (long) map.get( "countx" );
+            long county = (long) map.get( "county" );
 
             LdbcQuery3Result ldbcQuery3Result = new LdbcQuery3Result(
-                GremlinUtils.getSNBId(person),
-                person.<String>property("firstName").value(),
-                person.<String>property("lastName").value(),
-                countx,
-                county,
-                countx + county
+                    GremlinUtils.getSNBId( person ),
+                    person.<String>property( "firstName" ).value(),
+                    person.<String>property( "lastName" ).value(),
+                    countx,
+                    county,
+                    countx + county
             );
 
-            resultList.add(ldbcQuery3Result);
+            resultList.add( ldbcQuery3Result );
         }
 
-        Collections.sort(resultList, (o1, o2) -> {
-            long o1count = o1.xCount() + o1.yCount();
-            long o2count = o2.xCount() + o2.yCount();
-            if (o1count < o2count) return 1;
-            else if (o1count > o2count) return -1;
-            else return o1.personId() < o2.personId() ? -1 : 1;
-        });
-
-
-        if(resultList.size() > ldbcQuery3.limit()) {
-            resultReporter.report(ldbcQuery3.limit(), resultList.subList(0, ldbcQuery3.limit()), ldbcQuery3);
-        } else {
-            resultReporter.report(resultList.size(), resultList, ldbcQuery3);
-        }
+        resultReporter.report( resultList.size(), resultList, ldbcQuery3 );
     }
 }

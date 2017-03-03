@@ -28,10 +28,13 @@ public class LdbcComplexQuery6Handler implements OperationHandler<LdbcQuery6, Db
         params.put("tag_name", ldbcQuery6.tagName());
         params.put("result_limit", ldbcQuery6.limit());
 
-        String statement = "g.V().has(person_label, 'iid', person_id).aggregate('start').repeat(out('knows').simplePath()).until(loops().is(gte(2)))" +
-                ".in('hasCreator').hasLabel('post').where(out('hasTag').has('name', tag_name))" +
-                ".out('hasTag').has('name', neq(tag_name)).groupCount('temp').by('name').cap('temp').next()" +
-                ".sort({-it.getValue()})[0..result_limit]";
+        String statement = "g.V().has(person_label, 'iid', person_id).aggregate('0')."+
+                "repeat(out('knows').simplePath()).times(2).where(without('0')).dedup()."+
+                "in('hasCreator').hasLabel('post')."+
+                "where(out('hasTag').has('name', tag_name))."+
+                "out('hasTag').has('name', neq(tag_name)).groupCount().by('name')."+
+                "order(local).by(values, decr).by(keys)."+
+                "limit(local, result_limit)";
 
         List<Result> results = null;
         try {
@@ -40,9 +43,9 @@ public class LdbcComplexQuery6Handler implements OperationHandler<LdbcQuery6, Db
             throw new DbException("Remote execution failed", e);
         }
 
+        HashMap<String, Long> resultMap = results.get(0).get(HashMap.class);
         List<LdbcQuery6Result> resultList = new ArrayList<>();
-        for(Result r: results) {
-            AbstractMap.SimpleEntry<String, Long> entry = r.get(AbstractMap.SimpleEntry.class);
+        for (HashMap.Entry<String, Long> entry : resultMap.entrySet()) {
             String tagName = entry.getKey();
             int tagCount = Math.toIntExact(entry.getValue());
 

@@ -31,14 +31,16 @@ public class LdbcUpdate7Handler implements OperationHandler<LdbcUpdate7AddCommen
         params.put("reply_to_c_id", GremlinUtils.makeIid( Entity.COMMENT, ldbcUpdate7AddComment.replyToCommentId() ) );
         params.put("reply_to_p_id", GremlinUtils.makeIid( Entity.POST, ldbcUpdate7AddComment.replyToPostId() ) );
         params.put("comment_id", GremlinUtils.makeIid( Entity.COMMENT, ldbcUpdate7AddComment.commentId() ) );
+        params.put("comment_id_long", ldbcUpdate7AddComment.commentId());
         params.put("length", ldbcUpdate7AddComment.length() );
         params.put("content", ldbcUpdate7AddComment.content() );
         params.put("location_ip", ldbcUpdate7AddComment.locationIp() );
         params.put("browser_used", ldbcUpdate7AddComment.browserUsed());
-        params.put("creation_date", String.valueOf(ldbcUpdate7AddComment.creationDate().getTime()));
+        params.put("creation_date", ldbcUpdate7AddComment.creationDate().getTime());
         params.put("tag_ids", GremlinUtils.makeIid(Entity.TAG, ldbcUpdate7AddComment.tagIds()));
 
         String statement = "comment = g.addV(label, comment_label).property('iid', comment_id)" +
+            ".property('iid_long', 'comment_id_long')" +
             ".property('length', length)" +
             ".property('content', content)" +
             ".property('locationIP', location_ip)" +

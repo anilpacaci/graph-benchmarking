@@ -50,7 +50,7 @@ public class LdbcShortQuery4Handler implements OperationHandler<LdbcShortQuery4M
         LdbcShortQuery4MessageContentResult result =
             new LdbcShortQuery4MessageContentResult(
                 content,
-                Long.decode( message.<String>property( "creationDate" ).value() ) );
+                 message.<Long>property( "creationDate" ).value() );
 
         resultReporter.report(1, result, ldbcShortQuery4MessageContent);
     }

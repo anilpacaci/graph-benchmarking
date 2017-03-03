@@ -35,7 +35,7 @@ public class LdbcShortQuery3Handler implements OperationHandler<LdbcShortQuery3P
 
         String statement = "g.V().has(person_label, 'iid', person_id)" +
                 ".outE('knows').as('relation')" +
-                ".order().by('creationDate', decr).by(inV().values('iid'), incr)" +
+                ".order().by('creationDate', decr).by(inV().values('iid_long'), incr)" +
                 ".inV().as('friend')" +
                 ".select('relation', 'friend')";
 
@@ -56,7 +56,7 @@ public class LdbcShortQuery3Handler implements OperationHandler<LdbcShortQuery3P
                             GremlinUtils.getSNBId(friend),
                             friend.<String>property("firstName").value(),
                             friend.<String>property("lastName").value(),
-                            Long.decode(edge.<String>property("creationDate").value()));
+                            edge.<Long>property("creationDate").value());
             result.add(res);
         }
 

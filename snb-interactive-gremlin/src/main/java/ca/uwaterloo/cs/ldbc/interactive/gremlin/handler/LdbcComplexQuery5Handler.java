@@ -11,16 +11,18 @@ import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery5;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery5Result;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Result;
+import org.apache.tinkerpop.gremlin.structure.Edge;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
-public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, DbConnectionState> {
+public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, DbConnectionState>
+{
     @Override
-    public void executeOperation(LdbcQuery5 ldbcQuery5, DbConnectionState dbConnectionState, ResultReporter resultReporter) throws DbException {
+    public void executeOperation( LdbcQuery5 ldbcQuery5, DbConnectionState dbConnectionState, ResultReporter resultReporter ) throws DbException
+    {
         //     * Description: Given a start Person,
         //     find the Forums which that Person's friends and friends of friends (excluding start Person)
         //     became Members of after a given date.
@@ -38,37 +40,72 @@ public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, Db
 
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
-        params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery5.personId()));
-        params.put("person_label", Entity.PERSON.getName());
-        params.put("min_date", String.valueOf(ldbcQuery5.minDate().getTime()));
+        params.put( "person_id", GremlinUtils.makeIid( Entity.PERSON, ldbcQuery5.personId() ) );
+        params.put( "person_label", Entity.PERSON.getName() );
+        params.put( "min_date", ldbcQuery5.minDate().getTime() );
+        params.put( "result_limit", ldbcQuery5.limit() );
 
-        String statement = "g.V().has(person_label, 'iid', person_id).repeat(out('knows')).times(2).emit()" +
-            ".inE('hasMember').has('joinDate',gte(min_date)).outV().as('forum_name')" +
-            ".in('hasCreator').as('post').out('hasContainer').select('post').count().where(is(gt(0))).as('cnt')" +
-            ".order().by('cnt',decr)" +
-            ".select('forum_name','cnt')" +
-            ".by('name')" +
-            ".limit(20);";
+        // String statement = "g.V().has(person_label, 'iid', person_id).repeat(out('knows')).times(2).emit().dedup().aggregate('member')" +
+        //         ".inE('hasMember').has('joinDate',gte(min_date)).outV().as('forum_name')" +
+        //         ".out('containerOf').as('post').out('hasCreator').where(within('member')).select('post')" +
+        //         ".groupCount().by(__.in('containerOf'))" +
+        //         ".order(local).by(value, decr)" +
+        //         //".order(local).by(key, incr)" +
+        //         ".limit(local, 20);";
+        String
+                statement = "g.V().has(person_label, 'iid', person_id).aggregate('0')." +
+                "repeat(out('knows').simplePath()).times(2).where(without('0')).dedup().aggregate('member')." +
+                "inE('hasMember').has('joinDate',gte(min_date)).outV().dedup().as('forum_name')." +
+                "match(" +
+                "   __.as('f').outE('hasMember').has('joinDate',gte(min_date)).inV().where(within('member')).aggregate('forummembers')," +
+                "   __.as('f').out('containerOf').as('post').out('hasCreator').where(within('forummembers')).select('post').count().as('postcount')" +
+                ").dedup().select('forum_name').values('iid_long').as('pid')." +
+                "order().by(select('postcount'), decr).by(select('pid'))." +
+                "limit(result_limit).select('forum_name', 'postcount').by('title').by()";
+
+
+        /*
+        g.V().has('person', 'iid', 'person:2202').
+        repeat(out('knows').simplePath()).times(2).dedup().aggregate('member').
+        inE('hasMember').has('joinDate',gte(1289520000000)).outV().as('forum_name').
+        out('containerOf').as('post').out('hasCreator').where(within('member')).
+        select('post').
+        groupCount().by(__.in('containerOf')).
+        order(local).by(values, decr).
+        limit(local, 20)
+
+         2202,
+      ,
+      20
+
+
+         */
         List<Result> results;
-        try {
-            results = client.submit(statement, params).all().get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new DbException("Remote execution failed", e);
+        try
+        {
+            results = client.submit( statement, params ).all().get();
+        }
+        catch ( InterruptedException | ExecutionException e )
+        {
+            throw new DbException( "Remote execution failed", e );
         }
 
         List<LdbcQuery5Result> resultList = new ArrayList<>();
-        for (Result r : results) {
+
+        for ( Result r : results )
+        {
             HashMap map = r.get(HashMap.class);
             String forum_name = (String) map.get("forum_name");
-            int count = (int) map.get("post_count");
+            Long count = (Long) map.get("postcount");
 
             LdbcQuery5Result ldbcQuery5Result = new LdbcQuery5Result(
-                forum_name,
-                count
+                    forum_name,
+                    count.intValue()
             );
 
-            resultList.add(ldbcQuery5Result);
+            resultList.add( ldbcQuery5Result );
         }
-        resultReporter.report(resultList.size(), resultList, ldbcQuery5);
+
+        resultReporter.report( resultList.size(), resultList, ldbcQuery5 );
     }
 }

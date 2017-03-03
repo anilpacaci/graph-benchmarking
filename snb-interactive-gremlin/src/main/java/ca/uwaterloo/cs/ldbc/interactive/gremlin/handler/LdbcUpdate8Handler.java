@@ -22,7 +22,7 @@ public class LdbcUpdate8Handler implements OperationHandler<LdbcUpdate8AddFriend
         params.put("p1_id", GremlinUtils.makeIid(Entity.PERSON, ldbcUpdate8AddFriendship.person1Id()));
         params.put("p2_id", GremlinUtils.makeIid(Entity.PERSON, ldbcUpdate8AddFriendship.person2Id()));
         params.put("person_label", Entity.PERSON.getName());
-        params.put( "creation_date", String.valueOf( ldbcUpdate8AddFriendship.creationDate().getTime() ) );
+        params.put( "creation_date", ldbcUpdate8AddFriendship.creationDate().getTime() );
         String statement = "p1 = g.V().has(person_label, 'iid', p1_id).next(); " +
                 "p2 = g.V().has(person_label, 'iid', p2_id).next(); " +
                 "p1.addEdge('knows', p2).property('creationDate', creation_date);" +

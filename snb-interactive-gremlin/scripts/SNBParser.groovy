@@ -16,7 +16,6 @@
  */
 
 
-import com.thinkaurelius.titan.graphdb.idmanagement.IDManager
 import org.apache.commons.configuration.Configuration
 import org.apache.commons.configuration.PropertiesConfiguration
 import org.apache.commons.io.FileUtils
@@ -27,8 +26,6 @@ import org.apache.tinkerpop.gremlin.structure.T
 import org.apache.tinkerpop.gremlin.structure.Vertex
 import org.apache.tinkerpop.gremlin.structure.VertexProperty
 
-import javax.sound.sampled.Line
-import java.nio.file.Files
 import java.nio.file.NoSuchFileException
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -61,10 +58,11 @@ class SNBParser {
         SimpleDateFormat creationDateDateFormat =
                 new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         creationDateDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-        String[] fileNameParts = filePath.getFileName().toString().split("_");
+        String fileName = filePath.getFileName().toString()
+        String[] fileNameParts = fileName.split("_");
         String entityName = fileNameParts[0];
 
-        LineIterator it = FileUtils.lineIterator(filePath.toFile())
+        LineIterator it = FileUtils.lineIterator(filePath.toFile(), "UTF-8")
         // because very large files cannot be read into memory
         //List<String> lines = Files.readAllLines(filePath);
         colNames = it.nextLine().split("\\|");
@@ -97,12 +95,11 @@ class SNBParser {
                         if (colNames[j].equals("id")) {
                             identifier = entityName + ":" + colVals[j]
                             propertiesMap.put("iid", identifier);
+                            propertiesMap.put("iid_long", Long.parseLong(colVals[j]))
                         } else if (colNames[j].equals("birthday")) {
-                            propertiesMap.put(colNames[j], String.valueOf(
-                                    birthdayDateFormat.parse(colVals[j]).getTime()));
+                            propertiesMap.put(colNames[j], birthdayDateFormat.parse(colVals[j]).getTime());
                         } else if (colNames[j].equals("creationDate")) {
-                            propertiesMap.put(colNames[j], String.valueOf(
-                                    creationDateDateFormat.parse(colVals[j]).getTime()));
+                            propertiesMap.put(colNames[j], creationDateDateFormat.parse(colVals[j]).getTime());
                         } else {
                             propertiesMap.put(colNames[j], colVals[j]);
                         }
@@ -146,8 +143,8 @@ class SNBParser {
                 long timeElapsed = System.currentTimeMillis() - startTime;
                 long linesLoaded = lineCount - lastLineCount;
                 System.out.println(String.format(
-                        "Time Elapsed: %03dm.%02ds, Lines Loaded: +%d",
-                        (timeElapsed.intdiv(1000)).intdiv(60), (timeElapsed.intdiv(1000)) % 60, linesLoaded));
+                        "Time Elapsed: %03dm.%02ds, Lines Loaded: +%d,\tFile: %s",
+                        (timeElapsed.intdiv(1000)).intdiv(60), (timeElapsed.intdiv(1000)) % 60, linesLoaded, fileName));
                 nextProgReportTime += progReportPeriod * 1000;
                 lastLineCount = lineCount;
             }
@@ -158,10 +155,11 @@ class SNBParser {
 
     static void loadProperties(Graph graph, Path filePath, boolean printLoadingDots, int batchSize, long progReportPeriod) throws IOException {
         String[] colNames;
-        String[] fileNameParts = filePath.getFileName().toString().split("_");
+        String fileName = filePath.getFileName().toString()
+        String[] fileNameParts = fileName.split("_");
         String entityName = fileNameParts[0];
 
-        LineIterator it = FileUtils.lineIterator(filePath.toFile())
+        LineIterator it = FileUtils.lineIterator(filePath.toFile(), "UTF-8")
         // because very large files cannot be read into memory
         //List<String> lines = Files.readAllLines(filePath);
         colNames = it.nextLine().split("\\|");
@@ -225,8 +223,8 @@ class SNBParser {
                 long timeElapsed = System.currentTimeMillis() - startTime;
                 long linesLoaded = lineCount - lastLineCount;
                 System.out.println(String.format(
-                        "Time Elapsed: %03dm.%02ds, Lines Loaded: +%d",
-                        (timeElapsed.intdiv(1000)).intdiv(60), (timeElapsed.intdiv(1000)) % 60, linesLoaded));
+                        "Time Elapsed: %03dm.%02ds, Lines Loaded: +%d,\tFile: %s",
+                        (timeElapsed.intdiv(1000)).intdiv(60), (timeElapsed.intdiv(1000)) % 60, linesLoaded, fileName));
                 nextProgReportTime += progReportPeriod * 1000;
                 lastLineCount = lineCount;
             }
@@ -244,12 +242,13 @@ class SNBParser {
         SimpleDateFormat joinDateDateFormat =
                 new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         joinDateDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-        String[] fileNameParts = filePath.getFileName().toString().split("_");
+        String fileName = filePath.getFileName().toString()
+        String[] fileNameParts = fileName.split("_");
         String v1EntityName = fileNameParts[0];
         String edgeLabel = fileNameParts[1];
         String v2EntityName = fileNameParts[2];
 
-        LineIterator it = FileUtils.lineIterator(filePath.toFile())
+        LineIterator it = FileUtils.lineIterator(filePath.toFile(), "UTF-8")
         // because very large files cannot be read into memory
         //List<String> lines = Files.readAllLines(filePath);
         colNames = it.nextLine().split("\\|");
@@ -294,11 +293,9 @@ class SNBParser {
                     propertiesMap = new HashMap<>();
                     for (int j = 2; j < colVals.length; ++j) {
                         if (colNames[j].equals("creationDate")) {
-                            propertiesMap.put(colNames[j], String.valueOf(
-                                    creationDateDateFormat.parse(colVals[j]).getTime()));
+                            propertiesMap.put(colNames[j], creationDateDateFormat.parse(colVals[j]).getTime());
                         } else if (colNames[j].equals("joinDate")) {
-                            propertiesMap.put(colNames[j], String.valueOf(
-                                    joinDateDateFormat.parse(colVals[j]).getTime()));
+                            propertiesMap.put(colNames[j], joinDateDateFormat.parse(colVals[j]).getTime());
                         } else {
                             propertiesMap.put(colNames[j], colVals[j]);
                         }
@@ -338,8 +335,8 @@ class SNBParser {
                 long timeElapsed = System.currentTimeMillis() - startTime;
                 long linesLoaded = lineCount - lastLineCount;
                 System.out.println(String.format(
-                        "Time Elapsed: %03dm.%02ds, Lines Loaded: +%d",
-                        (timeElapsed.intdiv(1000)).intdiv(60), (timeElapsed.intdiv(1000)) % 60, linesLoaded));
+                        "Time Elapsed: %03dm.%02ds, Lines Loaded: +%d,\tFile: %s",
+                        (timeElapsed.intdiv(1000)).intdiv(60), (timeElapsed.intdiv(1000)) % 60, linesLoaded, fileName));
                 nextProgReportTime += progReportPeriod * 1000;
                 lastLineCount = lineCount;
             }
@@ -362,45 +359,45 @@ class SNBParser {
             idMappingServer = new IDMapping(servers)
         }
 
+        List<Thread> threads = new ArrayList<>()
+
         try {
             for (String fileName : nodeFiles) {
-                System.out.print("Loading node file " + fileName + " ");
-                try {
-                    loadVertices(graph, Paths.get(inputBaseDir + "/" + fileName),
-                            true, batchSize, progReportPeriod);
-                    System.out.println("Finished");
-                } catch (NoSuchFileException e) {
-                    System.out.println(" File not found.");
-                }
+                LoadTask t = new LoadTask(fileName, ElementType.VERTEX, graph, inputBaseDir, batchSize, progReportPeriod)
+                Thread thread = new Thread(t)
+                threads.add(thread)
+                thread.run()
             }
+
+            for(Thread thread : threads) {
+                thread.join()
+            }
+            threads.clear()
 
             for (String fileName : propertiesFiles) {
-                System.out.print("Loading properties file " + fileName + " ");
-                try {
-                    loadProperties(graph, Paths.get(inputBaseDir + "/" + fileName),
-                            true, batchSize, progReportPeriod);
-                    System.out.println("Finished");
-                } catch (NoSuchFileException e) {
-                    System.out.println(" File not found.");
-                }
+                LoadTask t = new LoadTask(fileName, ElementType.PROPERTY, graph, inputBaseDir, batchSize, progReportPeriod)
+                Thread thread = new Thread(t)
+                threads.add(thread)
+                thread.run()
             }
+
+            for(Thread thread : threads) {
+                thread.join()
+            }
+            threads.clear()
 
             for (String fileName : edgeFiles) {
-                System.out.print("Loading edge file " + fileName + " ");
-                try {
-                    if (fileName.contains("person_knows_person")) {
-                        loadEdges(graph, Paths.get(inputBaseDir + "/" + fileName), true,
-                                true, batchSize, progReportPeriod);
-                    } else {
-                        loadEdges(graph, Paths.get(inputBaseDir + "/" + fileName), false,
-                                true, batchSize, progReportPeriod);
-                    }
-
-                    System.out.println("Finished");
-                } catch (NoSuchFileException e) {
-                    System.out.println(" File not found.");
-                }
+                LoadTask t = new LoadTask(fileName, ElementType.EDGE, graph, inputBaseDir, batchSize, progReportPeriod)
+                Thread thread = new Thread(t)
+                threads.add(thread)
+                thread.run()
             }
+
+            for(Thread thread : threads) {
+                thread.join()
+            }
+            threads.clear()
+
         } catch (Exception e) {
             System.out.println("Exception: " + e);
             e.printStackTrace();
@@ -444,5 +441,67 @@ class SNBParser {
             client.set(identifier, id)
         }
     }
+
+    static class LoadTask implements Runnable {
+
+        private String fileName;
+        private ElementType elementType;
+
+        private Graph graph
+        private String inputBaseDir
+        private int batchSize
+        private long reportingPeriod
+
+        LoadTask(String fileName, ElementType elementType, Graph graph, String inputBaseDir, int batchSize, long reportingPeriod) {
+            this.fileName = fileName
+            this.elementType = elementType
+            this.graph = graph
+            this.inputBaseDir = inputBaseDir
+            this.batchSize = batchSize
+            this.reportingPeriod = reportingPeriod
+        }
+
+        @Override
+        void run() {
+
+            if(elementType.equals(ElementType.VERTEX)) {
+                System.out.println("Loading node file " + fileName + " ");
+                try {
+                    loadVertices(   graph, Paths.get(inputBaseDir + "/" + fileName),
+                            true, batchSize, reportingPeriod);
+                    System.out.println("Finished");
+                } catch (NoSuchFileException e) {
+                    System.out.println(" File not found.");
+                }
+            } else if(elementType.equals(ElementType.PROPERTY)) {
+                System.out.println("Loading properties file " + fileName + " ");
+                try {
+                    loadProperties(graph, Paths.get(inputBaseDir + "/" + fileName),
+                            true, batchSize, reportingPeriod);
+                    System.out.println("Finished");
+                } catch (NoSuchFileException e) {
+                    System.out.println(" File not found.");
+                }
+            } else {
+                System.out.println("Loading edge file " + fileName + " ");
+                try {
+                    if (fileName.contains("person_knows_person")) {
+                        loadEdges(graph, Paths.get(inputBaseDir + "/" + fileName), true,
+                                true, batchSize, reportingPeriod);
+                    } else {
+                        loadEdges(graph, Paths.get(inputBaseDir + "/" + fileName), false,
+                                true, batchSize, reportingPeriod);
+                    }
+
+                    System.out.println("Finished");
+                } catch (NoSuchFileException e) {
+                    System.out.println(" File not found.");
+                }
+            }
+
+        }
+    }
+
+    enum ElementType {VERTEX, PROPERTY, EDGE}
 
 }

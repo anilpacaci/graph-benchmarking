@@ -23,7 +23,7 @@ public class LdbcUpdate5Handler implements OperationHandler<LdbcUpdate5AddForumM
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcUpdate5AddForumMembership.personId()));
         params.put("forum_id", GremlinUtils.makeIid(Entity.FORUM, ldbcUpdate5AddForumMembership.forumId()));
-        params.put("join_date", String.valueOf(ldbcUpdate5AddForumMembership.joinDate().getTime()));
+        params.put("join_date", ldbcUpdate5AddForumMembership.joinDate().getTime());
 
         params.put("person_label", Entity.PERSON.getName());
         params.put("forum_label", Entity.FORUM.getName());

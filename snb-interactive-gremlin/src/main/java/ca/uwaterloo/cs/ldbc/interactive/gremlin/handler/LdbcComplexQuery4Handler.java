@@ -41,23 +41,32 @@ public class LdbcComplexQuery4Handler implements OperationHandler<LdbcQuery4, Db
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery4.personId()));
         params.put("person_label", Entity.PERSON.getName());
+        params.put("post_label", Entity.POST.getName());
         Date start = ldbcQuery4.startDate();
         Date end = new DateTime( start ).plusDays( ldbcQuery4.durationDays() ).toDate();
-        params.put("start_date", String.valueOf(start.getTime()));
-        params.put("end_date", String.valueOf(end.getTime()));
+        params.put("start_date", start.getTime());
+        params.put("end_date", end.getTime());
         params.put("result_limit", ldbcQuery4.limit());
 
         String statement = "g.V().has(person_label, 'iid', person_id).out('knows')" +
-            ".in('hasCreator').as('friend_posts')" +
-            ".has('creationDate',lt(start_date))" +
-            ".out('hasTag').as('before_tags')" +
-            ".select('friend_posts')" +
+            ".in('hasCreator').hasLabel(post_label).as('friend_posts')" +
+            ".sideEffect(has('creationDate',lt(start_date)).out('hasTag').aggregate('before_tags'))"+
             ".has('creationDate', inside(start_date, end_date))" +
             ".out('hasTag')" +
-            ".is(without(select('before_tags')))" +
+            ".is(without('before_tags'))" +
             ".groupCount().by('name')" +
-            ".order().by(valueDecr)" +
-            ".limit(result_limit)";
+            ".order(local).by(values, decr).by(keys)" +
+            ".limit(local, result_limit)";
+        /*
+        g.V().has('person', 'iid', 'person:10995116278092').out('knows').
+        in('hasCreator').as('friend_posts').
+        has('creationDate', inside(1275350400000,1975350400000 )).
+        out('hasTag').
+        is(without('before_tags')).
+        groupCount().by('name').
+        order(local).by(values, decr).
+        limit(local, 10)
+        */
         List<Result> results;
         try {
             results = client.submit(statement, params).all().get();

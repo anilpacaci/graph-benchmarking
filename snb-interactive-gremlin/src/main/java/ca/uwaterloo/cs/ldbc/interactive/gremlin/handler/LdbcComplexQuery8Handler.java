@@ -33,9 +33,11 @@ public class LdbcComplexQuery8Handler implements OperationHandler<LdbcQuery8, Db
 
         String statement = "g.V().has(person_label, 'iid', person_id)" +
                 ".in('hasCreator').in('replyOf')" +
-                ".order().by('creationDate', decr).by('iid', incr).limit(result_limit).as('comment')" +
+                ".order().by('creationDate', decr)" +
+                ".by('iid_long', incr).as('comment')" +
                 ".out('hasCreator').as('person')" +
-                ".select('person', 'comment')";
+                ".limit(result_limit)" +
+                ".select('person', 'comment');";
 
         List<Result> results = null;
         try {
@@ -54,7 +56,7 @@ public class LdbcComplexQuery8Handler implements OperationHandler<LdbcQuery8, Db
             LdbcQuery8Result ldbcQuery8Result = new LdbcQuery8Result(GremlinUtils.getSNBId(person),
                     person.<String>property("firstName").value(),
                     person.<String>property("lastName").value(),
-                    Long.parseLong(comment.<String>property("creationDate").value()),
+                    comment.<Long>property("creationDate").value(),
                     GremlinUtils.getSNBId(comment),
                     comment.<String>property("content").value());
 

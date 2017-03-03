@@ -18,65 +18,86 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 /**
  * Created by anilpacaci on 2016-07-23.
  */
-public class LdbcComplexQuery12Handler implements OperationHandler<LdbcQuery12, DbConnectionState> {
+public class LdbcComplexQuery12Handler implements OperationHandler<LdbcQuery12, DbConnectionState>
+{
     @Override
-    public void executeOperation(LdbcQuery12 ldbcQuery12, DbConnectionState dbConnectionState, ResultReporter resultReporter) throws DbException {
+    public void executeOperation( LdbcQuery12 ldbcQuery12, DbConnectionState dbConnectionState, ResultReporter resultReporter ) throws DbException
+    {
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
-        params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery12.personId()));
-        params.put("person_label", Entity.PERSON.getName());
-        params.put("tagclass", ldbcQuery12.tagClassName());
-        params.put("result_limit", ldbcQuery12.limit());
+        params.put( "person_id", GremlinUtils.makeIid( Entity.PERSON, ldbcQuery12.personId() ) );
+        params.put( "person_label", Entity.PERSON.getName() );
+        params.put( "tagclass", ldbcQuery12.tagClassName() );
+        params.put( "result_limit", ldbcQuery12.limit() );
 
-        String statement = "g.V().has(person_label, 'iid', person_id)" +
-                ".out('knows').limit(result_limit).as('friends')" +
-                ".in('hasCreator').where(out('replyOf').hasLabel('post').out('hasTag').repeat(out('hasType')).until(has('name', tagclass))).as('messages')" +
-                ".out('hasTag').values('name').as('tags')" +
-                ".select('friends', 'messages', 'tags')";
+        //String statement = "g.V().has(person_label, 'iid', person_id)" +
+        //        ".out('knows').limit(result_limit).as('friends')" +
+        //        ".in('hasCreator').where(out('replyOf').hasLabel('post')" +
+        //        ".out('hasTag').repeat(out('hasType')).until(has('name', tagclass))).as('messages')" +
+        //        ".out('hasTag').values('name').as('tags')" +
+        //        ".select('friends', 'messages', 'tags')";
+        String statement = "g.V().has(person_label, 'iid', person_id)." +
+                "out('knows').as('friends').values('iid_long').as('pid')." +
+                "select('friends').match(" +
+                "__.as('f').in('hasCreator').hasLabel('comment')." +
+                "        where(out('replyOf').hasLabel('post').out('hasTag').out('hasType')." +
+                "        until(has('name', tagclass)).repeat(out('isSubclassOf')).count().is(gt(0))).fold().as('comments')," +
+                "__.as('comments').unfold().out('replyOf').out('hasTag')." +
+                "        where(out('hasType').until(has('name', tagclass)).repeat(out('isSubclassOf')).count().is(gt(0)))." +
+                "        values('name').fold().as('tagnames')," +
+                "__.as('comments').count().as('count')" +
+                ").where(select('comments').unfold().count().is(gt(0)))." +
+                "order().by(select('count'), decr).by(select('pid'))." +
+                "select('friends', 'count', 'tagnames')";
+        /*
+        g= Neo4jGraph.open('/hdd1/ldbc/datasets/neo4j/validation/').traversal()
+        g.V().has('person', 'iid', 'person:1129').
+        out('knows').as('friends').values('iid_long').as('pid').
+        select('friends').
+        match(
+        __.as('f').in('hasCreator').hasLabel('comment').
+            where(out('replyOf').hasLabel('post').out('hasTag').
+            repeat(out('hasType')).until(has('name', 'Politician'))).fold().as('comments'),
+        __.as('comments').unfold().out('hasTag').values('name').fold().as('tagnames'),
+        __.as('comments').unfold().count().as('count')
+        ).where(select('count').is(gt(0))).
+        order().by(select('count'), decr).by(select('friends').value('iid_long')).
+        select('friends', 'count', 'tagnames')
+
+        tagclass=Politician, result_limit=20, person_label=person, person_id=person:939
+         */
 
         List<Result> results = null;
-        try {
-            results = client.submit(statement, params).all().get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new DbException("Remote execution failed", e);
+        try
+        {
+            results = client.submit( statement, params ).all().get();
         }
-
-        Map<Vertex, List<Vertex>> personMessageMap = new HashMap<>();
-        Map<Vertex, List<String>> personTagMap = new HashMap<>();
-        for(Result r : results) {
-            HashMap map = r.get(HashMap.class);
-            Vertex person = (Vertex) map.get("friends");
-            Vertex message = (Vertex) map.get("messages");
-            String tag = (String) map.get("tags");
-
-            if(!personMessageMap.containsKey(person)) {
-                personMessageMap.put(person, new ArrayList<Vertex>());
-            }
-            personMessageMap.get(person).add(message);
-
-            if(!personTagMap.containsKey(person)) {
-                personTagMap.put(person, new ArrayList<String>());
-            }
-            personTagMap.get(person).add(tag);
+        catch ( InterruptedException | ExecutionException e )
+        {
+            throw new DbException( "Remote execution failed", e );
         }
 
         ArrayList<LdbcQuery12Result> ldbcQuery12Results = new ArrayList<>();
-        for( Map.Entry<Vertex, List<Vertex>> entry : personMessageMap.entrySet()) {
-            Vertex person = entry.getKey();
-            List<Vertex> messageList = entry.getValue();
-            List<String> tagList = personTagMap.get(person);
+        for ( Result r : results )
+        {
+            HashMap map = r.get( HashMap.class );
+            Vertex person = (Vertex) map.get( "friends" );
+            Long count = (Long) map.get( "count" );
+            List<Object> tags = (List<Object>) map.get( "tagnames" );
+            List<String> tagList = tags.size() == 0 ? new ArrayList<>() : tags.stream().map( Object::toString ).collect( Collectors.toList() );
 
-            LdbcQuery12Result ldbcQuery12Result = new LdbcQuery12Result(GremlinUtils.getSNBId(person), person.<String>property("firstName").value(),
-                    person.<String>property("lastName").value(),
+            LdbcQuery12Result ldbcQuery12Result = new LdbcQuery12Result( GremlinUtils.getSNBId( person ), person.<String>property( "firstName" ).value(),
+                    person.<String>property( "lastName" ).value(),
                     tagList,
-                    messageList.size());
-            ldbcQuery12Results.add(ldbcQuery12Result);
+                    count.intValue() );
+            ldbcQuery12Results.add( ldbcQuery12Result );
         }
 
-        resultReporter.report(ldbcQuery12Results.size(), ldbcQuery12Results, ldbcQuery12);
+        resultReporter.report( ldbcQuery12Results.size(), ldbcQuery12Results, ldbcQuery12 );
     }
 }
