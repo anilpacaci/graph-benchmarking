@@ -41,6 +41,7 @@ public class LdbcComplexQuery4Handler implements OperationHandler<LdbcQuery4, Db
         Map<String, Object> params = new HashMap<>();
         params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery4.personId()));
         params.put("person_label", Entity.PERSON.getName());
+        params.put("post_label", Entity.POST.getName());
         Date start = ldbcQuery4.startDate();
         Date end = new DateTime( start ).plusDays( ldbcQuery4.durationDays() ).toDate();
         params.put("start_date", start.getTime());
@@ -48,7 +49,7 @@ public class LdbcComplexQuery4Handler implements OperationHandler<LdbcQuery4, Db
         params.put("result_limit", ldbcQuery4.limit());
 
         String statement = "g.V().has(person_label, 'iid', person_id).out('knows')" +
-            ".in('hasCreator').as('friend_posts')" +
+            ".in('hasCreator').hasLabel(post_label).as('friend_posts')" +
             ".sideEffect(has('creationDate',lt(start_date)).out('hasTag').aggregate('before_tags'))"+
             ".has('creationDate', inside(start_date, end_date))" +
             ".out('hasTag')" +

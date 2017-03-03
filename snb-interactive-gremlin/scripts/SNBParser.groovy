@@ -62,7 +62,7 @@ class SNBParser {
         String[] fileNameParts = fileName.split("_");
         String entityName = fileNameParts[0];
 
-        LineIterator it = FileUtils.lineIterator(filePath.toFile())
+        LineIterator it = FileUtils.lineIterator(filePath.toFile(), "UTF-8")
         // because very large files cannot be read into memory
         //List<String> lines = Files.readAllLines(filePath);
         colNames = it.nextLine().split("\\|");
@@ -159,7 +159,7 @@ class SNBParser {
         String[] fileNameParts = fileName.split("_");
         String entityName = fileNameParts[0];
 
-        LineIterator it = FileUtils.lineIterator(filePath.toFile())
+        LineIterator it = FileUtils.lineIterator(filePath.toFile(), "UTF-8")
         // because very large files cannot be read into memory
         //List<String> lines = Files.readAllLines(filePath);
         colNames = it.nextLine().split("\\|");
@@ -248,7 +248,7 @@ class SNBParser {
         String edgeLabel = fileNameParts[1];
         String v2EntityName = fileNameParts[2];
 
-        LineIterator it = FileUtils.lineIterator(filePath.toFile())
+        LineIterator it = FileUtils.lineIterator(filePath.toFile(), "UTF-8")
         // because very large files cannot be read into memory
         //List<String> lines = Files.readAllLines(filePath);
         colNames = it.nextLine().split("\\|");

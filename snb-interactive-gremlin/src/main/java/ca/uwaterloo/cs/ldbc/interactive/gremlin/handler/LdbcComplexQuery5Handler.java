@@ -11,6 +11,7 @@ import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery5;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery5Result;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Result;
+import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 import java.util.*;
@@ -51,13 +52,18 @@ public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, Db
         //         ".order(local).by(value, decr)" +
         //         //".order(local).by(key, incr)" +
         //         ".limit(local, 20);";
-        String statement = "g.V().has(person_label, 'iid', person_id)." +
-                "repeat(out('knows').simplePath()).times(2).dedup().aggregate('member')." +
-                "inE('hasMember').has('joinDate',gte(min_date)).outV().as('forum_name')." +
-                "out('containerOf').as('post').out('hasCreator').where(within('member')).select('post')." +
-                "groupCount().by(__.in('containerOf'))." +
-                "order(local).by(values, decr)." +
-                "limit(local, result_limit)";
+        String
+                statement = "g.V().has(person_label, 'iid', person_id).aggregate('0')." +
+                "repeat(out('knows').simplePath()).times(2).where(without('0')).dedup().aggregate('member')." +
+                "inE('hasMember').has('joinDate',gte(min_date)).outV().dedup().as('forum_name')." +
+                "match(" +
+                "   __.as('f').outE('hasMember').has('joinDate',gte(min_date)).inV().where(within('member')).aggregate('forummembers')," +
+                "   __.as('f').out('containerOf').as('post').out('hasCreator').where(within('forummembers')).select('post').count().as('postcount')" +
+                ").dedup().select('forum_name').values('iid_long').as('pid')." +
+                "order().by(select('postcount'), decr).by(select('pid'))." +
+                "limit(result_limit).select('forum_name', 'postcount').by('title').by()";
+
+
         /*
         g.V().has('person', 'iid', 'person:2202').
         repeat(out('knows').simplePath()).times(2).dedup().aggregate('member').
@@ -84,16 +90,13 @@ public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, Db
             throw new DbException( "Remote execution failed", e );
         }
 
-        HashMap<Vertex, Long> resultMap = results.get( 0 ).get( HashMap.class );
-
         List<LdbcQuery5Result> resultList = new ArrayList<>();
-        List<Map.Entry<Vertex, Long>> sortedList = resultMap.entrySet().stream().collect( Collectors.toList() );
-        sortedList.sort( Comparator.comparing( r2 -> r2.getKey().<Long>property( "iid_long" ).value() ) );
-        for ( Map.Entry<Vertex, Long> r : sortedList )
+
+        for ( Result r : results )
         {
-            Vertex forum = r.getKey();
-            String forum_name = forum.<String>property( "title" ).value();
-            Long count = r.getValue();
+            HashMap map = r.get(HashMap.class);
+            String forum_name = (String) map.get("forum_name");
+            Long count = (Long) map.get("postcount");
 
             LdbcQuery5Result ldbcQuery5Result = new LdbcQuery5Result(
                     forum_name,

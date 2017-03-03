@@ -28,27 +28,13 @@ public class LdbcComplexQuery6Handler implements OperationHandler<LdbcQuery6, Db
         params.put("tag_name", ldbcQuery6.tagName());
         params.put("result_limit", ldbcQuery6.limit());
 
-        String statement = "g.V().has(person_label, 'iid', person_id)."+
-        "repeat(out('knows').simplePath()).times(2).dedup()."+
-        "in('hasCreator').hasLabel('post')."+
-        "where(out('hasTag').has('name', tag_name))."+
-        "out('hasTag').has('name', neq(tag_name)).groupCount().by('name')."+
-        "order(local).by(keys).by(values, decr)."+
-        "limit(local, result_limit)";
-        /*
-                g.V().has('person', 'iid', 'person:2738').
-                repeat(out('knows').simplePath()).times(2).dedup().
-                in('hasCreator').hasLabel('post').
-                where(out('hasTag').has('name', 'James_Monroe')).
-                out('hasTag').has('name', neq('James_Monroe')).groupCount().by('name').
-                order(local).by(values, decr).by(keys).
-                limit(local, 10)
-
-
-                      2738,
-      "James_Monroe",
-      10
-                */
+        String statement = "g.V().has(person_label, 'iid', person_id).aggregate('0')."+
+                "repeat(out('knows').simplePath()).times(2).where(without('0')).dedup()."+
+                "in('hasCreator').hasLabel('post')."+
+                "where(out('hasTag').has('name', tag_name))."+
+                "out('hasTag').has('name', neq(tag_name)).groupCount().by('name')."+
+                "order(local).by(values, decr).by(keys)."+
+                "limit(local, result_limit)";
 
         List<Result> results = null;
         try {

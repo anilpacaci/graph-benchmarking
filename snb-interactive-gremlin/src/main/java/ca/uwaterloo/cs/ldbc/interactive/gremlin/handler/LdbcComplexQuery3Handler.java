@@ -34,42 +34,17 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
         params.put( "end_date", end );
         params.put( "result_limit", ldbcQuery3.limit() );
 
-        // String statement = "g.V().has(person_label, 'iid', person_id)" +
-        //         ".repeat(out('knows')).times(2).emit().as('person')" +
-        //         ".where(out('isLocatedIn').out('isPartOf').has('name', neq(countryX))" +
-        //         ".and().out('isLocatedIn').out('isPartOf').has('name', neq(countryY)))" +
-        //         ".in('hasCreator')" +
-        //         ".where(out('isLocatedIn').has('name', countryX)" +
-        //         ".or().out('isLocatedIn').has('name', countryY))" +
-        //         ".has('creationDate', inside(start_date, end_date)).as('message')" +
-        //         ".out('hasCreator').order().by('iid_long')" +
-        //         ".select('message').group().by(out('hasCreator'))" +
-        //         ".by(groupCount().by(out('isLocatedIn')).values('name')))" +
-        //         ".limit(local, result_limit)";
-
-        String statement = " g.V().has(person_label, 'iid', person_id)." +
-                " repeat(out('knows').simplePath()).times(2).dedup().as('person')." +
+        String statement = " g.V().has(person_label, 'iid', person_id).aggregate('0')." +
+                " repeat(out('knows').simplePath()).times(2).where(without('0')).dedup().as('person')." +
                 " values('iid_long').as('pid')." +
                 " select('person').where(out('isLocatedIn').out('isPartOf').has('name', neq(countryX))." +
-                " and().out('isLocatedIn').out('isPartOf').has('name', neq(countryY)))." +
+                " and().out('isLocatedIn').out('isPartOf').has('name', neq('countryY')))." +
                 " match(" +
-                "         __.as('p').in('hasCreator').where(out('isLocatedIn').has('name', countryX)).count().as('countx')," +
-                "         __.as('p').in('hasCreator').where(out('isLocatedIn').has('name', countryY)).count().as('county')" +
-                " ).order().by(select('countx'), decr).by(select('pid')).limit(result_limit)." +
+                "         __.as('p').in('hasCreator').has('creationDate', between(start_date, end_date)).where(out('isLocatedIn').has('name', countryX)).count().as('countx')," +
+                "         __.as('p').in('hasCreator').has('creationDate', between(start_date, end_date)).where(out('isLocatedIn').has('name', 'countryY')).count().as('county')," +
+                "         __.as('countx').map(union(identity(), select('county')).sum()).as('count')  " +
+                " ).order().by(select('count'), decr).by(select('pid')).limit(result_limit)." +
                 "select('person', 'countx', 'county')";
-        /*
-        g= Neo4jGraph.open('/hdd1/ldbc/datasets/neo4j/validation/').traversal()
-        g.V().has('person', 'iid', 'person:2202').
-        repeat(out('knows').simplePath().aggregate('x')).times(2).select('x').unfold().dedup().
-        as('person').
-        where(out('isLocatedIn').out('isPartOf').has('name', neq('Switzerland')).
-        and().out('isLocatedIn').out('isPartOf').has('name', neq('Rwanda'))).
-        match(
-           __.as('p').in('hasCreator').where(out('isLocatedIn').has('name', 'Switzerland')).count().as('countx'),
-           __.as('p').in('hasCreator').where(out('isLocatedIn').has('name', 'Rwanda')).count().as('county')
-        ).order().by(select('countx'), decr).by(select('person').values('iid_long')).limit(20).
-        select('person', 'countx', 'county')
-         */
 
         List<Result> results;
         try
