@@ -1,12 +1,15 @@
 package ca.uwaterloo.cs.ldbc.interactive.gremlin.handler;
 
-import ca.uwaterloo.cs.ldbc.interactive.gremlin.*;
+import ca.uwaterloo.cs.ldbc.interactive.gremlin.Entity;
+import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinDbConnectionState;
+import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinUtils;
 import com.ldbc.driver.DbConnectionState;
 import com.ldbc.driver.DbException;
 import com.ldbc.driver.OperationHandler;
 import com.ldbc.driver.ResultReporter;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcNoResult;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcUpdate1AddPerson;
+import org.apache.tinkerpop.gremlin.driver.Client;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +19,7 @@ public class LdbcUpdate1Handler implements OperationHandler<LdbcUpdate1AddPerson
 
     @Override
     public void executeOperation(LdbcUpdate1AddPerson ldbcUpdate1AddPerson, DbConnectionState dbConnectionState, ResultReporter resultReporter) throws DbException {
-        UpdateHandler updateHandler = ((GremlinDbConnectionState) dbConnectionState).getUpdateHandler();
+        Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
 
         params.put("vlabel", Entity.PERSON.getName());
@@ -71,7 +74,7 @@ public class LdbcUpdate1Handler implements OperationHandler<LdbcUpdate1AddPerson
 
         statement = String.join("\n", statement, uni_statement, company_statement);
 
-        updateHandler.submitQuery( statement, params );
+        client.submit( statement, params );
 
         resultReporter.report(0, LdbcNoResult.INSTANCE, ldbcUpdate1AddPerson);
 

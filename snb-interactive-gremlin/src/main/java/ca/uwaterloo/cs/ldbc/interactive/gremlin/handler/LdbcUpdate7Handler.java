@@ -1,12 +1,15 @@
 package ca.uwaterloo.cs.ldbc.interactive.gremlin.handler;
 
-import ca.uwaterloo.cs.ldbc.interactive.gremlin.*;
+import ca.uwaterloo.cs.ldbc.interactive.gremlin.Entity;
+import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinDbConnectionState;
+import ca.uwaterloo.cs.ldbc.interactive.gremlin.GremlinUtils;
 import com.ldbc.driver.DbConnectionState;
 import com.ldbc.driver.DbException;
 import com.ldbc.driver.OperationHandler;
 import com.ldbc.driver.ResultReporter;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcNoResult;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcUpdate7AddComment;
+import org.apache.tinkerpop.gremlin.driver.Client;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +19,7 @@ public class LdbcUpdate7Handler implements OperationHandler<LdbcUpdate7AddCommen
     @Override
     public void executeOperation( LdbcUpdate7AddComment ldbcUpdate7AddComment, DbConnectionState dbConnectionState, ResultReporter resultReporter ) throws DbException
     {
-        UpdateHandler updateHandler = ((GremlinDbConnectionState) dbConnectionState).getUpdateHandler();
+        Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
         params.put("comment_label", Entity.COMMENT.getName());
         params.put("place_label", Entity.PLACE.getName());
@@ -58,7 +61,7 @@ public class LdbcUpdate7Handler implements OperationHandler<LdbcUpdate7AddCommen
 
         statement += "tag_ids.forEach{t ->  tag = g.V().has(tag_label, 'iid', t).next(); comment.addEdge('hasTag', tag); }";
 
-        updateHandler.submitQuery( statement, params );
+        client.submit( statement, params );
 
         resultReporter.report( 0, LdbcNoResult.INSTANCE, ldbcUpdate7AddComment );
 
