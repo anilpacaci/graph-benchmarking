@@ -11,12 +11,12 @@ import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery5;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery5Result;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Result;
-import org.apache.tinkerpop.gremlin.structure.Edge;
-import org.apache.tinkerpop.gremlin.structure.Vertex;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, DbConnectionState>
 {
@@ -54,7 +54,8 @@ public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, Db
         //         ".limit(local, 20);";
         String
                 statement = "g.V().has(person_label, 'iid', person_id).aggregate('0')." +
-                "repeat(out('knows').simplePath()).times(2).where(without('0')).dedup().aggregate('member')." +
+                "repeat(out('knows').aggregate('fof')).times(2)." +
+                "cap('fof').unfold().where(without('0')).dedup().aggregate('member')." +
                 "inE('hasMember').has('joinDate',gte(min_date)).outV().dedup().as('forum_name')." +
                 "match(" +
                 "   __.as('f').outE('hasMember').has('joinDate',gte(min_date)).inV().where(within('member')).aggregate('forummembers')," +

@@ -35,12 +35,6 @@ public class LdbcComplexQuery12Handler implements OperationHandler<LdbcQuery12, 
         params.put( "tagclass", ldbcQuery12.tagClassName() );
         params.put( "result_limit", ldbcQuery12.limit() );
 
-        //String statement = "g.V().has(person_label, 'iid', person_id)" +
-        //        ".out('knows').limit(result_limit).as('friends')" +
-        //        ".in('hasCreator').where(out('replyOf').hasLabel('post')" +
-        //        ".out('hasTag').repeat(out('hasType')).until(has('name', tagclass))).as('messages')" +
-        //        ".out('hasTag').values('name').as('tags')" +
-        //        ".select('friends', 'messages', 'tags')";
         String statement = "g.V().has(person_label, 'iid', person_id)." +
                 "out('knows').as('friends').values('iid_long').as('pid')." +
                 "select('friends').match(" +
@@ -54,23 +48,6 @@ public class LdbcComplexQuery12Handler implements OperationHandler<LdbcQuery12, 
                 ").where(select('comments').unfold().count().is(gt(0)))." +
                 "order().by(select('count'), decr).by(select('pid'))." +
                 "select('friends', 'count', 'tagnames')";
-        /*
-        g= Neo4jGraph.open('/hdd1/ldbc/datasets/neo4j/validation/').traversal()
-        g.V().has('person', 'iid', 'person:1129').
-        out('knows').as('friends').values('iid_long').as('pid').
-        select('friends').
-        match(
-        __.as('f').in('hasCreator').hasLabel('comment').
-            where(out('replyOf').hasLabel('post').out('hasTag').
-            repeat(out('hasType')).until(has('name', 'Politician'))).fold().as('comments'),
-        __.as('comments').unfold().out('hasTag').values('name').fold().as('tagnames'),
-        __.as('comments').unfold().count().as('count')
-        ).where(select('count').is(gt(0))).
-        order().by(select('count'), decr).by(select('friends').value('iid_long')).
-        select('friends', 'count', 'tagnames')
-
-        tagclass=Politician, result_limit=20, person_label=person, person_id=person:939
-         */
 
         List<Result> results = null;
         try

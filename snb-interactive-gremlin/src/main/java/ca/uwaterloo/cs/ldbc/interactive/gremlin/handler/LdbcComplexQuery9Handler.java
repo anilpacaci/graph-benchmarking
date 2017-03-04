@@ -34,24 +34,13 @@ public class LdbcComplexQuery9Handler implements OperationHandler<LdbcQuery9, Db
         params.put( "max_date", ldbcQuery9.maxDate().getTime() );
         params.put( "result_limit", ldbcQuery9.limit() );
 
-        //String statement = "g.V().has(person_label, 'iid', person_id)" +
-        //        ".repeat(out('knows').simplePath()).until(loops().is(gt(1))).as('person')" +
-        //        ".in('hasCreator').has('creationDate', lt(max_date)).limit(result_limit).as('message')" +
-        //        ".order().by('creationDate', decr).by('iid_long', incr)" +
-        //        ".select('person', 'message')";
         String statement = "g.V().has(person_label, 'iid', person_id).aggregate('start')." +
-                "repeat(out('knows').simplePath()).times(2).dedup().where(without('start')).as('person')." +
+                "repeat(out('knows').aggregate('fof')).times(2).cap('fof').unfold().dedup()." +
+                "where(without('start')).as('person')." +
                 "in('hasCreator').has('creationDate', lt(max_date)).as('message')." +
                 "order().by('creationDate', decr).by('iid_long', incr)." +
                 "limit(result_limit)." +
                 "select('person', 'message')";
-        /*
-                g.V().has('person', 'iid', 'person:234').
-                repeat(out('knows').simplePath()).times(2).dedup().as('person').
-                in('hasCreator').has('creationDate', lt(12345544444443)).limit(20).as('message').
-                order().by('creationDate', decr).by('iid_long', incr).
-                select('person', 'message')
-         */
         List<Result> results = null;
         try
         {

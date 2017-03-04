@@ -29,7 +29,7 @@ public class LdbcComplexQuery6Handler implements OperationHandler<LdbcQuery6, Db
         params.put("result_limit", ldbcQuery6.limit());
 
         String statement = "g.V().has(person_label, 'iid', person_id).aggregate('0')."+
-                "repeat(out('knows').simplePath()).times(2).where(without('0')).dedup()."+
+                "repeat(out('knows').aggregate('fof')).times(2).cap('fof').unfold().where(without('0')).dedup()."+
                 "in('hasCreator').hasLabel('post')."+
                 "where(out('hasTag').has('name', tag_name))."+
                 "out('hasTag').has('name', neq(tag_name)).groupCount().by('name')."+
