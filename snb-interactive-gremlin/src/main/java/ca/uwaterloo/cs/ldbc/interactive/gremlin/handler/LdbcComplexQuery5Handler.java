@@ -45,8 +45,7 @@ public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, Db
         params.put( "min_date", ldbcQuery5.minDate().getTime() );
         params.put( "result_limit", ldbcQuery5.limit() );
 
-        String
-                statement = "g.V().has(person_label, 'iid', person_id).aggregate('0')." +
+        String statement = "g.V().has(person_label, 'iid', person_id).aggregate('0')." +
                 "repeat(out('knows').aggregate('fof')).times(2)." +
                 "cap('fof').unfold().where(without('0')).dedup().aggregate('member')." +
                 "inE('hasMember').has('joinDate',gte(min_date)).outV().dedup().as('forum_name')." +
@@ -71,9 +70,9 @@ public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, Db
 
         for ( Result r : results )
         {
-            HashMap map = r.get(HashMap.class);
-            String forum_name = (String) map.get("forum_name");
-            Long count = (Long) map.get("postcount");
+            HashMap map = r.get( HashMap.class );
+            String forum_name = (String) map.get( "forum_name" );
+            Long count = (Long) map.get( "postcount" );
 
             LdbcQuery5Result ldbcQuery5Result = new LdbcQuery5Result(
                     forum_name,
