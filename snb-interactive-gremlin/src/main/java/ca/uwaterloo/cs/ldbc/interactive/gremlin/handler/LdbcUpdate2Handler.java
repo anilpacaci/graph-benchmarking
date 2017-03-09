@@ -13,6 +13,7 @@ import org.apache.tinkerpop.gremlin.driver.Client;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by anilpacaci on 2016-07-21.
@@ -33,7 +34,13 @@ public class LdbcUpdate2Handler implements OperationHandler<LdbcUpdate2AddPostLi
         String statement = "person = g.V().has(person_label, 'iid', person_id).next(); " +
                 "post = g.V().has(post_label, 'iid', post_id).next(); " +
                 "person.addEdge('likes', post).property('creationDate', creation_date);";
-        client.submit( statement, params );
+        try {
+            client.submit( statement, params ).all().get();
+        }
+        catch ( InterruptedException | ExecutionException e )
+        {
+            throw new DbException( "Remote execution failed", e );
+        }
 
         resultReporter.report(0, LdbcNoResult.INSTANCE, ldbcUpdate2AddPostLike);
 

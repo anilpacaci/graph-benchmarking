@@ -13,6 +13,7 @@ import org.apache.tinkerpop.gremlin.driver.Client;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public class LdbcUpdate7Handler implements OperationHandler<LdbcUpdate7AddComment, DbConnectionState>
 {
@@ -61,7 +62,13 @@ public class LdbcUpdate7Handler implements OperationHandler<LdbcUpdate7AddCommen
 
         statement += "tag_ids.forEach{t ->  tag = g.V().has(tag_label, 'iid', t).next(); comment.addEdge('hasTag', tag); }";
 
-        client.submit( statement, params );
+        try {
+            client.submit( statement, params ).all().get();
+        }
+        catch ( InterruptedException | ExecutionException e )
+        {
+            throw new DbException( "Remote execution failed", e );
+        }
 
         resultReporter.report( 0, LdbcNoResult.INSTANCE, ldbcUpdate7AddComment );
 

@@ -13,6 +13,7 @@ import org.apache.tinkerpop.gremlin.driver.Client;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class LdbcUpdate1Handler implements OperationHandler<LdbcUpdate1AddPerson, DbConnectionState> {
@@ -74,7 +75,13 @@ public class LdbcUpdate1Handler implements OperationHandler<LdbcUpdate1AddPerson
 
         statement = String.join("\n", statement, uni_statement, company_statement);
 
-        client.submit( statement, params );
+        try {
+            client.submit( statement, params ).all().get();
+        }
+        catch ( InterruptedException | ExecutionException e )
+        {
+            throw new DbException( "Remote execution failed", e );
+        }
 
         resultReporter.report(0, LdbcNoResult.INSTANCE, ldbcUpdate1AddPerson);
 

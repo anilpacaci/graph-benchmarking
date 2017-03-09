@@ -13,6 +13,7 @@ import org.apache.tinkerpop.gremlin.driver.Client;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public class LdbcUpdate5Handler implements OperationHandler<LdbcUpdate5AddForumMembership, DbConnectionState> {
 
@@ -32,7 +33,13 @@ public class LdbcUpdate5Handler implements OperationHandler<LdbcUpdate5AddForumM
                           "forum = g.V().has(forum_label, 'iid', forum_id).next();" +
                           "edge = forum.addEdge('hasMember', person);" +
                           "edge.property('joinDate', join_date);";
-        client.submit( statement, params );
+        try {
+            client.submit( statement, params ).all().get();
+        }
+        catch ( InterruptedException | ExecutionException e )
+        {
+            throw new DbException( "Remote execution failed", e );
+        }
 
         resultReporter.report(0, LdbcNoResult.INSTANCE, ldbcUpdate5AddForumMembership);
 

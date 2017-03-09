@@ -13,6 +13,7 @@ import org.apache.tinkerpop.gremlin.driver.Client;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public class LdbcUpdate8Handler implements OperationHandler<LdbcUpdate8AddFriendship, DbConnectionState> {
     @Override
@@ -27,7 +28,13 @@ public class LdbcUpdate8Handler implements OperationHandler<LdbcUpdate8AddFriend
                 "p2 = g.V().has(person_label, 'iid', p2_id).next(); " +
                 "p1.addEdge('knows', p2).property('creationDate', creation_date);" +
                 "p2.addEdge('knows', p1).property('creationDate', creation_date);";
-        client.submit( statement, params );
+        try {
+            client.submit( statement, params ).all().get();
+        }
+        catch ( InterruptedException | ExecutionException e )
+        {
+            throw new DbException( "Remote execution failed", e );
+        }
 
         resultReporter.report(0, LdbcNoResult.INSTANCE, ldbcUpdate8AddFriendship);
 
