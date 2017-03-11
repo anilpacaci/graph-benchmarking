@@ -161,7 +161,10 @@ class SNBParser {
             birthdayDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
             SimpleDateFormat creationDateDateFormat =
                     new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-            creationDateDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+            creationDateDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"))
+            SimpleDateFormat joinDateDateFormat =
+                    new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+            joinDateDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
             String[] colNames = graphReader.getColNames()
             String[] fileNameParts = graphReader.getFileNameParts()
             String entityName = fileNameParts[0];
@@ -182,103 +185,105 @@ class SNBParser {
                 txFailCount = 0;
                 while (!txSucceeded) {
                     for (int i = 0; i < lines.size(); i++) {
-                        String line = lines.get(i);
-                        String[] colVals = line.split("\\|");
+                        try {
+                            String line = lines.get(i);
+                            String[] colVals = line.split("\\|");
 
-                        if (elementType == ElementType.VERTEX) {
-                            Map<Object, Object> propertiesMap = new HashMap<>();
+                            if (elementType == ElementType.VERTEX) {
+                                Map<Object, Object> propertiesMap = new HashMap<>();
 
-                            String identifier;
-                            for (int j = 0; j < colVals.length; ++j) {
-                                if (colNames[j].equals("id")) {
-                                    identifier = entityName + ":" + colVals[j]
-                                    propertiesMap.put("iid", identifier);
-                                    propertiesMap.put("iid_long", Long.parseLong(colVals[j]))
-                                } else if (colNames[j].equals("birthday")) {
-                                    propertiesMap.put(colNames[j], birthdayDateFormat.parse(colVals[j]).getTime());
-                                } else if (colNames[j].equals("creationDate")) {
-                                    propertiesMap.put(colNames[j], creationDateDateFormat.parse(colVals[j]).getTime());
+                                String identifier;
+                                for (int j = 0; j < colVals.length; ++j) {
+                                    if (colNames[j].equals("id")) {
+                                        identifier = entityName + ":" + colVals[j]
+                                        propertiesMap.put("iid", identifier);
+                                        propertiesMap.put("iid_long", Long.parseLong(colVals[j]))
+                                    } else if (colNames[j].equals("birthday")) {
+                                        propertiesMap.put(colNames[j], birthdayDateFormat.parse(colVals[j]).getTime());
+                                    } else if (colNames[j].equals("creationDate")) {
+                                        propertiesMap.put(colNames[j], creationDateDateFormat.parse(colVals[j]).getTime());
+                                    } else {
+                                        propertiesMap.put(colNames[j], colVals[j]);
+                                    }
+                                }
+                                propertiesMap.put(T.label, entityName);
+
+                                List<Object> keyValues = new ArrayList<>();
+                                propertiesMap.forEach { key, val ->
+                                    keyValues.add(key);
+                                    keyValues.add(val);
+                                }
+
+                                Vertex vertex = graph.addVertex(keyValues.toArray());
+
+                                //populate IDMapping if enabled
+                                if (isIdMappingEnabled) {
+                                    Long id = (Long) vertex.id()
+                                    idMappingServer.setId(identifier, id)
+                                }
+
+                            } else if (elementType == ElementType.PROPERTY) {
+                                GraphTraversalSource g = graph.traversal();
+
+                                Vertex vertex = null;
+                                if (isIdMappingEnabled) {
+                                    Long id = idMappingServer.getId(entityName + ":" + colVals[0]);
+                                    vertex = g.V(id).next()
                                 } else {
-                                    propertiesMap.put(colNames[j], colVals[j]);
+                                    vertex = g.V().has(entityName, "iid", entityName + ":" + colVals[0]).next();
+                                }
+
+                                for (int j = 1; j < colVals.length; ++j) {
+                                    vertex.property(VertexProperty.Cardinality.list, colNames[j],
+                                            colVals[j]);
+                                }
+
+                            } else {
+                                GraphTraversalSource g = graph.traversal();
+                                Vertex vertex1, vertex2;
+
+                                if (isIdMappingEnabled) {
+                                    Long id1 = idMappingServer.getId(entityName + ":" + colVals[0])
+                                    Long id2 = idMappingServer.getId(v2EntityName + ":" + colVals[1])
+                                    vertex1 = g.V(id1).next()
+                                    vertex2 = g.V(id2).next()
+                                } else {
+                                    vertex1 =
+                                            g.V().has(entityName, "iid", entityName + ":" + colVals[0]).next();
+                                    vertex2 =
+                                            g.V().has(v2EntityName, "iid", v2EntityName + ":" + colVals[1]).next();
+                                }
+
+                                Map<Object, Object> propertiesMap = new HashMap<>();
+                                for (int j = 2; j < colVals.length; ++j) {
+                                    if (colNames[j].equals("creationDate")) {
+                                        propertiesMap.put(colNames[j], creationDateDateFormat.parse(colVals[j]).getTime());
+                                    } else if (colNames[j].equals("joinDate")) {
+                                        propertiesMap.put(colNames[j], joinDateDateFormat.parse(colVals[j]).getTime());
+                                    } else {
+                                        propertiesMap.put(colNames[j], colVals[j]);
+                                    }
+                                }
+
+                                List<Object> keyValues = new ArrayList<>();
+                                propertiesMap.forEach { key, val ->
+                                    keyValues.add(key);
+                                    keyValues.add(val);
+                                }
+
+                                vertex1.addEdge(edgeLabel, vertex2, keyValues.toArray());
+
+                                if (edgeLabel.equals("knows")) {
+                                    //TODO: this is implementation spefic, parameterize this
+                                    vertex2.addEdge(edgeLabel, vertex1, keyValues.toArray());
                                 }
                             }
-                            propertiesMap.put(T.label, entityName);
 
-                            List<Object> keyValues = new ArrayList<>();
-                            propertiesMap.forEach { key, val ->
-                                keyValues.add(key);
-                                keyValues.add(val);
-                            }
-
-                            Vertex vertex = graph.addVertex(keyValues.toArray());
-
-                            //populate IDMapping if enabled
-                            if (isIdMappingEnabled) {
-                                Long id = (Long) vertex.id()
-                                idMappingServer.setId(identifier, id)
-                            }
-
-                        } else if (elementType == ElementType.PROPERTY) {
-                            GraphTraversalSource g = graph.traversal();
-
-                            Vertex vertex = null;
-                            if(isIdMappingEnabled) {
-                                Long id = idMappingServer.getId(entityName + ":" + colVals[0]);
-                                vertex = g.V(id).next()
-                            } else {
-                                vertex = g.V().has(entityName, "iid", entityName + ":" + colVals[0]).next();
-                            }
-
-                            for (int j = 1; j < colVals.length; ++j) {
-                                vertex.property(VertexProperty.Cardinality.list, colNames[j],
-                                        colVals[j]);
-                            }
-
-                        } else {
-                            GraphTraversalSource g = graph.traversal();
-                            Vertex vertex1, vertex2;
-
-                            if(isIdMappingEnabled) {
-                                Long id1 = idMappingServer.getId(entityName + ":" + colVals[0])
-                                Long id2 = idMappingServer.getId(v2EntityName + ":" + colVals[1])
-                                vertex1 = g.V(id1).next()
-                                vertex2 = g.V(id2).next()
-                            } else {
-                                vertex1 =
-                                        g.V().has(entityName, "iid", entityName + ":" + colVals[0]).next();
-                                vertex2 =
-                                        g.V().has(v2EntityName, "iid", v2EntityName + ":" + colVals[1]).next();
-                            }
-
-                            Map<Object, Object> propertiesMap = new HashMap<>();
-                            for (int j = 2; j < colVals.length; ++j) {
-                                if (colNames[j].equals("creationDate")) {
-                                    propertiesMap.put(colNames[j], creationDateDateFormat.parse(colVals[j]).getTime());
-                                } else if (colNames[j].equals("joinDate")) {
-                                    propertiesMap.put(colNames[j], joinDateDateFormat.parse(colVals[j]).getTime());
-                                } else {
-                                    propertiesMap.put(colNames[j], colVals[j]);
-                                }
-                            }
-
-                            List<Object> keyValues = new ArrayList<>();
-                            propertiesMap.forEach { key, val ->
-                                keyValues.add(key);
-                                keyValues.add(val);
-                            }
-
-                            vertex1.addEdge(edgeLabel, vertex2, keyValues.toArray());
-
-                            if (edgeLabel.equals("knows")) {
-                                //TODO: this is implementation spefic, parameterize this
-                                vertex2.addEdge(edgeLabel, vertex1, keyValues.toArray());
-                            }
+                            this.counter.incrementAndGet()
+                        } catch (Exception e) {
+                            println(String.format("Inset failed on file: %s, index: %s, reason: ", graphReader.getFileName(), i, e.printStackTrace()))
                         }
-
-                        this.counter.incrementAndGet()
-
                     }
-
                     try {
                         graph.tx().commit();
                         txSucceeded = true;
