@@ -11,12 +11,12 @@ import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery5;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery5Result;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Result;
-import org.apache.tinkerpop.gremlin.structure.Edge;
-import org.apache.tinkerpop.gremlin.structure.Vertex;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, DbConnectionState>
 {
@@ -45,41 +45,17 @@ public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, Db
         params.put( "min_date", ldbcQuery5.minDate().getTime() );
         params.put( "result_limit", ldbcQuery5.limit() );
 
-        // String statement = "g.V().has(person_label, 'iid', person_id).repeat(out('knows')).times(2).emit().dedup().aggregate('member')" +
-        //         ".inE('hasMember').has('joinDate',gte(min_date)).outV().as('forum_name')" +
-        //         ".out('containerOf').as('post').out('hasCreator').where(within('member')).select('post')" +
-        //         ".groupCount().by(__.in('containerOf'))" +
-        //         ".order(local).by(value, decr)" +
-        //         //".order(local).by(key, incr)" +
-        //         ".limit(local, 20);";
-        String
-                statement = "g.V().has(person_label, 'iid', person_id).aggregate('0')." +
-                "repeat(out('knows').simplePath()).times(2).where(without('0')).dedup().aggregate('member')." +
+        String statement = "g.V().has(person_label, 'iid', person_id).aggregate('0')." +
+                "repeat(out('knows').aggregate('fof')).times(2)." +
+                "cap('fof').unfold().where(without('0')).dedup().aggregate('member')." +
                 "inE('hasMember').has('joinDate',gte(min_date)).outV().dedup().as('forum_name')." +
                 "match(" +
                 "   __.as('f').outE('hasMember').has('joinDate',gte(min_date)).inV().where(within('member')).aggregate('forummembers')," +
                 "   __.as('f').out('containerOf').as('post').out('hasCreator').where(within('forummembers')).select('post').count().as('postcount')" +
-                ").dedup().select('forum_name').values('iid_long').as('pid')." +
+                ").select('forum_name').dedup().values('iid_long').as('pid')." +
                 "order().by(select('postcount'), decr).by(select('pid'))." +
                 "limit(result_limit).select('forum_name', 'postcount').by('title').by()";
 
-
-        /*
-        g.V().has('person', 'iid', 'person:2202').
-        repeat(out('knows').simplePath()).times(2).dedup().aggregate('member').
-        inE('hasMember').has('joinDate',gte(1289520000000)).outV().as('forum_name').
-        out('containerOf').as('post').out('hasCreator').where(within('member')).
-        select('post').
-        groupCount().by(__.in('containerOf')).
-        order(local).by(values, decr).
-        limit(local, 20)
-
-         2202,
-      ,
-      20
-
-
-         */
         List<Result> results;
         try
         {
@@ -94,9 +70,9 @@ public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, Db
 
         for ( Result r : results )
         {
-            HashMap map = r.get(HashMap.class);
-            String forum_name = (String) map.get("forum_name");
-            Long count = (Long) map.get("postcount");
+            HashMap map = r.get( HashMap.class );
+            String forum_name = (String) map.get( "forum_name" );
+            Long count = (Long) map.get( "postcount" );
 
             LdbcQuery5Result ldbcQuery5Result = new LdbcQuery5Result(
                     forum_name,

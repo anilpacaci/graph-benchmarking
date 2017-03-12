@@ -35,7 +35,8 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
         params.put( "result_limit", ldbcQuery3.limit() );
 
         String statement = " g.V().has(person_label, 'iid', person_id).aggregate('0')." +
-                " repeat(out('knows').simplePath()).times(2).where(without('0')).dedup().as('person')." +
+                " repeat(out('knows').aggregate('fof')).times(2)." +
+                " cap('fof').unfold().where(without('0')).dedup().as('person')." +
                 " values('iid_long').as('pid')." +
                 " select('person').where(out('isLocatedIn').out('isPartOf').has('name', neq(countryX))." +
                 " and().out('isLocatedIn').out('isPartOf').has('name', neq('countryY')))." +

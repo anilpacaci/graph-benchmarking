@@ -12,9 +12,11 @@ import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery14Result;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Result;
 import org.apache.tinkerpop.gremlin.process.traversal.Path;
-import org.apache.tinkerpop.gremlin.structure.Vertex;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 public class LdbcComplexQuery14Handler implements OperationHandler<LdbcQuery14, DbConnectionState>
@@ -29,7 +31,7 @@ public class LdbcComplexQuery14Handler implements OperationHandler<LdbcQuery14, 
         params.put( "person2_id", GremlinUtils.makeIid( Entity.PERSON, ldbcQuery14.person2Id() ) );
         params.put( "person_label", Entity.PERSON.getName() );
 
-        String statement =             "static double calculateWeight(GraphTraversalSource g, Long v1, Long v2) {" +
+        String statement = "static double calculateWeight(GraphTraversalSource g, Long v1, Long v2) {" +
                 "long postForward = g.V().has('person', 'iid_long', v1).in('hasCreator').hasLabel('post').in('replyOf').out('hasCreator').has('person', 'iid_long', v2).count().next(); " +
                 "long postBackward = g.V().has('person', 'iid_long', v2).in('hasCreator').hasLabel('post').in('replyOf').out('hasCreator').has('person', 'iid_long', v1).count().next(); " +
                 "long commentForward = g.V().has('person', 'iid_long', v1).in('hasCreator').hasLabel('comment').in('replyOf').out('hasCreator').has('person', 'iid_long', v2).count().next(); " +
