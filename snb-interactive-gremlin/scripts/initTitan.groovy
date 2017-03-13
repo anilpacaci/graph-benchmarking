@@ -69,16 +69,13 @@ Graph initializeTitan(String propertiesFile) {
             "workAt"]
 
     // All property keys with Cardinality.SINGLE
-    List<String> singleCardPropKeys = [
-            "birthday", // person
+    List<String> singleCardStringPropKeys = [
             "browserUsed", // comment person post
             "classYear", // studyAt
             "content", // comment post
-            "creationDate", // comment forum person post knows likes
             "firstName", // person
             "gender", // person
             "imageFile", // post
-            "joinDate", // hasMember
             //"language", // post
             "lastName", // person
             "length", // comment post
@@ -88,6 +85,11 @@ Graph initializeTitan(String propertiesFile) {
             "type", // organisation place
             "url", // organisation place tag tagclass
             "workFrom"] // workAt
+
+    List<String> singleCardLongPropKeys = [
+            "birthday", // person
+            "creationDate", // comment forum person post knows likes
+            "joinDate"] // workAt
 
     // All property keys with Cardinality.LIST
     List<String> listCardPropKeys = [
@@ -120,10 +122,17 @@ Graph initializeTitan(String propertiesFile) {
         }
 
         // Delcare all properties with Cardinality.SINGLE
-        for (String propKey : singleCardPropKeys) {
+        for (String propKey : singleCardStringPropKeys) {
             System.out.println(propKey);
             mgmt = (ManagementSystem) titanGraph.openManagement();
             mgmt.makePropertyKey(propKey).dataType(String.class)
+                    .cardinality(Cardinality.SINGLE).make();
+            mgmt.commit();
+        }
+        for (String propKey : singleCardLongPropKeys) {
+            System.out.println(propKey);
+            mgmt = (ManagementSystem) titanGraph.openManagement();
+            mgmt.makePropertyKey(propKey).dataType(Long.class)
                     .cardinality(Cardinality.SINGLE).make();
             mgmt.commit();
         }
@@ -158,6 +167,24 @@ Graph initializeTitan(String propertiesFile) {
 
         mgmt = (ManagementSystem) titanGraph.openManagement();
         mgmt.updateIndex(mgmt.getGraphIndex("byIid"), SchemaAction.REINDEX)
+                .get();
+        mgmt.commit();
+
+
+        mgmt = (ManagementSystem) titanGraph.openManagement();
+        mgmt.makePropertyKey("iid_long").dataType(Long.class)
+                .cardinality(Cardinality.SINGLE).make();
+        mgmt.commit();
+
+        mgmt = (ManagementSystem) titanGraph.openManagement();
+        PropertyKey iid_long = mgmt.getPropertyKey("iid_long");
+        mgmt.buildIndex("byIidLong", Vertex.class).addKey(iid_long).buildCompositeIndex();
+        mgmt.commit();
+
+        mgmt.awaitGraphIndexStatus(titanGraph, "byIidLong").call();
+
+        mgmt = (ManagementSystem) titanGraph.openManagement();
+        mgmt.updateIndex(mgmt.getGraphIndex("byIidLong"), SchemaAction.REINDEX)
                 .get();
         mgmt.commit();
 
