@@ -41,7 +41,7 @@ public class LdbcUpdate7Handler implements OperationHandler<LdbcUpdate7AddCommen
         params.put("tag_ids", GremlinUtils.makeIid(Entity.TAG, ldbcUpdate7AddComment.tagIds()));
 
         String statement = "comment = g.addV(label, comment_label).property('iid', comment_id)" +
-            ".property('iid_long', 'comment_id_long')" +
+            ".property('iid_long', comment_id_long)" +
             ".property('length', length)" +
             ".property('content', content)" +
             ".property('locationIP', location_ip)" +
