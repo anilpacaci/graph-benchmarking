@@ -48,10 +48,10 @@ public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, Db
         String statement = "g.V().has(person_label, 'iid', person_id).aggregate('0')." +
                 "repeat(out('knows').aggregate('fof')).times(2)." +
                 "cap('fof').unfold().where(without('0')).dedup().aggregate('member')." +
-                "inE('hasMember').has('joinDate',gte(min_date)).outV().dedup().as('forum_name')." +
+                "inE('hasMember').has('joinDate',gte(min_date)).outV().dedup()." +
                 "match(" +
-                "   __.as('f').outE('hasMember').has('joinDate',gte(min_date)).inV().where(within('member')).aggregate('forummembers')," +
-                "   __.as('f').out('containerOf').as('post').out('hasCreator').where(within('forummembers')).select('post').count().as('postcount')" +
+                "   __.as('forum_name').outE('hasMember').has('joinDate',gte(min_date)).inV().where(within('member')).aggregate('forummembers')," +
+                "   __.as('forum_name').out('containerOf').as('post').out('hasCreator').where(within('forummembers')).select('post').count().as('postcount')" +
                 ").select('forum_name').dedup().values('iid_long').as('pid')." +
                 "order().by(select('postcount'), decr).by(select('pid'))." +
                 "limit(result_limit).select('forum_name', 'postcount').by('title').by()";
