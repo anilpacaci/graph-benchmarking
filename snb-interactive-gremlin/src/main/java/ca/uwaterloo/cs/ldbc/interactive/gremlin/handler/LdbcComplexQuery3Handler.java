@@ -42,7 +42,7 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
                 " match(" +
                 "         __.as('p').in('hasCreator').has('creationDate', between(start_date, end_date)).where(out('isLocatedIn').has('name', countryX)).count().as('countx')," +
                 "         __.as('p').in('hasCreator').has('creationDate', between(start_date, end_date)).where(out('isLocatedIn').has('name', countryY)).count().as('county')," +
-                "         __.as('p').map(union(identity(), select('county')).sum()).as('count')  " +
+                "         __.as('countx').map(union(identity(), select('county')).sum()).as('count')  " +
                 " ).select('p').order().by('iid_long').limit(result_limit)." +
                 "select('p', 'countx', 'county')";
 
