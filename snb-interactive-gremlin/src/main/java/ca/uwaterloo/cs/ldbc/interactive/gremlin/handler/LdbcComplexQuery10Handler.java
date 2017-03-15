@@ -50,7 +50,7 @@ public class LdbcComplexQuery10Handler implements OperationHandler<LdbcQuery10, 
                 "   __.as('fof').in('hasCreator').hasLabel('post').count().fold(-1, mult).as('totaln')," +
                 "   __.as('common2').map(union(identity(), select('totaln')).sum()).as('similarity')" +
                 ").select('fof').out('isLocatedIn').as('city').select('fof')." +
-                "order().by(select('similarity'), decr).by(values('iid_long'))." +
+                "order().by(select('similarity'), decr).by('iid_long')." +
                 "limit(result_limit)." +
                 "select('fof', 'city', 'similarity')";
 

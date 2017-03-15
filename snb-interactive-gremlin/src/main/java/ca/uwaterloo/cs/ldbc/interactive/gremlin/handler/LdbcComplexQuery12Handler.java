@@ -45,7 +45,7 @@ public class LdbcComplexQuery12Handler implements OperationHandler<LdbcQuery12, 
                 "        values('name').fold().as('tagnames')," +
                 "__.as('comments').count().as('count')" +
                 ").where(select('comments').unfold().count().is(gt(0)))." +
-                "order().by(select('count'), decr).by(values('iid_long'))." +
+                "order().by(select('count'), decr).by('iid_long')." +
                 "select('friends', 'count', 'tagnames')";
 
         List<Result> results = null;
