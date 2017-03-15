@@ -20,71 +20,76 @@ import java.util.concurrent.ExecutionException;
 /**
  * Created by anilpacaci on 2016-07-23.
  */
-public class LdbcComplexQuery11Handler implements OperationHandler<LdbcQuery11, DbConnectionState> {
+public class LdbcComplexQuery11Handler implements OperationHandler<LdbcQuery11, DbConnectionState>
+{
     @Override
-    public void executeOperation(LdbcQuery11 ldbcQuery11, DbConnectionState dbConnectionState, ResultReporter resultReporter) throws DbException {
+    public void executeOperation( LdbcQuery11 ldbcQuery11, DbConnectionState dbConnectionState, ResultReporter resultReporter ) throws DbException
+    {
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
         Map<String, Object> params = new HashMap<>();
-        params.put("person_id", GremlinUtils.makeIid(Entity.PERSON, ldbcQuery11.personId()));
-        params.put("person_label", Entity.PERSON.getName());
-        params.put("country_name", ldbcQuery11.countryName());
-        params.put("start_year", Integer.toString(ldbcQuery11.workFromYear()));
-        params.put("result_limit", ldbcQuery11.limit());
+        params.put( "person_id", GremlinUtils.makeIid( Entity.PERSON, ldbcQuery11.personId() ) );
+        params.put( "person_label", Entity.PERSON.getName() );
+        params.put( "country_name", ldbcQuery11.countryName() );
+        params.put( "start_year", Integer.toString( ldbcQuery11.workFromYear() ) );
+        params.put( "result_limit", ldbcQuery11.limit() );
 
-        String statement= "g.V().has(person_label, 'iid', person_id).aggregate('0')."+
-        "repeat(out('knows').aggregate('fof')).times(2).cap('fof').unfold()." +
-        "where(without('0')).dedup().as('friend')."+
-        "outE('workAt').has('workFrom', lte(start_year)).as('workEdge')."+
-        "inV().as('organization').out('isLocatedIn').has('name', country_name)."+
-        "limit(result_limit)."+
-        "select('organization').order().by('name', decr)."+
-        "select('friend').order().by('iid_long')."+
-        "select('workEdge').order().by('workFrom')."+
-        "select('friend', 'workEdge', 'organization')";
-
-       // 1st Person-worksAt->.worksFrom (ascending)
-       // 2nd Person.id (ascending)
-       // 3st Person-worksAt->Organization.name (descending)
+        String statement = "g.V().has(person_label, 'iid', person_id).aggregate('0')." +
+                "repeat(out('knows').aggregate('fof')).times(2).cap('fof').unfold()." +
+                "where(without('0')).dedup().as('friend')." +
+                "outE('workAt').has('workFrom', lte(start_year)).as('workEdge')." +
+                "inV().as('organization').out('isLocatedIn').has('name', country_name)." +
+                "limit(result_limit)." +
+                "select('friend', 'workEdge', 'organization')";
+        // 1st Person-worksAt->.worksFrom (ascending)
+        // 2nd Person.id (ascending)
+        // 3st Person-worksAt->Organization.name (descending)
         List<Result> results = null;
-        try {
-            results = client.submit(statement, params).all().get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new DbException("Remote execution failed", e);
+        try
+        {
+            results = client.submit( statement, params ).all().get();
+        }
+        catch ( InterruptedException | ExecutionException e )
+        {
+            throw new DbException( "Remote execution failed", e );
         }
 
 
         List<LdbcQuery11Result> resultList = new ArrayList<>();
-        for(Result r : results) {
-            HashMap map = r.get(HashMap.class);
-            Vertex person = (Vertex) map.get("friend");
-            Vertex organization = (Vertex) map.get("organization");
-            Edge workAt = (Edge) map.get("workEdge");
+        for ( Result r : results )
+        {
+            HashMap map = r.get( HashMap.class );
+            Vertex person = (Vertex) map.get( "friend" );
+            Vertex organization = (Vertex) map.get( "organization" );
+            Edge workAt = (Edge) map.get( "workEdge" );
 
-            LdbcQuery11Result ldbcQuery11Result = new LdbcQuery11Result(GremlinUtils.getSNBId(person),
-                    person.<String>property("firstName").value(),
-                    person.<String>property("lastName").value(),
-                    organization.<String>property("name").value(),
-                    Integer.parseInt(workAt.<String>property("workFrom").value()));
+            LdbcQuery11Result ldbcQuery11Result = new LdbcQuery11Result( GremlinUtils.getSNBId( person ),
+                    person.<String>property( "firstName" ).value(),
+                    person.<String>property( "lastName" ).value(),
+                    organization.<String>property( "name" ).value(),
+                    Integer.parseInt( workAt.<String>property( "workFrom" ).value() ) );
 
-            resultList.add(ldbcQuery11Result);
+            resultList.add( ldbcQuery11Result );
         }
 
         resultList.sort( ( o1, o2 ) ->
         {
-            if (o1.organizationWorkFromYear() == o2.organizationWorkFromYear()) {
-                if (o1.personId() == o2.personId())
-                    return o2.organizationName().compareTo(o1.organizationName());
+            if ( o1.organizationWorkFromYear() == o2.organizationWorkFromYear() )
+            {
+                if ( o1.personId() == o2.personId() )
+                    return o2.organizationName().compareTo( o1.organizationName() );
                 else
-                    return Long.compare(o1.personId(), o2.personId());
-            } else
-                return Integer.compare(o1.organizationWorkFromYear(), o2.organizationWorkFromYear());
+                    return Long.compare( o1.personId(), o2.personId() );
+            }
+            else
+                return Integer.compare( o1.organizationWorkFromYear(), o2.organizationWorkFromYear() );
         } );
 
-        if(resultList.size() > ldbcQuery11.limit()) {
-            resultList = resultList.subList(0, ldbcQuery11.limit());
+        if ( resultList.size() > ldbcQuery11.limit() )
+        {
+            resultList = resultList.subList( 0, ldbcQuery11.limit() );
         }
 
-        resultReporter.report(resultList.size(), resultList, ldbcQuery11);
+        resultReporter.report( resultList.size(), resultList, ldbcQuery11 );
 
     }
 }

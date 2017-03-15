@@ -37,15 +37,14 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
         String statement = " g.V().has(person_label, 'iid', person_id).aggregate('0')." +
                 " repeat(out('knows').aggregate('fof')).times(2)." +
                 " cap('fof').unfold().where(without('0')).dedup().as('person')." +
-                " values('iid_long').as('pid')." +
-                " select('person').where(out('isLocatedIn').out('isPartOf').has('name', neq(countryX))." +
+                " where(out('isLocatedIn').out('isPartOf').has('name', neq(countryX))." +
                 " and().out('isLocatedIn').out('isPartOf').has('name', neq('countryY')))." +
                 " match(" +
                 "         __.as('p').in('hasCreator').has('creationDate', between(start_date, end_date)).where(out('isLocatedIn').has('name', countryX)).count().as('countx')," +
                 "         __.as('p').in('hasCreator').has('creationDate', between(start_date, end_date)).where(out('isLocatedIn').has('name', countryY)).count().as('county')," +
-                "         __.as('countx').map(union(identity(), select('county')).sum()).as('count')  " +
-                " ).order().by(select('count'), decr).by(select('pid')).limit(result_limit)." +
-                "select('person', 'countx', 'county')";
+                "         __.as('p').map(union(identity(), select('county')).sum()).as('count')  " +
+                " ).select('p').order().by('iid_long').limit(result_limit)." +
+                "select('p', 'countx', 'county')";
 
         List<Result> results;
         try
@@ -61,7 +60,7 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
         for ( Result r : results )
         {
             HashMap map = r.get( HashMap.class );
-            Vertex person = (Vertex) map.get( "person" );
+            Vertex person = (Vertex) map.get( "p" );
             long countx = (long) map.get( "countx" );
             long county = (long) map.get( "county" );
 

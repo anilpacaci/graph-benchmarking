@@ -47,7 +47,7 @@ public class LdbcComplexQuery14Handler implements OperationHandler<LdbcQuery14, 
                 "        for(int i = 0; i < path.size() - 2; i++) " +
                 "            totalScore += calculateWeight(g, path.get(i), path.get(i + 1));" +
                 "        return totalScore; " +
-                "}.as('length').order().by(select('length'), decr).select('path', 'length')";
+                "}.as('length').select('path', 'length')";
 
 
         List<Result> results = null;

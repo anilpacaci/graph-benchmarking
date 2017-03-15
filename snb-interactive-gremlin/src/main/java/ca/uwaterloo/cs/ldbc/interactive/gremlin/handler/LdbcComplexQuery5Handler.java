@@ -51,9 +51,9 @@ public class LdbcComplexQuery5Handler implements OperationHandler<LdbcQuery5, Db
                 "inE('hasMember').has('joinDate',gte(min_date)).outV().dedup()." +
                 "match(" +
                 "   __.as('forum_name').outE('hasMember').has('joinDate',gte(min_date)).inV().where(within('member')).aggregate('forummembers')," +
-                "   __.as('forum_name').out('containerOf').as('post').out('hasCreator').where(within('forummembers')).select('post').count().as('postcount')" +
-                ").select('forum_name').dedup().values('iid_long').as('pid')." +
-                "order().by(select('postcount'), decr).by(select('pid'))." +
+                "   __.as('forum_name').out('containerOf').as('post').out('hasCreator').where(is(within('forummembers'))).select('post').count().as('postcount')" +
+                ").select('forum_name').dedup()." +
+                "order().by('iid_long')." +
                 "limit(result_limit).select('forum_name', 'postcount').by('title').by()";
 
         List<Result> results;
