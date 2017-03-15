@@ -35,8 +35,11 @@ public class LdbcComplexQuery12Handler implements OperationHandler<LdbcQuery12, 
         params.put( "tagclass", ldbcQuery12.tagClassName() );
         params.put( "result_limit", ldbcQuery12.limit() );
 
+
+
         String statement = "g.V().has(person_label, 'iid', person_id)." +
-                "out('knows').as('friends').match(" +
+                "out('knows').as('friends').values('iid_long').as('pid')." +
+                "select('friends').match(" +
                 "__.as('f').in('hasCreator').hasLabel('comment')." +
                 "        where(out('replyOf').hasLabel('post').out('hasTag').out('hasType')." +
                 "        until(has('name', tagclass)).repeat(out('isSubclassOf')).count().is(gt(0))).fold().as('comments')," +
@@ -45,7 +48,7 @@ public class LdbcComplexQuery12Handler implements OperationHandler<LdbcQuery12, 
                 "        values('name').fold().as('tagnames')," +
                 "__.as('comments').count().as('count')" +
                 ").where(select('comments').unfold().count().is(gt(0)))." +
-                "order().by(select('count'), decr).by('iid_long')." +
+                "order().by(select('count'), decr).by(select('pid'))." +
                 "select('friends', 'count', 'tagnames')";
 
         List<Result> results = null;

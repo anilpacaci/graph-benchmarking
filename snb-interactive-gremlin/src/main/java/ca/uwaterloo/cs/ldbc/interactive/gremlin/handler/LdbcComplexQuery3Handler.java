@@ -37,13 +37,14 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
         String statement = " g.V().has(person_label, 'iid', person_id).aggregate('0')." +
                 " repeat(out('knows').aggregate('fof')).times(2)." +
                 " cap('fof').unfold().where(without('0')).dedup().as('person')." +
-                " where(out('isLocatedIn').out('isPartOf').has('name', neq(countryX))." +
+                " values('iid_long').as('pid')." +
+                " select('person').where(out('isLocatedIn').out('isPartOf').has('name', neq(countryX))." +
                 " and().out('isLocatedIn').out('isPartOf').has('name', neq(countryY)))." +
                 " match(" +
                 "         __.as('p').in('hasCreator').has('creationDate', between(start_date, end_date)).where(out('isLocatedIn').has('name', countryX)).count().as('countx')," +
                 "         __.as('p').in('hasCreator').has('creationDate', between(start_date, end_date)).where(out('isLocatedIn').has('name', countryY)).count().as('county')," +
                 "         __.as('countx').map(union(identity(), select('county')).sum()).as('count')  " +
-                " ).order().by(select('count'), decr).by('iid_long').limit(result_limit)." +
+                " ).order().by(select('count'), decr).by(select('pid')).limit(result_limit)." +
                 "select('person', 'countx', 'county')";
 
         List<Result> results;
