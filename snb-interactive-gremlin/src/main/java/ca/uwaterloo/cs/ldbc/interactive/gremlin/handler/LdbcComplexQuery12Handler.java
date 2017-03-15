@@ -36,16 +36,16 @@ public class LdbcComplexQuery12Handler implements OperationHandler<LdbcQuery12, 
         params.put( "result_limit", ldbcQuery12.limit() );
 
         String statement = "g.V().has(person_label, 'iid', person_id)." +
-                "out('knows').as('friends').match(" +
-                "__.as('f').in('hasCreator').hasLabel('comment')." +
+                "out('knows').match(" +
+                "__.as('friends').in('hasCreator').hasLabel('comment')." +
                 "        where(out('replyOf').hasLabel('post').out('hasTag').out('hasType')." +
                 "        until(has('name', tagclass)).repeat(out('isSubclassOf')).count().is(gt(0))).fold().as('comments')," +
                 "__.as('comments').unfold().out('replyOf').out('hasTag')." +
                 "        where(out('hasType').until(has('name', tagclass)).repeat(out('isSubclassOf')).count().is(gt(0)))." +
                 "        values('name').fold().as('tagnames')," +
                 "__.as('comments').count().as('count')" +
-                ").where(select('comments').unfold().count().is(gt(0)))." +
-                "order().by('iid_long'))." +
+                ").select('friends').where(select('comments').unfold().count().is(gt(0)))." +
+                "order().by('iid_long')." +
                 "select('friends', 'count', 'tagnames')";
 
         List<Result> results = null;
