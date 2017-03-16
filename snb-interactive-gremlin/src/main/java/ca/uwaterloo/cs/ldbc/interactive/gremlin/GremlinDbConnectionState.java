@@ -18,16 +18,7 @@ public class GremlinDbConnectionState extends DbConnectionState {
 
     public GremlinDbConnectionState(Map<String, String> properties)
     {
-        String locator;
-        if ( properties.containsKey( "locator" ) )
-        {
-            locator = properties.get( "locator" );
-        }
-        else
-        {
-            locator = "127.0.0.1";
-        }
-
+        String locator = properties.getOrDefault( "locator", "localhost" );
         try
         {
             cluster = Cluster.open( locator );
@@ -36,6 +27,7 @@ public class GremlinDbConnectionState extends DbConnectionState {
         catch ( Exception e )
         {
             logger.error( "Connection to remote Gremlin Server could NOT obtained" );
+	    logger.error(e.getMessage());
         }
     }
 

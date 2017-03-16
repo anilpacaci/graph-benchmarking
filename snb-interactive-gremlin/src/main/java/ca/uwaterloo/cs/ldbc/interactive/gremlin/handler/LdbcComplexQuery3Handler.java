@@ -39,7 +39,7 @@ public class LdbcComplexQuery3Handler implements OperationHandler<LdbcQuery3, Db
                 " cap('fof').unfold().where(without('0')).dedup().as('person')." +
                 " values('iid_long').as('pid')." +
                 " select('person').where(out('isLocatedIn').out('isPartOf').has('name', neq(countryX))." +
-                " and().out('isLocatedIn').out('isPartOf').has('name', neq('countryY')))." +
+                " and().out('isLocatedIn').out('isPartOf').has('name', neq(countryY)))." +
                 " match(" +
                 "         __.as('p').in('hasCreator').has('creationDate', between(start_date, end_date)).where(out('isLocatedIn').has('name', countryX)).count().as('countx')," +
                 "         __.as('p').in('hasCreator').has('creationDate', between(start_date, end_date)).where(out('isLocatedIn').has('name', countryY)).count().as('county')," +

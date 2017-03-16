@@ -57,7 +57,7 @@
       <dependency>
           <groupId>org.umlg</groupId>
           <artifactId>sqlg-postgres</artifactId>
-          <version>1.3.3-SNAPSHOT</version>
+          <version>1.3.2</version>
       </dependency>
       <!-- CSV Writer -->
       <dependency>
