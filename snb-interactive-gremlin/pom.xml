@@ -34,7 +34,7 @@
       <dependency>
           <groupId>org.apache.tinkerpop</groupId>
           <artifactId>gremlin-driver</artifactId>
-          <version>3.1.1-incubating</version>
+          <version>3.2.3</version>
       </dependency>
     <dependency>
       <groupId>joda-time</groupId>
@@ -51,13 +51,13 @@
       <dependency>
           <groupId>org.apache.tinkerpop</groupId>
           <artifactId>neo4j-gremlin</artifactId>
-          <version>3.1.1-incubating</version>
+          <version>3.2.3</version>
       </dependency>
       <!-- Sqlg Postgres Adaptir -->
       <dependency>
           <groupId>org.umlg</groupId>
           <artifactId>sqlg-postgres</artifactId>
-          <version>1.3.3-SNAPSHOT</version>
+          <version>1.3.2</version>
       </dependency>
       <!-- CSV Writer -->
       <dependency>
