@@ -4,7 +4,7 @@
   <groupId>ca.uwaterloo.cs</groupId>
   <artifactId>snb-interactive-gremlin</artifactId>
   <packaging>jar</packaging>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0-titan-SNAPSHOT</version>
   <name>snb-interactive-gremlin</name>
   <url>http://maven.apache.org</url>
   <dependencies>
@@ -34,7 +34,7 @@
       <dependency>
           <groupId>org.apache.tinkerpop</groupId>
           <artifactId>gremlin-driver</artifactId>
-          <version>3.2.3</version>
+          <version>3.2.0-incubating</version>
       </dependency>
     <dependency>
       <groupId>joda-time</groupId>
@@ -48,17 +48,21 @@
           <version>1.1.0-SNAPSHOT</version>
       </dependency>
       <!-- Neo4j Gremlin Adaptor -->
+<!--
       <dependency>
           <groupId>org.apache.tinkerpop</groupId>
           <artifactId>neo4j-gremlin</artifactId>
           <version>3.2.3</version>
       </dependency>
+-->
       <!-- Sqlg Postgres Adaptir -->
+<!--
       <dependency>
           <groupId>org.umlg</groupId>
           <artifactId>sqlg-postgres</artifactId>
           <version>1.3.2</version>
       </dependency>
+-->
       <!-- CSV Writer -->
       <dependency>
           <groupId>com.opencsv</groupId>
