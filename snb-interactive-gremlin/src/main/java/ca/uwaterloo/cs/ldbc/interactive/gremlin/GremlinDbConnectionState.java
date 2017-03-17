@@ -9,25 +9,17 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Map;
 
-public class GremlinDbConnectionState extends DbConnectionState {
+public class GremlinDbConnectionState extends DbConnectionState
+{
 
-    final static Logger logger = LoggerFactory.getLogger(GremlinDbConnectionState.class);
+    final static Logger logger = LoggerFactory.getLogger( GremlinDbConnectionState.class );
 
     private Cluster cluster;
     private Client remoteClient;
 
-    public GremlinDbConnectionState(Map<String, String> properties)
+    public GremlinDbConnectionState( Map<String, String> properties )
     {
-        String locator;
-        if ( properties.containsKey( "locator" ) )
-        {
-            locator = properties.get( "locator" );
-        }
-        else
-        {
-            locator = "127.0.0.1";
-        }
-
+        String locator = properties.getOrDefault( "locator", "localhost" );
         try
         {
             cluster = Cluster.open( locator );
@@ -35,20 +27,23 @@ public class GremlinDbConnectionState extends DbConnectionState {
         }
         catch ( Exception e )
         {
-            logger.error( "Connection to remote Gremlin Server could NOT obtained" );
+            logger.error( "Connection to remote Gremlin Server could NOT obtained, locator: " + locator );
         }
     }
 
     /**
      * Cluster/Client is configured through constructor. Just a utility method to retrieve client reference
+     *
      * @return Client for Remote Gremlin Server
      */
-    public Client getClient() {
+    public Client getClient()
+    {
         return remoteClient;
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() throws IOException
+    {
         remoteClient.close();
         cluster.close();
     }

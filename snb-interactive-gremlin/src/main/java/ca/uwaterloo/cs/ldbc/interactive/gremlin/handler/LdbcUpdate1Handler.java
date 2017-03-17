@@ -10,6 +10,8 @@ import com.ldbc.driver.ResultReporter;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcNoResult;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcUpdate1AddPerson;
 import org.apache.tinkerpop.gremlin.driver.Client;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 
 public class LdbcUpdate1Handler implements OperationHandler<LdbcUpdate1AddPerson, DbConnectionState> {
 
+    final static Logger logger = LoggerFactory.getLogger( LdbcUpdate1Handler.class );
     @Override
     public void executeOperation(LdbcUpdate1AddPerson ldbcUpdate1AddPerson, DbConnectionState dbConnectionState, ResultReporter resultReporter) throws DbException {
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
@@ -84,6 +87,6 @@ public class LdbcUpdate1Handler implements OperationHandler<LdbcUpdate1AddPerson
         }
 
         resultReporter.report(0, LdbcNoResult.INSTANCE, ldbcUpdate1AddPerson);
-
+        logger.info("update 1 run");
     }
 }

@@ -10,6 +10,8 @@ import com.ldbc.driver.ResultReporter;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcNoResult;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcUpdate3AddCommentLike;
 import org.apache.tinkerpop.gremlin.driver.Client;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +22,7 @@ import java.util.concurrent.ExecutionException;
  */
 public class LdbcUpdate3Handler implements OperationHandler<LdbcUpdate3AddCommentLike, DbConnectionState> {
 
+    final static Logger logger = LoggerFactory.getLogger( GremlinDbConnectionState.class );
     @Override
     public void executeOperation(LdbcUpdate3AddCommentLike ldbcUpdate3AddCommentLike, DbConnectionState dbConnectionState, ResultReporter resultReporter) throws DbException {
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
@@ -44,6 +47,7 @@ public class LdbcUpdate3Handler implements OperationHandler<LdbcUpdate3AddCommen
         }
 
         resultReporter.report(0, LdbcNoResult.INSTANCE, ldbcUpdate3AddCommentLike);
+        logger.info("update 3 run");
 
     }
 }
