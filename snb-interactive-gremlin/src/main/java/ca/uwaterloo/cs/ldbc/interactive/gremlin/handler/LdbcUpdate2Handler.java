@@ -10,6 +10,8 @@ import com.ldbc.driver.ResultReporter;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcNoResult;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcUpdate2AddPostLike;
 import org.apache.tinkerpop.gremlin.driver.Client;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +22,7 @@ import java.util.concurrent.ExecutionException;
  */
 public class LdbcUpdate2Handler implements OperationHandler<LdbcUpdate2AddPostLike, DbConnectionState> {
 
+    final static Logger logger = LoggerFactory.getLogger( GremlinDbConnectionState.class );
     @Override
     public void executeOperation(LdbcUpdate2AddPostLike ldbcUpdate2AddPostLike, DbConnectionState dbConnectionState, ResultReporter resultReporter) throws DbException {
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
@@ -43,6 +46,7 @@ public class LdbcUpdate2Handler implements OperationHandler<LdbcUpdate2AddPostLi
         }
 
         resultReporter.report(0, LdbcNoResult.INSTANCE, ldbcUpdate2AddPostLike);
+        logger.info("update 2 run");
 
     }
 }

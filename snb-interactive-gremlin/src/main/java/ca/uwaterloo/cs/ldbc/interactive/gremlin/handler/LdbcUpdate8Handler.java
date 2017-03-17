@@ -10,12 +10,15 @@ import com.ldbc.driver.ResultReporter;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcNoResult;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcUpdate8AddFriendship;
 import org.apache.tinkerpop.gremlin.driver.Client;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 public class LdbcUpdate8Handler implements OperationHandler<LdbcUpdate8AddFriendship, DbConnectionState> {
+    final static Logger logger = LoggerFactory.getLogger( GremlinDbConnectionState.class );
     @Override
     public void executeOperation(LdbcUpdate8AddFriendship ldbcUpdate8AddFriendship, DbConnectionState dbConnectionState, ResultReporter resultReporter) throws DbException {
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
@@ -37,6 +40,6 @@ public class LdbcUpdate8Handler implements OperationHandler<LdbcUpdate8AddFriend
         }
 
         resultReporter.report(0, LdbcNoResult.INSTANCE, ldbcUpdate8AddFriendship);
-
+        logger.info("update 8 run");
     }
 }
