@@ -39,7 +39,7 @@ public class LdbcComplexQuery7Handler implements OperationHandler<LdbcQuery7, Db
         List<Result> authorKnowsResults = null;
         try
         {
-            authorKnowsResults = client.submit( " g.V().has('iid', person_id).out('knows')", params ).all().get();
+            authorKnowsResults = client.submit( " g.V().has(person_label, 'iid', person_id).out('knows')", params ).all().get();
 
         }
         catch ( InterruptedException | ExecutionException e )
