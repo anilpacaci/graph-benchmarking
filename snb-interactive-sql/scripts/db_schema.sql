@@ -29,7 +29,7 @@ create table post (
     ps_locationip varchar not null,
     ps_browserused varchar not null,
     ps_language varchar,
-    ps_content varchar not null,
+    ps_content varchar,
     ps_length int not null,
     ps_creatorid bigint,
     ps_p_creatorid bigint,
