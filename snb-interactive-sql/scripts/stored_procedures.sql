@@ -105,3 +105,52 @@ begin
 	order by 4 desc, 1;
 end
 $func$ LANGUAGE plpgsql;
+
+-- helper functions for update queries
+
+create or replace function c_weight_upd(person1id bigint, person2id bigint)
+returns real as $$
+declare
+    x real;
+    y real;
+begin
+    if person1id is null or person2id is null then
+        return 0;
+    end if;
+    select sum (case when ps2.ps_replyof is null then 1 else 0.5 end) into x from post ps1, post ps2
+	   where ps1.ps_creatorid = person1id and ps1.ps_replyof = ps2.ps_postid and ps2.ps_creatorid = person2id;
+    select sum (case when ps2.ps_replyof is null then 1 else 0.5 end) into y from post ps1, post ps2
+	   where ps1.ps_creatorid = person2id and ps1.ps_replyof = ps2.ps_postid and ps2.ps_creatorid = person1id;
+    return coalesce(x, 0) + coalesce(y, 0);  
+end
+$$ LANGUAGE plpgsql;
+
+create or replace function k_weight_add(person1id bigint, person2id bigint)
+returns void as $$
+declare 
+    cw real;
+begin
+    cw := c_weight_upd(person1id, person2id);
+    if cw <> 0 then
+        if person1id < person2id then
+            insert into k_weight values (person1id, person2id, cw);
+        else
+            insert into k_weight values (person2id, person1id, cw);
+        end if;
+    end if;
+end
+$$ LANGUAGE plpgsql;
+
+
+-- LDBC Update Queries 1 to 8
+
+create or replace function LdbcUpdate8AddFriendship(person1id bigint, person2id bigint, creationdate timestamptz)
+returns void as $$
+begin
+    insert into knows values(person1id, person2id, extract(epoch from creationdate::timestamptz) * 1000 );
+	insert into knows values(person2id, person1id, extract(epoch from creationdate::timestamptz) * 1000 );
+    perform k_weight_add(person1id, person2id);
+end
+$$ LANGUAGE plpgsql;
+
+
