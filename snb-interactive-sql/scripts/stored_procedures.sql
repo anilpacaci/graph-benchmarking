@@ -141,8 +141,128 @@ begin
 end
 $$ LANGUAGE plpgsql;
 
+create or replace function kw_reply(p1 bigint, r_post bigint, r_comment bigint)
+returns void as $$
+declare
+    tmp bigint;
+    p2 bigint;
+    reply bigint;
+    inc real;    
+begin
+    select ps_creatorid into p2 from post where ps_postid = r_post + r_comment + 1;
+    if r_post then
+        inc := 1;
+    else
+        inc := 0.5;
+    end if;
+    
+    if p1 > p2 then
+        tmp := p2;
+        p2 := p1;
+        p1 := tmp;
+    end if;
+    if not exists (select 1 from knows where k_person1id = p1 and k_person2id = p2) then
+        return;
+    end if;
+    if exists (select 1 from k_weight where kw_p1 = p1 and kw_p2 = p2) then
+        update k_weight set kw_weight = kw_weight + inc where kw_p1 = p1 and kw_p2 = p2;
+    else
+        insert into k_weight values (p1, p2, inc);
+    end if;
+end
+$$ LANGUAGE plpgsql;
 
 -- LDBC Update Queries 1 to 8
+
+create or replace function LdbcUpdate1AddPerson(personid bigint, personfirstname varchar, personlastname varchar, gender varchar, birthday timestamptz, creationdate timestamptz, locationip varchar, browserused varchar, cityid bigint, languages varchar array, emails varchar array, tagids bigint array, studyatorgids bigint array, studyatyears int array, workatorgids bigint array, workatyears int array)
+returns void as $$
+declare
+    language varchar;
+    email varchar;
+    tagid bigint;
+    i int;
+begin
+    insert into person values(personid, personfirstname, personlastname, gender,
+	       	            extract(epoch from birthday::timestamptz) * 1000 ,
+				        extract(epoch from creationdate::timestamptz) * 1000 ,
+				        locationip, browserused, cityid, null); 
+    foreach language in array languages loop
+        insert into person_language values(personid, i1);
+    end loop; 
+    
+    foreach email in array emails loop
+        insert into person_email values(personid, i1);
+    end loop;
+    
+    foreach tagid in array tagids loop
+        insert into person_tag values(personid, i1);
+    end loop;   
+     
+    for i in 1..array_upper(studyatorgids, 1) loop
+        insert into person_university values(personid, studyatorgids[i], studyatyears[i]);
+    end loop;
+    
+    for i in 1..array_upper(workatorgids, 1) loop
+        insert into person_company values(personid, workatorgids[i], workatyears[i]);
+    end loop;
+   
+
+create or replace function LdbcUpdate2AddPostLike(personid bigint, postid bigint, creationdate timestamptz)
+returns void as $$
+begin
+    insert into likes values(personid, postid, extract(epoch from creationdate::timestamptz) * 1000);
+end
+$$ LANGUAGE plpgsql;
+
+create or replace function LdbcUpdate4AddForum(forumid bigint, forumtitle varchar, creationdate timestamptz, moderatorpersonid bigint, tagid bigint array)
+returns void as $$
+declare
+    tag bigint;
+begin
+    insert into forum values(forumid, forumtitle, extract(epoch from creationdate::timestamptz) * 1000 , moderatorpersonid);
+    foreach tag in array tagids loop
+        insert into forum_tag values(forumid, tag);
+    end loop;
+end
+$$ LANGUAGE plpgsql;
+
+
+create or replace function LdbcUpdate5AddForumMembership(forumid bigint, personid bigint, creationdate timestamptz)
+returns void as $$
+begin
+    insert into forum_person values(forumid, personid, extract(epoch from creationdate::timestamptz) * 1000 );
+end
+$$ LANGUAGE plpgsql;
+
+create or replace function LdbcUpdate6AddPost(postid bigint, imagefile varchar, creationdate timestamptz, locationip varchar, browserused varchar, lang varchar, content varchar, len int, authorpersonid bigint, forumid bigint, countryid bigint, tagids bigint array)
+returns void as $$
+declare
+    tag bigint;
+begin
+    insert into post values(postid, imagefile, extract(epoch from creationdate::timestamptz) * 1000, locationip,
+				browserused, lang, content, len, authorpersonid, authorpersonid, countryid, forumid, NULL, NULL);
+    foreach tag in array tagids loop
+        insert into post_tag values(postid, tag);
+    end loop;   
+end
+$$ LANGUAGE plpgsql;
+
+
+create or replace function LdbcUpdate7AddComment(commentid bigint, creationdate timestamptz, locationip varchar, browserused varchar, content varchar, len int, authorpersonid bigint, countryid bigint, replytopostid bigint, replytocommentid bigint, tagids bigint array)
+returns void as $$
+declare
+    tag bigint;
+begin
+    insert into post values(commentid, NULL, extract(epoch from creationdate::timestamptz) * 1000, locationip,
+				browserused, NULL, content, len, authorpersonid, NULL, countryid, NULL,
+				replytocommentid+replytopostid+1,
+				NULL);
+    foreach tag in array tagids loop
+        insert into post_tag values(commentid, tag);
+    end loop;   
+    perform kw_reply (authorpersonid, replytocommentid, replytopostid); 
+end
+$$ LANGUAGE plpgsql;
 
 create or replace function LdbcUpdate8AddFriendship(person1id bigint, person2id bigint, creationdate timestamptz)
 returns void as $$
