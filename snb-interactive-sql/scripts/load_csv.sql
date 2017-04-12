@@ -175,28 +175,28 @@ create table tag_hastype_tagclass_f (
 );
 
 -- now load CSV files into these temp tables
-\copy comment_f from '/var/lib/postgresql/data/merge/comment_0_0.csv' delimiter '|' CSV HEADER;
-\copy comment_hastag_tag_f from '/var/lib/postgresql/data/merge/comment_hasTag_tag_0_0.csv' delimiter '|' CSV HEADER;
-\copy forum_f from '/var/lib/postgresql/data/merge/forum_0_0.csv' delimiter '|' CSV HEADER;
-\copy forum_hasmember_person_f from '/var/lib/postgresql/data/merge/forum_hasMember_person_0_0.csv' delimiter '|' CSV HEADER;
-\copy forum_hastag_tag_f from '/var/lib/postgresql/data/merge/forum_hasTag_tag_0_0.csv' delimiter '|' CSV HEADER;
-\copy organisation_f from '/var/lib/postgresql/data/merge/organisation_0_0.csv' delimiter '|' CSV HEADER;
-\copy person_f from '/var/lib/postgresql/data/merge/person_0_0.csv' delimiter '|' CSV HEADER;
-\copy person_email_emailaddress_f from '/var/lib/postgresql/data/merge/person_email_emailaddress_0_0.csv' delimiter '|' CSV HEADER;
-\copy person_hasinterest_tag_f from '/var/lib/postgresql/data/merge/person_hasInterest_tag_0_0.csv' delimiter '|' CSV HEADER;
-\copy person_knows_person_f from '/var/lib/postgresql/data/merge/person_knows_person_0_0.csv' delimiter '|' CSV HEADER;
-\copy person_likes_post_f from '/var/lib/postgresql/data/merge/person_likes_post_0_0.csv' delimiter '|' CSV HEADER;
-\copy person_likes_comment_f from '/var/lib/postgresql/data/merge/person_likes_comment_0_0.csv' delimiter '|' CSV HEADER;
-\copy person_speaks_language_f from '/var/lib/postgresql/data/merge/person_speaks_language_0_0.csv' delimiter '|' CSV HEADER;
-\copy person_studyat_organisation_f from '/var/lib/postgresql/data/merge/person_studyAt_organisation_0_0.csv' delimiter '|' CSV HEADER;
-\copy person_workat_organisation_f from '/var/lib/postgresql/data/merge/person_workAt_organisation_0_0.csv' delimiter '|' CSV HEADER;
-\copy place_f from '/var/lib/postgresql/data/merge/place_0_0.csv' delimiter '|' CSV HEADER;
-\copy post_f from '/var/lib/postgresql/data/merge/post_0_0.csv' delimiter '|' CSV HEADER;
-\copy post_hastag_tag_f from '/var/lib/postgresql/data/merge/post_hasTag_tag_0_0.csv' delimiter '|' CSV HEADER;
-\copy tagclass_f from '/var/lib/postgresql/data/merge/tagclass_0_0.csv' delimiter '|' CSV HEADER;
-\copy tagclass_issubclassof_tagclass_f from '/var/lib/postgresql/data/merge/tagclass_isSubclassOf_tagclass_0_0.csv' delimiter '|' CSV HEADER;
-\copy tag_f from '/var/lib/postgresql/data/merge/tag_0_0.csv' delimiter '|' CSV HEADER;
-\copy tag_hastype_tagclass_f from '/var/lib/postgresql/data/merge/tag_hasType_tagclass_0_0.csv' delimiter '|' CSV HEADER;
+\copy comment_f from '/home/r32zhou/ldbc/dataset/datagen/sf3_updates_csvmergeforeign/social_network/comment_0_0.csv' delimiter '|' CSV HEADER ENCODING 'UTF8';
+\copy comment_hastag_tag_f from '/home/r32zhou/ldbc/dataset/datagen/sf3_updates_csvmergeforeign/social_network/comment_hasTag_tag_0_0.csv' delimiter '|' CSV HEADER ENCODING 'UTF8';
+\copy forum_f from '/home/r32zhou/ldbc/dataset/datagen/sf3_updates_csvmergeforeign/social_network/forum_0_0.csv' delimiter '|' CSV HEADER ENCODING 'UTF8';
+\copy forum_hasmember_person_f from '/home/r32zhou/ldbc/dataset/datagen/sf3_updates_csvmergeforeign/social_network/forum_hasMember_person_0_0.csv' delimiter '|' CSV HEADER ENCODING 'UTF8';
+\copy forum_hastag_tag_f from '/home/r32zhou/ldbc/dataset/datagen/sf3_updates_csvmergeforeign/social_network/forum_hasTag_tag_0_0.csv' delimiter '|' CSV HEADER ENCODING 'UTF8';
+\copy organisation_f from '/home/r32zhou/ldbc/dataset/datagen/sf3_updates_csvmergeforeign/social_network/organisation_0_0.csv' delimiter '|' CSV HEADER ENCODING 'UTF8';
+\copy person_f from '/home/r32zhou/ldbc/dataset/datagen/sf3_updates_csvmergeforeign/social_network/person_0_0.csv' delimiter '|' CSV HEADER ENCODING 'UTF8';
+\copy person_email_emailaddress_f from '/home/r32zhou/ldbc/dataset/datagen/sf3_updates_csvmergeforeign/social_network/person_email_emailaddress_0_0.csv' delimiter '|' CSV HEADER ENCODING 'UTF8';
+\copy person_hasinterest_tag_f from '/home/r32zhou/ldbc/dataset/datagen/sf3_updates_csvmergeforeign/social_network/person_hasInterest_tag_0_0.csv' delimiter '|' CSV HEADER ENCODING 'UTF8';
+\copy person_knows_person_f from '/home/r32zhou/ldbc/dataset/datagen/sf3_updates_csvmergeforeign/social_network/person_knows_person_0_0.csv' delimiter '|' CSV HEADER ENCODING 'UTF8';
+\copy person_likes_post_f from '/home/r32zhou/ldbc/dataset/datagen/sf3_updates_csvmergeforeign/social_network/person_likes_post_0_0.csv' delimiter '|' CSV HEADER ENCODING 'UTF8';
+\copy person_likes_comment_f from '/home/r32zhou/ldbc/dataset/datagen/sf3_updates_csvmergeforeign/social_network/person_likes_comment_0_0.csv' delimiter '|' CSV HEADER ENCODING 'UTF8';
+\copy person_speaks_language_f from '/home/r32zhou/ldbc/dataset/datagen/sf3_updates_csvmergeforeign/social_network/person_speaks_language_0_0.csv' delimiter '|' CSV HEADER ENCODING 'UTF8';
+\copy person_studyat_organisation_f from '/home/r32zhou/ldbc/dataset/datagen/sf3_updates_csvmergeforeign/social_network/person_studyAt_organisation_0_0.csv' delimiter '|' CSV HEADER ENCODING 'UTF8';
+\copy person_workat_organisation_f from '/home/r32zhou/ldbc/dataset/datagen/sf3_updates_csvmergeforeign/social_network/person_workAt_organisation_0_0.csv' delimiter '|' CSV HEADER ENCODING 'UTF8';
+\copy place_f from '/home/r32zhou/ldbc/dataset/datagen/sf3_updates_csvmergeforeign/social_network/place_0_0.csv' delimiter '|' CSV HEADER ENCODING 'UTF8';
+\copy post_f from '/home/r32zhou/ldbc/dataset/datagen/sf3_updates_csvmergeforeign/social_network/post_0_0.csv' delimiter '|' CSV HEADER ENCODING 'UTF8';
+\copy post_hastag_tag_f from '/home/r32zhou/ldbc/dataset/datagen/sf3_updates_csvmergeforeign/social_network/post_hasTag_tag_0_0.csv' delimiter '|' CSV HEADER ENCODING 'UTF8';
+\copy tagclass_f from '/home/r32zhou/ldbc/dataset/datagen/sf3_updates_csvmergeforeign/social_network/tagclass_0_0.csv' delimiter '|' CSV HEADER ENCODING 'UTF8';
+\copy tagclass_issubclassof_tagclass_f from '/home/r32zhou/ldbc/dataset/datagen/sf3_updates_csvmergeforeign/social_network/tagclass_isSubclassOf_tagclass_0_0.csv' delimiter '|' CSV HEADER ENCODING 'UTF8';
+\copy tag_f from '/home/r32zhou/ldbc/dataset/datagen/sf3_updates_csvmergeforeign/social_network/tag_0_0.csv' delimiter '|' CSV HEADER ENCODING 'UTF8';
+\copy tag_hastype_tagclass_f from '/home/r32zhou/ldbc/dataset/datagen/sf3_updates_csvmergeforeign/social_network/tag_hasType_tagclass_0_0.csv' delimiter '|' CSV HEADER ENCODING 'UTF8';
 
 -- now final step, populate real tables from these temporary tables
 insert into likes select pp_personid, pp_postid, extract(epoch from pp_creationdate) * 1000 from person_likes_post_f;
@@ -256,3 +256,4 @@ insert into subclass select * from tagclass_issubclassof_tagclass_f;
 insert into tagclass select * from tagclass_f;
 
 insert into tag select * from tag_f;
+
