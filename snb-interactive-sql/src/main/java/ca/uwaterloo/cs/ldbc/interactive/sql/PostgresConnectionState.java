@@ -34,6 +34,8 @@ public class PostgresConnectionState extends DbConnectionState {
 
 		String dbUrl = "jdbc:postgresql://" + hostname + ":" + port + "/" + database;
 
+		Integer threadCount = Integer.parseInt(properties.get("tc"));
+
 		connectionPool = new BasicDataSource();
 
 		connectionPool.setDriverClassName("org.postgresql.Driver");
@@ -41,6 +43,10 @@ public class PostgresConnectionState extends DbConnectionState {
 
 		connectionPool.setUsername(user);
 		connectionPool.setPassword(password);
+
+		connectionPool.setInitialSize(threadCount);
+		connectionPool.setMaxTotal(threadCount * 2);
+		connectionPool.setMaxIdle(-1);
 
 		queryDir = properties.get("queryDir");
 

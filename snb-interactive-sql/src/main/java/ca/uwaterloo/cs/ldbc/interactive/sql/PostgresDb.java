@@ -70,23 +70,23 @@ public class PostgresDb extends Db {
 		registerOperationHandler(LdbcQuery11.class, LdbcComplexQuery11Handler.class);
 
 		// Short Queries
-//		registerOperationHandler(LdbcShortQuery1PersonProfile.class, LdbcShortQuery1Handler.class);
-//		registerOperationHandler(LdbcShortQuery2PersonPosts.class, LdbcShortQuery2Handler.class);
-//		registerOperationHandler(LdbcShortQuery3PersonFriends.class, LdbcShortQuery3Handler.class);
-//		registerOperationHandler(LdbcShortQuery4MessageContent.class, LdbcShortQuery4Handler.class);
-//		registerOperationHandler(LdbcShortQuery5MessageCreator.class, LdbcShortQuery5Handler.class);
-//		registerOperationHandler(LdbcShortQuery6MessageForum.class, LdbcShortQuery6Handler.class);
-//		registerOperationHandler(LdbcShortQuery7MessageReplies.class, LdbcShortQuery7Handler.class);
+		registerOperationHandler(LdbcShortQuery1PersonProfile.class, LdbcShortQuery1Handler.class);
+		registerOperationHandler(LdbcShortQuery2PersonPosts.class, LdbcShortQuery2Handler.class);
+		registerOperationHandler(LdbcShortQuery3PersonFriends.class, LdbcShortQuery3Handler.class);
+		registerOperationHandler(LdbcShortQuery4MessageContent.class, LdbcShortQuery4Handler.class);
+		registerOperationHandler(LdbcShortQuery5MessageCreator.class, LdbcShortQuery5Handler.class);
+		registerOperationHandler(LdbcShortQuery6MessageForum.class, LdbcShortQuery6Handler.class);
+		registerOperationHandler(LdbcShortQuery7MessageReplies.class, LdbcShortQuery7Handler.class);
 //
 //		// Update Queries
-//		registerOperationHandler(LdbcUpdate1AddPerson.class, LdbcUpdate1Handler.class);
-//		registerOperationHandler(LdbcUpdate2AddPostLike.class, LdbcUpdate2Handler.class);
-//		registerOperationHandler(LdbcUpdate3AddCommentLike.class, LdbcUpdate3Handler.class);
-//		registerOperationHandler(LdbcUpdate4AddForum.class, LdbcUpdate4Handler.class);
-//		registerOperationHandler(LdbcUpdate5AddForumMembership.class, LdbcUpdate5Handler.class);
-//		registerOperationHandler(LdbcUpdate6AddPost.class, LdbcUpdate6Handler.class);
-//		registerOperationHandler(LdbcUpdate7AddComment.class, LdbcUpdate7Handler.class);
-//		registerOperationHandler(LdbcUpdate8AddFriendship.class, LdbcUpdate8Handler.class);
+		registerOperationHandler(LdbcUpdate1AddPerson.class, LdbcUpdate1Handler.class);
+		registerOperationHandler(LdbcUpdate2AddPostLike.class, LdbcUpdate2Handler.class);
+		registerOperationHandler(LdbcUpdate3AddCommentLike.class, LdbcUpdate3Handler.class);
+		registerOperationHandler(LdbcUpdate4AddForum.class, LdbcUpdate4Handler.class);
+		registerOperationHandler(LdbcUpdate5AddForumMembership.class, LdbcUpdate5Handler.class);
+		registerOperationHandler(LdbcUpdate6AddPost.class, LdbcUpdate6Handler.class);
+		registerOperationHandler(LdbcUpdate7AddComment.class, LdbcUpdate7Handler.class);
+		registerOperationHandler(LdbcUpdate8AddFriendship.class, LdbcUpdate8Handler.class);
 
 	}
 
