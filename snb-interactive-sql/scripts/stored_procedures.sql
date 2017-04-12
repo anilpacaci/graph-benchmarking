@@ -150,7 +150,7 @@ declare
     inc real;    
 begin
     select ps_creatorid into p2 from post where ps_postid = r_post + r_comment + 1;
-    if r_post then
+    if r_post > 0 then
         inc := 1;
     else
         inc := 0.5;
@@ -172,6 +172,20 @@ begin
 end
 $$ LANGUAGE plpgsql;
 
+create or replace function c_weight_pre(p1 bigint, p2 bigint)
+returns real as $$
+begin
+    if p1 is null or p2 is null then
+        return 0;
+    end if;
+    if p1 < p2 then
+        return coalesce ((select kw_weight from k_weight where kw_p1 = p1 and kw_p2 = p2), 0);
+    else 
+        return coalesce ((select kw_weight from k_weight where kw_p1 = p2 and kw_p2 = p1), 0);
+    end if;
+end
+$$ LANGUAGE plpgsql;
+
 -- LDBC Update Queries 1 to 8
 
 create or replace function LdbcUpdate1AddPerson(personid bigint, personfirstname varchar, personlastname varchar, gender varchar, birthday timestamptz, creationdate timestamptz, locationip varchar, browserused varchar, cityid bigint, languages varchar array, emails varchar array, tagids bigint array, studyatorgids bigint array, studyatyears int array, workatorgids bigint array, workatyears int array)
@@ -187,24 +201,26 @@ begin
 				        extract(epoch from creationdate::timestamptz) * 1000 ,
 				        locationip, browserused, cityid, null); 
     foreach language in array languages loop
-        insert into person_language values(personid, i1);
+        insert into person_language values(personid, language);
     end loop; 
     
     foreach email in array emails loop
-        insert into person_email values(personid, i1);
+        insert into person_email values(personid, email);
     end loop;
     
     foreach tagid in array tagids loop
-        insert into person_tag values(personid, i1);
+        insert into person_tag values(personid, tagid);
     end loop;   
      
-    for i in 1..array_upper(studyatorgids, 1) loop
+    for i in 1..coalesce(array_upper(studyatorgids, 1), 0) loop
         insert into person_university values(personid, studyatorgids[i], studyatyears[i]);
     end loop;
     
-    for i in 1..array_upper(workatorgids, 1) loop
+    for i in 1..coalesce(array_upper(workatorgids, 1), 0) loop
         insert into person_company values(personid, workatorgids[i], workatyears[i]);
     end loop;
+end
+$$ LANGUAGE plpgsql;
    
 
 create or replace function LdbcUpdate2AddPostLike(personid bigint, postid bigint, creationdate timestamptz)
@@ -214,7 +230,7 @@ begin
 end
 $$ LANGUAGE plpgsql;
 
-create or replace function LdbcUpdate4AddForum(forumid bigint, forumtitle varchar, creationdate timestamptz, moderatorpersonid bigint, tagid bigint array)
+create or replace function LdbcUpdate4AddForum(forumid bigint, forumtitle varchar, creationdate timestamptz, moderatorpersonid bigint, tagids bigint array)
 returns void as $$
 declare
     tag bigint;
