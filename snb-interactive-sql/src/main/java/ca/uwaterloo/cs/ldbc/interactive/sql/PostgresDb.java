@@ -27,7 +27,7 @@ import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcUpdate6AddPost;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcUpdate7AddComment;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcUpdate8AddFriendship;
 
-import ca.uwaterloo.cs.ldbc.interactive.sql.handler.LdbcComplexQuery11Handler;
+import ca.uwaterloo.cs.ldbc.interactive.sql.handler.LdbcFakeComplexQuery11Handler;
 import ca.uwaterloo.cs.ldbc.interactive.sql.handler.LdbcShortQuery1Handler;
 import ca.uwaterloo.cs.ldbc.interactive.sql.handler.LdbcShortQuery2Handler;
 import ca.uwaterloo.cs.ldbc.interactive.sql.handler.LdbcShortQuery3Handler;
@@ -67,7 +67,7 @@ public class PostgresDb extends Db {
 		}
 
 		// Complex Queries
-		registerOperationHandler(LdbcQuery11.class, LdbcComplexQuery11Handler.class);
+		registerOperationHandler(LdbcQuery11.class, LdbcFakeComplexQuery11Handler.class);
 
 		// Short Queries
 		registerOperationHandler(LdbcShortQuery1PersonProfile.class, LdbcShortQuery1Handler.class);
@@ -77,8 +77,8 @@ public class PostgresDb extends Db {
 		registerOperationHandler(LdbcShortQuery5MessageCreator.class, LdbcShortQuery5Handler.class);
 		registerOperationHandler(LdbcShortQuery6MessageForum.class, LdbcShortQuery6Handler.class);
 		registerOperationHandler(LdbcShortQuery7MessageReplies.class, LdbcShortQuery7Handler.class);
-//
-//		// Update Queries
+		//
+		// // Update Queries
 		registerOperationHandler(LdbcUpdate1AddPerson.class, LdbcUpdate1Handler.class);
 		registerOperationHandler(LdbcUpdate2AddPostLike.class, LdbcUpdate2Handler.class);
 		registerOperationHandler(LdbcUpdate3AddCommentLike.class, LdbcUpdate3Handler.class);
