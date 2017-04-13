@@ -36,10 +36,11 @@ public class LdbcComplexQuery11Handler implements OperationHandler<LdbcQuery11, 
         "where(without('0')).dedup().as('friend')."+
         "outE('workAt').has('workFrom', lte(start_year)).as('workEdge')."+
         "inV().as('organization').out('isLocatedIn').has('name', country_name)."+
+        "order()." +
+        "by(select('friend').values('iid_long'))."+
+        "by(select('workEdge').values('workFrom'))."+
+        "by(select('organization').values('name'), decr)."+
         "limit(result_limit)."+
-        "select('organization').order().by('name', decr)."+
-        "select('friend').order().by('iid_long')."+
-        "select('workEdge').order().by('workFrom')."+
         "select('friend', 'workEdge', 'organization')";
 
         /*
@@ -61,7 +62,6 @@ public class LdbcComplexQuery11Handler implements OperationHandler<LdbcQuery11, 
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
         }
-
 
         List<LdbcQuery11Result> resultList = new ArrayList<>();
         for(Result r : results) {

@@ -36,7 +36,7 @@ public class LdbcUpdate7Handler implements OperationHandler<LdbcUpdate7AddCommen
         params.put("reply_to_p_id", GremlinUtils.makeIid( Entity.POST, ldbcUpdate7AddComment.replyToPostId() ) );
         params.put("comment_id", GremlinUtils.makeIid( Entity.COMMENT, ldbcUpdate7AddComment.commentId() ) );
         params.put("comment_id_long", ldbcUpdate7AddComment.commentId());
-        params.put("length", ldbcUpdate7AddComment.length() );
+        params.put("length", String.valueOf( ldbcUpdate7AddComment.length() ) );
         params.put("content", ldbcUpdate7AddComment.content() );
         params.put("location_ip", ldbcUpdate7AddComment.locationIp() );
         params.put("browser_used", ldbcUpdate7AddComment.browserUsed());

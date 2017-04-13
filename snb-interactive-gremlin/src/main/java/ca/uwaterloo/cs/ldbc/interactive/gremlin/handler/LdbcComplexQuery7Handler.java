@@ -39,7 +39,7 @@ public class LdbcComplexQuery7Handler implements OperationHandler<LdbcQuery7, Db
         List<Result> authorKnowsResults = null;
         try
         {
-            authorKnowsResults = client.submit( " g.V().has('iid', person_id).out('knows')", params ).all().get();
+            authorKnowsResults = client.submit( " g.V().has(person_label, 'iid', person_id).out('knows')", params ).all().get();
 
         }
         catch ( InterruptedException | ExecutionException e )
@@ -60,15 +60,6 @@ public class LdbcComplexQuery7Handler implements OperationHandler<LdbcQuery7, Db
                 ".select('like').order().by('creationDate', decr)" +
                 ".limit(result_limit)" +
                 ".select('post', 'like', 'liker').by().by('creationDate').by()";
-        /*
-        g.V().has('person', 'iid', 'person:8796093024325').
-        in('hasCreator').as('post').
-        inE('likes').as('like').
-        outV().as('liker').order().by('iid_long').
-        select('like').order().by('creationDate', decr).
-        limit(20).
-        select('post', 'like', 'liker').by('content').by('creationDate').by('firstName')
-         */
 
         List<Result> results = null;
         try

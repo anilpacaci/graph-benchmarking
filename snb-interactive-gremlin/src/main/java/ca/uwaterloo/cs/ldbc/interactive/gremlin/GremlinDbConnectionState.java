@@ -27,7 +27,8 @@ public class GremlinDbConnectionState extends DbConnectionState
         }
         catch ( Exception e )
         {
-            logger.error( "Connection to remote Gremlin Server could NOT obtained, locator: " + locator );
+            logger.error( "Connection to remote Gremlin Server could NOT obtained" );
+	    logger.error(e.getMessage());
         }
     }
 

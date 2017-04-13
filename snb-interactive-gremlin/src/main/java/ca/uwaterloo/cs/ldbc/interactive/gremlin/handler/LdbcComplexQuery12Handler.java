@@ -35,6 +35,8 @@ public class LdbcComplexQuery12Handler implements OperationHandler<LdbcQuery12, 
         params.put( "tagclass", ldbcQuery12.tagClassName() );
         params.put( "result_limit", ldbcQuery12.limit() );
 
+
+
         String statement = "g.V().has(person_label, 'iid', person_id)." +
                 "out('knows').as('friends').values('iid_long').as('pid')." +
                 "select('friends').match(" +
