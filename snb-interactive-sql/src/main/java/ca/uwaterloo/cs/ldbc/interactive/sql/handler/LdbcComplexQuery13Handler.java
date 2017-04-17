@@ -22,7 +22,7 @@ public class LdbcComplexQuery13Handler implements OperationHandler<LdbcQuery13, 
 
 	public void executeOperation(LdbcQuery13 operation, PostgresConnectionState dbConnectionState,
 			ResultReporter resultReporter) throws DbException {
-		LdbcQuery13Result RESULT = null;
+		LdbcQuery13Result RESULT = new LdbcQuery13Result(-1);
 		int results_count = 0;
 		Connection conn = dbConnectionState.getConnection();
 		Statement stmt = null;
