@@ -187,6 +187,19 @@ Graph initializeJanus(String propertiesFile) {
         mgmt.updateIndex(mgmt.getGraphIndex("byIidLong"), SchemaAction.REINDEX)
                 .get();
         mgmt.commit();
+        
+        // finally BLVP ID Index
+        mgmt = (ManagementSystem) janusGraph.openManagement();
+        PropertyKey blid = mgmt.makePropertyKey("bulkLoader.vertex.id").dataType(String.class).make()
+        mgmt.buildIndex("byBulkLoaderVertexId", Vertex.class).addKey(blid).buildCompositeIndex()
+        mgmt.commit()
+
+        mgmt.awaitGraphIndexStatus(janusGraph, "byBulkLoaderVertexId").call();
+
+        mgmt = (ManagementSystem) janusGraph.openManagement();
+        mgmt.updateIndex(mgmt.getGraphIndex("byBulkLoaderVertexId"), SchemaAction.REINDEX)
+                .get();
+        mgmt.commit();
 
     } catch (Exception e) {
         System.out.println("Exception: " + e);
