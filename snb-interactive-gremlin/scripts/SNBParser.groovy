@@ -392,7 +392,7 @@ class SNBParser {
             pool.initialize();
 
             client = new MemCachedClient(INSTANCE_NAME);
-            client.flushAll();
+            // client.flushAll();
         }
 
         public Long getId(String identifier) {
