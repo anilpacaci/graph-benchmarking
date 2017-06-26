@@ -25,6 +25,7 @@ import org.apache.tinkerpop.gremlin.structure.Graph
 import org.apache.tinkerpop.gremlin.structure.T
 import org.apache.tinkerpop.gremlin.structure.Vertex
 import org.apache.tinkerpop.gremlin.structure.VertexProperty
+import org.janusgraph.core.JanusGraph
 
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -143,12 +144,12 @@ class SNBParser {
 
     static class GraphLoader implements Callable {
 
-        Graph graph
+        JanusGraph graph
         SharedGraphReader graphReader
         ElementType elementType
         AtomicLong counter
 
-        GraphLoader(Graph graph, SharedGraphReader graphReader, ElementType elementType) {
+        GraphLoader(JanusGraph graph, SharedGraphReader graphReader, ElementType elementType) {
             this.graph = graph
             this.graphReader = graphReader
             this.elementType = elementType
@@ -304,7 +305,7 @@ class SNBParser {
         }
     }
 
-    static void loadSNBGraph(Graph graph, String configurationFile) throws IOException {
+    static void loadSNBGraph(JanusGraph graph, String configurationFile) throws IOException {
 
         Configuration configuration = new PropertiesConfiguration(configurationFile);
 
