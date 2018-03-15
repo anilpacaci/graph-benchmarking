@@ -43,13 +43,25 @@ public class LdbcComplexQuery11Handler implements OperationHandler<LdbcQuery11, 
         "limit(result_limit)."+
         "select('friend', 'workEdge', 'organization')";
 
+        /*
+        statement= "g.V().has('person', 'iid', 'person:19791209325795').aggregate('0')."+
+                "repeat(out('knows').aggregate('fof')).times(2).cap('fof').unfold()." +
+                "where(without('0')).dedup().as('friend')."+
+                "outE('workAt').has('workFrom', lte('2005')).as('workEdge')."+
+                "inV().as('organization').out('isLocatedIn').has('name', 'Lithuania')."+
+                "limit(20)."+
+                "select('friend', 'workEdge', 'organization')";
+                */
+
+       // 1st Person-worksAt->.worksFrom (ascending)
+       // 2nd Person.id (ascending)
+       // 3st Person-worksAt->Organization.name (descending)
         List<Result> results = null;
         try {
             results = client.submit(statement, params).all().get();
         } catch (InterruptedException | ExecutionException e) {
             throw new DbException("Remote execution failed", e);
         }
-
 
         List<LdbcQuery11Result> resultList = new ArrayList<>();
         for(Result r : results) {

@@ -28,6 +28,7 @@ import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcUpdate6AddPost;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcUpdate7AddComment;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcUpdate8AddFriendship;
 
+import ca.uwaterloo.cs.ldbc.interactive.sql.handler.LdbcFakeComplexQuery11Handler;
 import ca.uwaterloo.cs.ldbc.interactive.sql.handler.LdbcComplexQuery11Handler;
 import ca.uwaterloo.cs.ldbc.interactive.sql.handler.LdbcComplexQuery13Handler;
 import ca.uwaterloo.cs.ldbc.interactive.sql.handler.LdbcShortQuery1Handler;
@@ -69,8 +70,8 @@ public class PostgresDb extends Db {
 		}
 
 		// Complex Queries
-		registerOperationHandler(LdbcQuery11.class, LdbcComplexQuery11Handler.class);
-		registerOperationHandler(LdbcQuery13.class, LdbcComplexQuery13Handler.class);
+		registerOperationHandler(LdbcQuery11.class, LdbcFakeComplexQuery11Handler.class);
+
 
 		// Short Queries
 		registerOperationHandler(LdbcShortQuery1PersonProfile.class, LdbcShortQuery1Handler.class);

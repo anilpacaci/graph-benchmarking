@@ -9,14 +9,15 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Map;
 
-public class GremlinDbConnectionState extends DbConnectionState {
+public class GremlinDbConnectionState extends DbConnectionState
+{
 
-    final static Logger logger = LoggerFactory.getLogger(GremlinDbConnectionState.class);
+    final static Logger logger = LoggerFactory.getLogger( GremlinDbConnectionState.class );
 
     private Cluster cluster;
     private Client remoteClient;
 
-    public GremlinDbConnectionState(Map<String, String> properties)
+    public GremlinDbConnectionState( Map<String, String> properties )
     {
         String locator = properties.getOrDefault( "locator", "localhost" );
         try
@@ -33,14 +34,17 @@ public class GremlinDbConnectionState extends DbConnectionState {
 
     /**
      * Cluster/Client is configured through constructor. Just a utility method to retrieve client reference
+     *
      * @return Client for Remote Gremlin Server
      */
-    public Client getClient() {
+    public Client getClient()
+    {
         return remoteClient;
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() throws IOException
+    {
         remoteClient.close();
         cluster.close();
     }

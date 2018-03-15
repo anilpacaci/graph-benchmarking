@@ -10,6 +10,8 @@ import com.ldbc.driver.ResultReporter;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcNoResult;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcUpdate6AddPost;
 import org.apache.tinkerpop.gremlin.driver.Client;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +19,7 @@ import java.util.concurrent.ExecutionException;
 
 public class LdbcUpdate6Handler implements OperationHandler<LdbcUpdate6AddPost,DbConnectionState>
 {
+    final static Logger logger = LoggerFactory.getLogger( GremlinDbConnectionState.class );
     @Override
     public void executeOperation( LdbcUpdate6AddPost ldbcUpdate6AddPost,
             DbConnectionState dbConnectionState, ResultReporter resultReporter ) throws DbException
@@ -70,6 +73,7 @@ public class LdbcUpdate6Handler implements OperationHandler<LdbcUpdate6AddPost,D
         }
 
         resultReporter.report( 0, LdbcNoResult.INSTANCE, ldbcUpdate6AddPost );
+        logger.info("update 6 run");
 
     }
 }
