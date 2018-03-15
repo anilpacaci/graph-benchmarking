@@ -1,8 +1,20 @@
-select count(*) - 1 --Q13
-from
-  (select transitive t_in (1) t_out (2) t_distinct t_exists t_shortest_only t_direction 3
-          k_person1id as p1, k_person2id as p2, t_step ('path_id') as path_no from knows) kt
-where
-  p1 = @Person1@ and
-  p2 = @Person2@ and
-  path_no = 0
+WITH RECURSIVE search_path(id, link, depth, route, cycle) AS (
+  SELECT k.k_person1id, k.k_person2id, 1,
+    ARRAY[k.k_person1id],
+    false
+  FROM knows k where k.k_person1id = @Person1@
+
+ UNION ALL
+
+ SELECT k.k_person1id, k.k_person2id,  sp.depth+1,
+    route || k.k_person1id,
+    k.k_person1id = ANY(route)
+ FROM knows k, search_path sp
+ WHERE k.k_person1id = sp.link AND NOT cycle AND sp.depth < 4
+)
+SELECT sp.depth AS route 
+FROM search_path AS sp 
+WHERE link = @Person2@ AND NOT cycle
+LIMIT 1;
+
+

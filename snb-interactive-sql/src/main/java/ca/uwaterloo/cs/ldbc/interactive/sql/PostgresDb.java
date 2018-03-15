@@ -11,6 +11,7 @@ import com.ldbc.driver.DbConnectionState;
 import com.ldbc.driver.DbException;
 import com.ldbc.driver.control.LoggingService;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery11;
+import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcQuery13;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcShortQuery1PersonProfile;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcShortQuery2PersonPosts;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcShortQuery3PersonFriends;
@@ -28,6 +29,8 @@ import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcUpdate7AddComment;
 import com.ldbc.driver.workloads.ldbc.snb.interactive.LdbcUpdate8AddFriendship;
 
 import ca.uwaterloo.cs.ldbc.interactive.sql.handler.LdbcFakeComplexQuery11Handler;
+import ca.uwaterloo.cs.ldbc.interactive.sql.handler.LdbcComplexQuery11Handler;
+import ca.uwaterloo.cs.ldbc.interactive.sql.handler.LdbcComplexQuery13Handler;
 import ca.uwaterloo.cs.ldbc.interactive.sql.handler.LdbcShortQuery1Handler;
 import ca.uwaterloo.cs.ldbc.interactive.sql.handler.LdbcShortQuery2Handler;
 import ca.uwaterloo.cs.ldbc.interactive.sql.handler.LdbcShortQuery3Handler;
@@ -68,6 +71,7 @@ public class PostgresDb extends Db {
 
 		// Complex Queries
 		registerOperationHandler(LdbcQuery11.class, LdbcFakeComplexQuery11Handler.class);
+
 
 		// Short Queries
 		registerOperationHandler(LdbcShortQuery1PersonProfile.class, LdbcShortQuery1Handler.class);
