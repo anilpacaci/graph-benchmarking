@@ -22,8 +22,9 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * Created by anilpacaci on 2016-07-23.
+ * runs 1-hop neighbourhood retrieval instead of Q11
  */
-public class LdbcFakeQuery11Handler implements OperationHandler<LdbcQuery11, DbConnectionState> {
+public class LdbcFakeQuery11HandlerOneHop implements OperationHandler<LdbcQuery11, DbConnectionState> {
     @Override
     public void executeOperation(LdbcQuery11 ldbcQuery11, DbConnectionState dbConnectionState, ResultReporter resultReporter) throws DbException {
         Client client = ((GremlinDbConnectionState) dbConnectionState).getClient();
