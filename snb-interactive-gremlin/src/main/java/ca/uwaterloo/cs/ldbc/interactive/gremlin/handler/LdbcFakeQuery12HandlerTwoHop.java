@@ -36,7 +36,7 @@ public class LdbcFakeQuery12HandlerTwoHop implements OperationHandler<LdbcQuery1
         String statement = "g.V().has(person_label, 'iid', person_id)" +
                 ".out('knows')" + // retrieve the second hop
                 ".outE('knows').as('relation')" +
-                ".order().by('creationDate', decr).by(inV().values('iid_long'), incr)" +
+                ".order().by(inV().values('iid_long'), incr)" +
                 ".inV().as('friend')" +
                 ".select('relation', 'friend')";
 
@@ -55,8 +55,8 @@ public class LdbcFakeQuery12HandlerTwoHop implements OperationHandler<LdbcQuery1
             Vertex person = (Vertex) map.get("friend");
 
             LdbcQuery12Result ldbcQuery12Result = new LdbcQuery12Result(GremlinUtils.getSNBId(person),
-                    person.<String>property("firstName").value(),
-                    person.<String>property("lastName").value(),
+                    "FAKE_FIRSTNAME",
+                    "FAKE_LASTNAME",
                     new ArrayList<String>(), // fake tag list
                     2017); // fake count
             resultList.add(ldbcQuery12Result);

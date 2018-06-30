@@ -35,7 +35,7 @@ public class LdbcFakeQuery11HandlerOneHop implements OperationHandler<LdbcQuery1
 
         String statement = "g.V().has(person_label, 'iid', person_id)" +
                 ".outE('knows').as('relation')" +
-                ".order().by('creationDate', decr).by(inV().values('iid_long'), incr)" +
+                ".order().by(inV().values('iid_long'), incr)" +
                 ".inV().as('friend')" +
                 ".select('relation', 'friend')";
 
@@ -54,8 +54,8 @@ public class LdbcFakeQuery11HandlerOneHop implements OperationHandler<LdbcQuery1
             Vertex person = (Vertex) map.get("friend");
 
             LdbcQuery11Result ldbcQuery11Result = new LdbcQuery11Result(GremlinUtils.getSNBId(person),
-                    person.<String>property("firstName").value(),
-                    person.<String>property("lastName").value(),
+                    "FAKE_FIRSTNAME",
+                    "FAKE_LASTNAME",
                     "FAKEORG",
                     2017);
             resultList.add(ldbcQuery11Result);
