@@ -35,7 +35,7 @@ public class LdbcFakeQuery12HandlerTwoHop implements OperationHandler<LdbcQuery1
 
         String statement = "g.V().has(person_label, 'iid', person_id)" +
                 ".out('knows')" + // retrieve the second hop
-                ".outE('knows').as('relation')" +
+                ".outE('knows').as('relation').limit(local, 35)" + // make sure that varience is not hight, since average degre on UK and twitter is 35
                 ".order().by(inV().values('iid_long'), incr)" +
                 ".inV().as('friend')" +
                 ".select('relation', 'friend')";
