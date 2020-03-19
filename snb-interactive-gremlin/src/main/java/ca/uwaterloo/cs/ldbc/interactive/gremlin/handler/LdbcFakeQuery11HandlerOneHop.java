@@ -34,7 +34,7 @@ public class LdbcFakeQuery11HandlerOneHop implements OperationHandler<LdbcQuery1
         params.put("person_label", Entity.PERSON.getName());
 
         String statement = "g.V().has(person_label, 'iid', person_id)" +
-                ".outE('knows').as('relation')" +
+                ".outE().as('relation')" +
                 ".order().by(inV().values('iid_long'), incr)" +
                 ".inV().as('friend')" +
                 ".select('relation', 'friend')";
